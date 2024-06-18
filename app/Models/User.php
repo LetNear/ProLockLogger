@@ -44,4 +44,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function idCard()
+    {
+        return $this->belongsTo(IdCard::class);
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function seatPlanning()
+    {
+        return $this->belongsTo(SeatPlanning::class);
+    }
 }

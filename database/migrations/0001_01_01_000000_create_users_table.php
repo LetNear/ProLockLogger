@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\IdCard;
+use App\Models\Role;
+use App\Models\SeatPlanning;
+use App\Models\YearAndProgram;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,8 +17,22 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('user_id')->unique()->nullable();
+            $table->foreignIdFor(IdCard::class);
+            $table->foreignId(Role::class);
+            $table->foreignId(SeatPlanning::class)->nullable();
+            $table->foreignId(YearAndProgram::class)->nullable();
+            //add id card, role id, seat id, yearlvl id as FK
             $table->string('name');
+            $table->string('firstName')->nullable();
+            $table->string('middleName')->nullable();
+            $table->string('lastName')->nullable();
+            $table->string('suffix')->nullable();
+            $table->string('date_of_birth')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('phone_no')->nullable();
             $table->string('email')->unique();
+            $table->string('complete_address')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
