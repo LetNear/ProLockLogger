@@ -1,0 +1,162 @@
+body {
+    box-sizing: border-box;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    /* text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; */
+    height: 115vh;
+    text-align: center;
+    justify-content: center;
+    background-color:  #656565;
+    overflow-x: hidden;
+}
+
+.card-section {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 65vh; /* Example: Set height to fill the viewport */
+}
+
+.id-card {
+    border-radius: 15px;
+    border: 2px solid black;
+    box-shadow: 0px 0px 15px black;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.photo-frame {
+    border: 3px solid black;
+    padding: 5px;
+    margin-left: 15%;
+    margin-top: 8%;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(212, 212, 212);
+}
+
+.user-photo {
+    max-width: 120%;
+    max-height: 120%;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* Center items horizontally */
+    text-align: center; /* Center text within each paragraph */
+}
+
+.user-details p {
+    margin: 7px 0; /* Adjust margin as needed */
+    font-size: 0.7em;
+    color: black;
+}
+
+.user-details p strong {
+    display: inline-block;
+    min-width: 140px; /* Adjust width as needed */
+    text-align: center;
+    margin-right: 10px;
+}
+
+
+.input-text1 {
+    width: 200px; /* Adjust width as needed */
+    text-align: center;
+    background-color: white;
+}
+
+.time-boxes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.time-boxes label, .time-boxes input {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+input {
+    padding: 5px;
+}
+
+.input-text {
+    font-size: 1.0em;  /* Adjusted font size for the text inside the input fields */
+}
+.date{
+    font-size: 10px;
+}
+
+.digital-clock {
+    font-family: Helvetica;
+    letter-spacing: 3px;
+    background: #ffffff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    width: 130px; /* Adjust width as needed */
+    text-align: center;
+    margin-right: 10px; /* Optional: Add margin between label and input */
+}
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.clockdate {
+    position: fixed;
+    bottom: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    display: flex;
+    flex-direction: row; /* Ensure items are placed side by side */
+    align-items: center;
+    justify-content: center; /* Optional: center horizontally */
+    flex: 1;
+    font-weight: bold;
+}
+
+.clockdate p {
+    margin: 0 10px;
+}
+.text-center {
+    text-align: center;
+    flex: 1;
+    font-family: Helvetica;
+    font-weight: bolder;
+    color: rgb(27, 67, 163);
+    font-size: 3.3em;
+    letter-spacing: 5px;
+    margin-top: 12vh;
+}
+.row {
+    display: flex;
+    justify-content: center;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.col label {
+    display: inline-block;
+    width: auto;
+    margin-right: 5px; /* Adjust spacing between label and input */
+}
