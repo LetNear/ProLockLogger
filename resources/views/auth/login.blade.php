@@ -31,7 +31,7 @@
             </div>
         @endif
         
-        <form method="POST" action="">
+        <form method="POST" action="{{ route('login.submit') }}">
             @csrf
             <div class="mb-3">
                 <label for="email" class="form-label">Email address</label>

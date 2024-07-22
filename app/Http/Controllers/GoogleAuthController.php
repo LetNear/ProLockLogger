@@ -27,6 +27,7 @@ class GoogleAuthController extends Controller
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
+                    'password' => bcrypt(''), // Generate a random password or leave it empty
                 ]
             );
         }
