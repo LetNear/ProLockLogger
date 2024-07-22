@@ -23,4 +23,4 @@ composer update
 
 ```sh
 php artisan key:generate
-``
+
