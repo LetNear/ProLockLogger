@@ -16,6 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class IdCardResource extends Resource
 {
@@ -71,6 +72,7 @@ class IdCardResource extends Resource
     {
         return [
             UserInformationRelationManager::class,
+            AuditsRelationManager::class,
         ];
     }
 

@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable as AuditingAuditable;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class UserInformation extends Model
+class UserInformation extends Model implements Auditable
 {
+    use HasFactory;
+    use AuditingAuditable;
 
     protected $fillable = [
         'user_id',
@@ -49,8 +53,4 @@ class UserInformation extends Model
     {
         return $this->belongsTo(YearAndProgram::class);
     }
-    
-
-
-    use HasFactory;
 }
