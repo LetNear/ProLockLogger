@@ -15,9 +15,11 @@ class UserInformation extends Model implements Auditable
     protected $fillable = [
         'user_id',
         'id_card_id',
-        'role_id',
+        'role',
         'seat_id',
-        'year_and_program_id',
+        'year',
+        'program',
+        'block_id',
         'first_name',
         'middle_name',
         'last_name',
@@ -49,8 +51,9 @@ class UserInformation extends Model implements Auditable
         return $this->belongsTo(Seat::class);
     }
 
-    public function yearAndProgram()
+
+    public function block()
     {
-        return $this->belongsTo(YearAndProgram::class);
+        return $this->belongsTo(Block::class);
     }
 }

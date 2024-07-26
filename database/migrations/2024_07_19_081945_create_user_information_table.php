@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Block;
 use App\Models\IdCard;
 use App\Models\Role;
 use App\Models\Seat;
@@ -22,7 +23,9 @@ return new class extends Migration
             $table->foreignIdFor(IdCard::class)->nullable();
             $table->foreignIdFor(Role::class)->nullable();
             $table->foreignIdFor(Seat::class)->nullable();
-            $table->foreignIdFor(YearAndProgram::class)->nullable();
+            $table->string('year')->nullable();
+            $table->string('program')->nullable();
+            $table->foreignIdFor(Block::class)->nullable();
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();

@@ -71,7 +71,7 @@ class IdCardResource extends Resource
     public static function getRelations(): array
     {
         return [
-            UserInformationRelationManager::class,
+           
             AuditsRelationManager::class,
         ];
     }

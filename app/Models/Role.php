@@ -11,8 +11,7 @@ class Role extends Model implements Auditable
 {
 
     protected $fillable = [
-        'name',
-        'category',
+        'role',
     ];
 
     public function userInformation()

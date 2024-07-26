@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('recent_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Role::class)->nullable();
+            
             $table->foreignIdFor(LabAttendance::class)->nullable();
             $table->timestamps();
         });
