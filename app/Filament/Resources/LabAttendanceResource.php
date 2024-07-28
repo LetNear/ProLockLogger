@@ -18,36 +18,54 @@ class LabAttendanceResource extends Resource
 {
     protected static ?string $model = LabAttendance::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-academic-cap';
+
+    protected static ?string $title = 'Laboratory Attendance';
+
+    protected static ?string $label = 'Laboratory Attendance';
+
+    protected static ?string $navigationGroup = 'Laboratory Management';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('seat_id')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('lab_schedule_id')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('time_in')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('time_out')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('logdate')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('instructor')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Section::make('Identification')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('user_id')
+                                    ->numeric()
+                                    ->default(null),
+                                Forms\Components\TextInput::make('seat_id')
+                                    ->numeric()
+                                    ->default(null),
+                                Forms\Components\TextInput::make('lab_schedule_id')
+                                    ->numeric()
+                                    ->default(null),
+                            ]),
+                    ]),
+                Forms\Components\Section::make('Attendance Details')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('time_in')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('time_out')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('status')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('logdate')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('instructor')
+                                    ->required()
+                                    ->maxLength(255),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -84,7 +102,7 @@ class LabAttendanceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // Define any filters here if needed
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

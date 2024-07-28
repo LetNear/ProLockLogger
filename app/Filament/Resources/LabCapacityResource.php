@@ -18,19 +18,33 @@ class LabCapacityResource extends Resource
 {
     protected static ?string $model = LabCapacity::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard';
+
+    protected static ?string $title = 'Laboratory Capacity';
+
+    protected static ?string $label = 'Laboratory Capacity';
+
+    protected static ?string $navigationGroup = 'Laboratory Management';
 
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('lab_attendance_id')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('max_cap')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        ->schema([
+            Forms\Components\Section::make('General Information')
+                ->schema([
+                    Forms\Components\Grid::make(2)
+                        ->schema([
+                            Forms\Components\TextInput::make('lab_attendance_id')
+                                ->label('Lab Attendance ID')
+                                ->numeric()
+                                ->default(null),
+                            Forms\Components\TextInput::make('max_cap')
+                                ->label('Maximum Capacity')
+                                ->required()
+                                ->maxLength(255),
+                        ]),
+                ]),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -38,21 +52,26 @@ class LabCapacityResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('lab_attendance_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Lab Attendance ID')
+                    ->sortable()
+                    ->numeric(),
                 Tables\Columns\TextColumn::make('max_cap')
+                    ->label('Maximum Capacity')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created At')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Updated At')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // Define any filters here if needed
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
