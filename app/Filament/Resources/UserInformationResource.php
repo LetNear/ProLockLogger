@@ -18,7 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
-
+use App\Models\User;
 class UserInformationResource extends Resource
 {
     protected static ?string $model = UserInformation::class;
@@ -34,6 +34,13 @@ class UserInformationResource extends Resource
 
     public static function form(Form $form): Form
     {
+
+        $assignedUserIds = UserInformation::pluck('user_id')->toArray();
+
+        // Fetch available users excluding assigned ones
+        $availableUsers = User::whereNotIn('id', $assignedUserIds)
+            ->pluck('name', 'id')
+            ->toArray();
         return $form
             ->schema([
                 Section::make('User Details')
@@ -43,6 +50,7 @@ class UserInformationResource extends Resource
                                 Select::make('user_id')
                                     ->relationship('user', 'name')
                                     ->label('User')
+                                    ->options($availableUsers)
                                     ->searchable()
                                     ->preload(10),
                                 Select::make('role_id')
@@ -121,9 +129,9 @@ class UserInformationResource extends Resource
                                 TextInput::make('contact_number')
                                     ->required()
                                     ->label('Contact Number'),
-                                    // ->tel()
-                                    // ->telRegex('/^(\+63|0)[1-9][0-9]{9}$/')
-                                    // ->maxLength(15),
+                                // ->tel()
+                                // ->telRegex('/^(\+63|0)[1-9][0-9]{9}$/')
+                                // ->maxLength(15),
                                 TextInput::make('complete_address')
                                     ->required()
                                     ->label('Complete Address')
