@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use App\Models\User;
+
 class UserInformationResource extends Resource
 {
     protected static ?string $model = UserInformation::class;
@@ -50,11 +51,11 @@ class UserInformationResource extends Resource
                                 Select::make('user_id')
                                     ->relationship('user', 'name')
                                     ->label('User')
-                                    ->options($availableUsers)
                                     ->searchable()
                                     ->preload(10),
                                 Select::make('role_id')
                                     ->relationship('role', 'name')
+
                                     ->label('Role')
                                     ->searchable()
                                     ->preload(10),
@@ -67,12 +68,42 @@ class UserInformationResource extends Resource
                                     ->relationship('seat', 'computer_number')
                                     ->label('Computer Number')
                                     ->searchable()
-                                    ->preload(10),
+                                    ->preload(10)
+                                    ->createOptionForm([
+                                        Section::make('New Seat Details')
+                                            ->schema([
+                                                Forms\Components\Grid::make(2)
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('computer_number')
+                                                            ->required()
+                                                            ->label('Computer Number'),
+                                                        Forms\Components\TextInput::make('instructor')
+                                                            ->required()
+                                                            ->label('Instructor'),
+                                                        Forms\Components\TextInput::make('year_section')
+                                                            ->required()
+                                                            ->label('Year Section'),
+                                                    ]),
+                                            ]),
+                                    ]),
+
                                 Select::make('block_id')
                                     ->relationship('block', 'block')
                                     ->label('Block')
                                     ->searchable()
-                                    ->preload(10),
+                                    ->preload(10)
+                                    ->createOptionForm([
+                                        Section::make('New Block Details')
+                                            ->schema([
+                                                Forms\Components\Grid::make(2)
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('block')
+                                                            ->required()
+                                                            ->label('Block Name'),
+                                                    ]),
+                                            ]),
+                                    ]),
+
                                 Select::make('year')
                                     ->options([
                                         '1' => '1',
