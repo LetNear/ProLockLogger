@@ -25,3 +25,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('/admin/logout', [LoginController::class, 'logout'])->name('filament.admin.auth.logout');
+
+Route::get('/notepad', function () {
+    return "<a href='notepad://'> Notepade </a>";
+});

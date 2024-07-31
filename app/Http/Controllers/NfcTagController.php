@@ -13,14 +13,16 @@ class NfcTagController extends Controller
     {
         // Validate and process incoming data
         $validated = $request->validate([
-            'rfid_number' => 'required|string|unique:nfc_tags,rfid_number',
+            'tag_uid' => 'required|string|unique:nfc_tags,rfid_number',
         ]);
 
         // Log the NFC data
         Log::info('NFC Tag Data', $validated);
 
         // Save the data to the database
-        $nfcTag = NfcTag::create($validated);
+        $nfcTag = NfcTag::firstOrCreate([
+            'rfid_number' => $validated['tag_uid'],
+        ]);
 
         // Return a JSON response with the created data and status code 201
         return response()->json(['message' => 'NFC tag data received', 'data' => $nfcTag], 201);
@@ -39,6 +41,7 @@ class NfcTagController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $nfcTag = NfcTag::findOrFail($id);
 
         $validated = $request->validate([
