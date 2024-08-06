@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('lab_schedules', function (Blueprint $table) {
             $table->id();
-            
+            // TODO : add year and program
             $table->string('subject_code');
             $table->string('subject_name');
             $table->string('instructor');

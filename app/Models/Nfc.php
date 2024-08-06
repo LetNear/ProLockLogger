@@ -7,11 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Auditable as AuditingAuditable;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class IdCard extends Model implements Auditable
+class Nfc extends Model implements Auditable
 {
-
     protected $fillable = [
-        'image_id',
         'rfid_number',
     ];
 

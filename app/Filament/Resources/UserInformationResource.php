@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserInformationResource\Pages;
 use App\Filament\Resources\UserInformationResource\RelationManagers;
+use App\Models\Nfc;
+use App\Models\Role;
 use App\Models\UserInformation;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -16,7 +18,6 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use App\Models\User;
 
@@ -31,17 +32,8 @@ class UserInformationResource extends Resource
     protected static ?string $label = 'User Information';
     protected static ?string $navigationGroup = 'User';
 
-
-
     public static function form(Form $form): Form
     {
-
-        $assignedUserIds = UserInformation::pluck('user_id')->toArray();
-
-        // Fetch available users excluding assigned ones
-        $availableUsers = User::whereNotIn('id', $assignedUserIds)
-            ->pluck('name', 'id')
-            ->toArray();
         return $form
             ->schema([
                 Section::make('User Details')
@@ -51,22 +43,29 @@ class UserInformationResource extends Resource
                                 Select::make('user_id')
                                     ->relationship('user', 'name')
                                     ->label('User')
+                                    ->placeholder('Select a user')
+                                    ->helperText('Choose the user for this information.')
                                     ->searchable()
                                     ->preload(10),
                                 Select::make('role_id')
                                     ->relationship('role', 'name')
-
                                     ->label('Role')
+                                    ->placeholder('Select a role')
+                                    ->helperText('Choose the role for this user.')
                                     ->searchable()
                                     ->preload(10),
                                 Select::make('id_card_id')
                                     ->relationship('idCard', 'rfid_number')
                                     ->label('RFID Number')
+                                    ->placeholder('Select an RFID number')
+                                    ->helperText('Choose the RFID number for this user.')
                                     ->searchable()
                                     ->preload(10),
                                 Select::make('seat_id')
                                     ->relationship('seat', 'computer_number')
                                     ->label('Computer Number')
+                                    ->placeholder('Select a computer number')
+                                    ->helperText('Choose the computer number assigned to this user.')
                                     ->searchable()
                                     ->preload(10)
                                     ->createOptionForm([
@@ -74,22 +73,26 @@ class UserInformationResource extends Resource
                                             ->schema([
                                                 Forms\Components\Grid::make(2)
                                                     ->schema([
-                                                        Forms\Components\TextInput::make('computer_number')
+                                                        TextInput::make('computer_number')
                                                             ->required()
-                                                            ->label('Computer Number'),
-                                                        Forms\Components\TextInput::make('instructor')
+                                                            ->label('Computer Number')
+                                                            ->placeholder('Enter the computer number'),
+                                                        TextInput::make('instructor')
                                                             ->required()
-                                                            ->label('Instructor'),
-                                                        Forms\Components\TextInput::make('year_section')
+                                                            ->label('Instructor')
+                                                            ->placeholder('Enter the instructor name'),
+                                                        TextInput::make('year_section')
                                                             ->required()
-                                                            ->label('Year Section'),
+                                                            ->label('Year Section')
+                                                            ->placeholder('Enter the year and section'),
                                                     ]),
                                             ]),
                                     ]),
-
                                 Select::make('block_id')
                                     ->relationship('block', 'block')
                                     ->label('Block')
+                                    ->placeholder('Select a block')
+                                    ->helperText('Choose the block assigned to this user.')
                                     ->searchable()
                                     ->preload(10)
                                     ->createOptionForm([
@@ -97,29 +100,33 @@ class UserInformationResource extends Resource
                                             ->schema([
                                                 Forms\Components\Grid::make(2)
                                                     ->schema([
-                                                        Forms\Components\TextInput::make('block')
+                                                        TextInput::make('block')
                                                             ->required()
-                                                            ->label('Block Name'),
+                                                            ->label('Block Name')
+                                                            ->placeholder('Enter the block name'),
                                                     ]),
                                             ]),
                                     ]),
-
                                 Select::make('year')
                                     ->options([
-                                        '1' => '1',
-                                        '2' => '2',
-                                        '3' => '3',
-                                        '4' => '4',
+                                        '1' => '1st Year',
+                                        '2' => '2nd Year',
+                                        '3' => '3rd Year',
+                                        '4' => '4th Year',
                                     ])
-                                    ->label('Year'),
+                                    ->label('Year')
+                                    ->placeholder('Select the year')
+                                    ->helperText('Choose the year level of the user.'),
                                 Select::make('program')
                                     ->options([
-                                        'Batchelor of Science in Information Technology' => 'Batchelor of Science in Information Technology',
-                                        'Batchelor of Science in Computer Science' => 'Batchelor of Science in Computer Science',
-                                        'Batchelor of Science in Information Systems' => 'Batchelor of Science in Information Systems',
-                                        'Batchelor of Library and Information Science' => 'Batchelor of Library and Information Science',
+                                        'Bachelor of Science in Information Technology' => 'Bachelor of Science in Information Technology',
+                                        'Bachelor of Science in Computer Science' => 'Bachelor of Science in Computer Science',
+                                        'Bachelor of Science in Information Systems' => 'Bachelor of Science in Information Systems',
+                                        'Bachelor of Library and Information Science' => 'Bachelor of Library and Information Science',
                                     ])
-                                    ->label('Program'),
+                                    ->label('Program')
+                                    ->placeholder('Select a program')
+                                    ->helperText('Choose the academic program of the user.'),
                             ]),
                     ]),
                 Section::make('Personal Information')
@@ -129,28 +136,41 @@ class UserInformationResource extends Resource
                                 TextInput::make('first_name')
                                     ->required()
                                     ->label('First Name')
+                                    ->placeholder('Enter the first name')
+                                    ->helperText('The user\'s first name.')
                                     ->maxLength(255),
                                 TextInput::make('middle_name')
-                                    ->maxLength(255)
                                     ->label('Middle Name')
+                                    ->placeholder('Enter the middle name')
+                                    ->helperText('The user\'s middle name.')
+                                    ->maxLength(255)
                                     ->default(null),
                                 TextInput::make('last_name')
                                     ->required()
                                     ->label('Last Name')
+                                    ->placeholder('Enter the last name')
+                                    ->helperText('The user\'s last name.')
                                     ->maxLength(255),
                                 TextInput::make('suffix')
+                                    ->label('Suffix')
+                                    ->placeholder('Enter the suffix')
+                                    ->helperText('The user\'s suffix, if any.')
                                     ->maxLength(255)
                                     ->default(null),
                                 DatePicker::make('date_of_birth')
                                     ->required()
-                                    ->label('Date of Birth'),
+                                    ->label('Date of Birth')
+                                    ->placeholder('Select the date of birth')
+                                    ->helperText('The user\'s date of birth.'),
                                 Select::make('gender')
                                     ->options([
                                         'Male' => 'Male',
                                         'Female' => 'Female',
                                         'Other' => 'Other',
                                     ])
-                                    ->label('Gender'),
+                                    ->label('Gender')
+                                    ->placeholder('Select the gender')
+                                    ->helperText('The user\'s gender.'),
                             ]),
                     ]),
                 Section::make('Contact Information')
@@ -159,13 +179,14 @@ class UserInformationResource extends Resource
                             ->schema([
                                 TextInput::make('contact_number')
                                     ->required()
-                                    ->label('Contact Number'),
-                                // ->tel()
-                                // ->telRegex('/^(\+63|0)[1-9][0-9]{9}$/')
-                                // ->maxLength(15),
+                                    ->label('Contact Number')
+                                    ->placeholder('Enter the contact number')
+                                    ->helperText('The user\'s contact number.'),
                                 TextInput::make('complete_address')
                                     ->required()
                                     ->label('Complete Address')
+                                    ->placeholder('Enter the complete address')
+                                    ->helperText('The user\'s complete address.')
                                     ->maxLength(255),
                             ]),
                     ]),
@@ -176,95 +197,130 @@ class UserInformationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->label('User ID')
-                    ->numeric()
+                TextColumn::make('user.name')
+                    ->label('User')
                     ->sortable()
                     ->searchable()
-                    ->alignRight(),
-                Tables\Columns\TextColumn::make('idCard.rfid_number')
+                    ->tooltip('The user\'s name.')
+                    ->alignLeft(),
+                TextColumn::make('idCard.rfid_number')
                     ->label('RFID Number')
-                    ->numeric()
                     ->sortable()
                     ->searchable()
-                    ->alignRight(),
-                Tables\Columns\TextColumn::make('role.name')
+                    ->tooltip('The user\'s RFID number.')
+                    ->alignLeft(),
+                TextColumn::make('role.name')
                     ->label('Role')
                     ->sortable()
                     ->searchable()
-                    ->alignRight(),
-                Tables\Columns\TextColumn::make('seat_id')
+                    ->tooltip('The user\'s role.')
+                    ->alignLeft(),
+                TextColumn::make('seat.computer_number')
                     ->label('Computer Number')
-                    ->numeric()
                     ->sortable()
                     ->searchable()
-                    ->alignRight(),
-                Tables\Columns\TextColumn::make('block.block')
+                    ->tooltip('The user\'s assigned computer number.')
+                    ->alignLeft(),
+                TextColumn::make('block.block')
                     ->label('Block')
                     ->sortable()
                     ->searchable()
-                    ->alignRight(),
-                Tables\Columns\TextColumn::make('year')
+                    ->tooltip('The user\'s block.')
+                    ->alignLeft(),
+                TextColumn::make('year')
                     ->label('Year')
                     ->sortable()
-                    ->numeric()
                     ->searchable()
-                    ->alignRight(),
-                Tables\Columns\TextColumn::make('program')
+                    ->tooltip('The user\'s year level.')
+                    ->alignLeft(),
+                TextColumn::make('program')
                     ->label('Program')
                     ->sortable()
                     ->searchable()
+                    ->tooltip('The user\'s academic program.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('first_name')
+                TextColumn::make('first_name')
                     ->label('First Name')
-                    ->searchable()
                     ->sortable()
+                    ->searchable()
+                    ->tooltip('The user\'s first name.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('middle_name')
+                TextColumn::make('middle_name')
                     ->label('Middle Name')
+                    ->sortable()
                     ->searchable()
+                    ->tooltip('The user\'s middle name.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('last_name')
+                TextColumn::make('last_name')
                     ->label('Last Name')
-                    ->searchable()
                     ->sortable()
+                    ->searchable()
+                    ->tooltip('The user\'s last name.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('suffix')
+                TextColumn::make('suffix')
                     ->label('Suffix')
+                    ->sortable()
                     ->searchable()
+                    ->tooltip('The user\'s suffix.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('date_of_birth')
+                TextColumn::make('date_of_birth')
                     ->label('Date of Birth')
-                    ->dateTime('M d, Y') // Custom date format
-                    ->searchable()
+                    ->dateTime('M d, Y')
                     ->sortable()
+                    ->searchable()
+                    ->tooltip('The user\'s date of birth.')
                     ->alignCenter(),
-                Tables\Columns\TextColumn::make('gender')
+                TextColumn::make('gender')
                     ->label('Gender')
-                    ->searchable()
                     ->sortable()
+                    ->searchable()
+                    ->tooltip('The user\'s gender.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('contact_number')
+                TextColumn::make('contact_number')
                     ->label('Contact Number')
+                    ->sortable()
                     ->searchable()
+                    ->tooltip('The user\'s contact number.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('complete_address')
+                TextColumn::make('complete_address')
                     ->label('Complete Address')
+                    ->sortable()
                     ->searchable()
+                    ->tooltip('The user\'s complete address.')
                     ->alignLeft(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Created At')
-                    ->dateTime('M d, Y h:i A') // Custom date-time format
+                    ->dateTime('M d, Y h:i A')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label('Updated At')
-                    ->dateTime('M d, Y h:i A') // Custom date-time format
+                    ->dateTime('M d, Y h:i A')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+ 
+                Tables\Filters\SelectFilter::make('role_id')
+                    ->label('Role')
+                    ->options(Role::pluck('name', 'id')->toArray()),
+                
+                Tables\Filters\SelectFilter::make('year')
+                    ->label('Year')
+                    ->options([
+                        '1' => '1st Year',
+                        '2' => '2nd Year',
+                        '3' => '3rd Year',
+                        '4' => '4th Year',
+                    ]),
+                Tables\Filters\SelectFilter::make('program')
+                    ->label('Program')
+                    ->options([
+                        'Bachelor of Science in Information Technology' => 'Bachelor of Science in Information Technology',
+                        'Bachelor of Science in Computer Science' => 'Bachelor of Science in Computer Science',
+                        'Bachelor of Science in Information Systems' => 'Bachelor of Science in Information Systems',
+                        'Bachelor of Library and Information Science' => 'Bachelor of Library and Information Science',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

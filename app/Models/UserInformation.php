@@ -38,7 +38,7 @@ class UserInformation extends Model implements Auditable
 
     public function idCard()
     {
-        return $this->belongsTo(IdCard::class);
+        return $this->belongsTo(Nfc::class);
     }
 
     public function role()

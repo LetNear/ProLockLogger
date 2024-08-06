@@ -2,6 +2,7 @@
 
 use App\Models\Block;
 use App\Models\IdCard;
+use App\Models\Nfc;
 use App\Models\Role;
 use App\Models\Seat;
 use App\Models\User;
@@ -20,7 +21,7 @@ return new class extends Migration
         Schema::create('user_information', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->nullable();
-            $table->foreignIdFor(IdCard::class)->nullable();
+            $table->foreignIdFor(Nfc::class, 'id_card_id')->nullable();
             $table->foreignIdFor(Role::class)->nullable();
             $table->foreignIdFor(Seat::class)->nullable();
             $table->string('year')->nullable();

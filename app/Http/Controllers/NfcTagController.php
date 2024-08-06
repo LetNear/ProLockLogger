@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
-use App\Models\NfcTag;
+use App\Models\Nfc;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
@@ -20,7 +19,7 @@ class NfcTagController extends Controller
         Log::info('NFC Tag Data', $validated);
 
         // Save the data to the database
-        $nfcTag = NfcTag::firstOrCreate([
+        $nfcTag = Nfc::firstOrCreate([
             'rfid_number' => $validated['tag_uid'],
         ]);
 
@@ -30,19 +29,19 @@ class NfcTagController extends Controller
 
     public function index()
     {
-        return response()->json(NfcTag::all(), 200);
+        return response()->json(Nfc::all(), 200);
     }
 
     public function show($id)
     {
-        $nfcTag = NfcTag::findOrFail($id);
+        $nfcTag = Nfc::findOrFail($id);
         return response()->json($nfcTag, 200);
     }
 
     public function update(Request $request, $id)
     {
 
-        $nfcTag = NfcTag::findOrFail($id);
+        $nfcTag = Nfc::findOrFail($id);
 
         $validated = $request->validate([
             'rfid_number' => 'sometimes|required|string|unique:nfc_tags,rfid_number,' . $nfcTag->id,
@@ -55,7 +54,7 @@ class NfcTagController extends Controller
 
     public function destroy($id)
     {
-        $nfcTag = NfcTag::findOrFail($id);
+        $nfcTag = Nfc::findOrFail($id);
         $nfcTag->delete();
 
         return response()->json(['message' => 'NFC tag data deleted'], 204);

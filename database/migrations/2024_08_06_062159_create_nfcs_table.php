@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('nfc_tags', function (Blueprint $table) {
+        Schema::create('nfcs', function (Blueprint $table) {
             $table->id();
             $table->string('rfid_number')->unique();
             $table->timestamps();
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('nfc_tags');
+        Schema::dropIfExists('nfcs');
     }
 };

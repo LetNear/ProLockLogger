@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Image;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('id_cards', function (Blueprint $table) {
+        Schema::create('computers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Image::class)->nullable();
-            $table->string('rfid_number');
+            $table->integer('computer_number');
+            $table->string('brand');
+            $table->string('model');
+            $table->string('serial_number');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('id_cards');
+        Schema::dropIfExists('computers');
     }
 };

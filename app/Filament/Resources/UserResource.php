@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -36,14 +37,18 @@ class UserResource extends Resource
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 TextInput::make('name')
+                                    ->label('Name')
                                     ->required()
                                     ->maxLength(255)
-                                    ->label('Name'),
+                                    ->placeholder('Enter the user\'s name')
+                                    ->helperText('The full name of the user.'),
                                 TextInput::make('email')
+                                    ->label('Email')
                                     ->email()
                                     ->required()
                                     ->maxLength(255)
-                                    ->label('Email'),
+                                    ->placeholder('Enter the user\'s email address')
+                                    ->helperText('The email address of the user.'),
                             ]),
                     ]),
                 Section::make('Verification & Security')
@@ -51,13 +56,16 @@ class UserResource extends Resource
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 DateTimePicker::make('email_verified_at')
-                                    ->label('Email Verified At'),
+                                    ->label('Email Verified At')
+                                    ->helperText('The date and time when the email was verified.'),
                                 TextInput::make('password')
+                                    ->label('Password')
                                     ->password()
+                                    ->placeholder('Enter a new password')
                                     ->dehydrated(fn($state) => filled($state))
                                     ->required(fn(string $context): bool => $context === 'create')
                                     ->maxLength(255)
-                                    ->label('Password'),
+                                    ->helperText('The password for the user. Leave blank to keep the current password.'),
                             ]),
                     ]),
             ]);
@@ -70,31 +78,40 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->tooltip('The full name of the user.'),
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->tooltip('The email address of the user.'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->tooltip('The date and time when the user was created.'),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Updated At')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->tooltip('The date and time when the user was last updated.'),
             ])
-            ->filters([
-                //
-            ])
+            
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->icon('heroicon-s-pencil')
+                    ->tooltip('Edit this user'),
+                Tables\Actions\DeleteAction::make()
+                    ->icon('heroicon-s-trash')
+                    ->tooltip('Delete this user'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->icon('heroicon-s-trash')
+                        ->tooltip('Delete selected users'),
                 ]),
             ]);
     }
@@ -102,7 +119,6 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            
             AuditsRelationManager::class,
         ];
     }
