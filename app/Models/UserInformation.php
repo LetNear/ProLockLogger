@@ -56,4 +56,9 @@ class UserInformation extends Model implements Auditable
     {
         return $this->belongsTo(Block::class);
     }
+
+    public function seats()
+    {
+        return $this->hasOne(Seat::class);
+    }
 }

@@ -11,8 +11,8 @@ class Seat extends Model implements Auditable
 {
 
     protected $fillable = [
-        'computer_number',
-        'instructor',
+        'computer_id',
+        'instructor_name',
         'year_section',
         'lab_attendance_id',
     ];
@@ -21,6 +21,18 @@ class Seat extends Model implements Auditable
     {
         return $this->hasOne(UserInformation::class);
     }
+
+    public function computer()
+    {
+        return $this->belongsTo(Computer::class);
+    }
+
+    public function userInformations()
+    {
+        return $this->belongsTo(UserInformation::class);
+    }
+
+    
 
     use HasFactory;
     use AuditingAuditable;

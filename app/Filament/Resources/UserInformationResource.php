@@ -6,6 +6,7 @@ use App\Filament\Resources\UserInformationResource\Pages;
 use App\Filament\Resources\UserInformationResource\RelationManagers;
 use App\Models\Nfc;
 use App\Models\Role;
+use App\Models\Seat;
 use App\Models\UserInformation;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -30,10 +31,15 @@ class UserInformationResource extends Resource
     protected static ?string $title = 'User Information';
 
     protected static ?string $label = 'User Information';
-    protected static ?string $navigationGroup = 'User';
+    protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
     {
+        // Retrieve IDs of existing records to exclude from selection
+        $existingUserIds = UserInformation::pluck('user_id')->toArray();
+        $existingIdCardIds = UserInformation::pluck('id_card_id')->toArray();
+        $existingSeatIds = UserInformation::pluck('seat_id')->toArray();
+
         return $form
             ->schema([
                 Section::make('User Details')
@@ -46,28 +52,38 @@ class UserInformationResource extends Resource
                                     ->placeholder('Select a user')
                                     ->helperText('Choose the user for this information.')
                                     ->searchable()
-                                    ->preload(10),
+                                    ->preload(10)
+                                    ->options(fn () => User::whereNotIn('id', $existingUserIds)->pluck('name', 'id')->toArray()),
+
                                 Select::make('role_id')
                                     ->relationship('role', 'name')
                                     ->label('Role')
                                     ->placeholder('Select a role')
                                     ->helperText('Choose the role for this user.')
                                     ->searchable()
-                                    ->preload(10),
+                                    ->preload(10)
+                                    ->reactive() // Enable reactivity
+                                    ->afterStateUpdated(fn ($state, callable $set) => $set('isInstructor', $state == 2)) // Set 'isInstructor' based on role
+                                    ->afterStateHydrated(fn ($state, callable $set) => $set('isInstructor', $state == 2)), // Set 'isInstructor' when editing
+
                                 Select::make('id_card_id')
                                     ->relationship('idCard', 'rfid_number')
                                     ->label('RFID Number')
                                     ->placeholder('Select an RFID number')
                                     ->helperText('Choose the RFID number for this user.')
                                     ->searchable()
-                                    ->preload(10),
+                                    ->preload(10)
+                                    ->options(fn () => Nfc::whereNotIn('id', $existingIdCardIds)->pluck('rfid_number', 'id')->toArray()),
+
                                 Select::make('seat_id')
-                                    ->relationship('seat', 'computer_number')
+                                    ->relationship('seat', 'computer_id')
                                     ->label('Computer Number')
                                     ->placeholder('Select a computer number')
                                     ->helperText('Choose the computer number assigned to this user.')
                                     ->searchable()
                                     ->preload(10)
+                                    ->disabled(fn ($get) => $get('isInstructor')) // Disable if instructor
+                                    ->options(fn () => Seat::whereNotIn('id', $existingSeatIds)->pluck('computer_id', 'id')->toArray())
                                     ->createOptionForm([
                                         Section::make('New Seat Details')
                                             ->schema([
@@ -88,6 +104,7 @@ class UserInformationResource extends Resource
                                                     ]),
                                             ]),
                                     ]),
+
                                 Select::make('block_id')
                                     ->relationship('block', 'block')
                                     ->label('Block')
@@ -107,6 +124,7 @@ class UserInformationResource extends Resource
                                                     ]),
                                             ]),
                                     ]),
+
                                 Select::make('year')
                                     ->options([
                                         '1' => '1st Year',
@@ -116,7 +134,9 @@ class UserInformationResource extends Resource
                                     ])
                                     ->label('Year')
                                     ->placeholder('Select the year')
-                                    ->helperText('Choose the year level of the user.'),
+                                    ->helperText('Choose the year level of the user.')
+                                    ->disabled(fn ($get) => $get('isInstructor')), // Disable if instructor
+
                                 Select::make('program')
                                     ->options([
                                         'Bachelor of Science in Information Technology' => 'Bachelor of Science in Information Technology',
@@ -126,7 +146,8 @@ class UserInformationResource extends Resource
                                     ])
                                     ->label('Program')
                                     ->placeholder('Select a program')
-                                    ->helperText('Choose the academic program of the user.'),
+                                    ->helperText('Choose the academic program of the user.')
+                                    ->disabled(fn ($get) => $get('isInstructor')), // Disable if instructor
                             ]),
                     ]),
                 Section::make('Personal Information')
@@ -192,6 +213,9 @@ class UserInformationResource extends Resource
                     ]),
             ]);
     }
+
+
+
 
     public static function table(Table $table): Table
     {
@@ -300,11 +324,11 @@ class UserInformationResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
- 
+
                 Tables\Filters\SelectFilter::make('role_id')
                     ->label('Role')
                     ->options(Role::pluck('name', 'id')->toArray()),
-                
+
                 Tables\Filters\SelectFilter::make('year')
                     ->label('Year')
                     ->options([

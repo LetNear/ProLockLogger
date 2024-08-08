@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('computers', function (Blueprint $table) {
             $table->id();
-            $table->integer('computer_number');
+            $table->integer('computer_number')->unique();
             $table->string('brand');
             $table->string('model');
             $table->string('serial_number');

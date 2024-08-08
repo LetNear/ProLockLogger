@@ -18,7 +18,13 @@ class NfcResource extends Resource
 {
     protected static ?string $model = Nfc::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
+    protected static ?string $title = 'NFC Card';
+
+    protected static ?string $label = 'NFC Card';
+
+    protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
     {
