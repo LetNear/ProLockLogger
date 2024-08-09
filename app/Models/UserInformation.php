@@ -61,4 +61,9 @@ class UserInformation extends Model implements Auditable
     {
         return $this->hasOne(Seat::class);
     }
+
+    public function labSchedules()
+    {
+        return $this->hasMany(LabSchedule::class);
+    }
 }

@@ -13,13 +13,26 @@ class LabSchedule extends Model implements Auditable
     use AuditingAuditable;
 
     protected $fillable = [
-        'year_and_program_id',
+        
         'subject_code',
         'subject_name',
-        'instructor',
+        'instructor_name',
+        'block_id',
+        'instructor_id',
+        'year',
         'day_of_the_week',
         'class_start',
         'class_end',
         
     ];
+
+    public function block()
+    {
+        return $this->belongsTo(Block::class);
+    }
+
+    public function userInformation()
+    {
+        return $this->belongsTo(UserInformation::class);
+    }
 }

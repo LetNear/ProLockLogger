@@ -21,6 +21,13 @@ class BlockResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $title = 'Block';
+
+    protected static ?string $label = 'Block';
+
+    protected static ?string $navigationGroup = 'User Management';
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -28,7 +35,8 @@ class BlockResource extends Resource
                 TextInput::make('block')
                     ->label('Block')
                     ->placeholder('Enter Block')
-                    ->required(),
+                    ->required()
+                    ->maxLength(1),
             ]);
     }
 

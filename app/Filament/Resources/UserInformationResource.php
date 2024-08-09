@@ -112,6 +112,7 @@ class UserInformationResource extends Resource
                                     ->helperText('Choose the block assigned to this user.')
                                     ->searchable()
                                     ->preload(10)
+                                    ->disabled(fn ($get) => $get('isInstructor')) // Disable if instructor
                                     ->createOptionForm([
                                         Section::make('New Block Details')
                                             ->schema([

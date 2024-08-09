@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Block;
+use App\Models\UserInformation;
 use App\Models\YearAndProgram;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,13 +16,16 @@ return new class extends Migration
     {
         Schema::create('lab_schedules', function (Blueprint $table) {
             $table->id();
-            // TODO : add year and program
-            $table->string('subject_code');
-            $table->string('subject_name');
-            $table->string('instructor');
-            $table->string('day_of_the_week');
-            $table->string('class_start');
-            $table->string('class_end');
+  
+            $table->string('subject_code')->nullable();
+            $table->string('subject_name')->nullable();
+            $table->foreignIdFor(UserInformation::class, 'instructor_id')->nullable(); // Foreign key for instructor
+            $table->string('instructor_name')->nullable(); // String to store the instructor's name
+            $table->foreignIdFor(Block::class)->nullable();
+            $table->string('year')->nullable();
+            $table->string('day_of_the_week')->nullable();
+            $table->string('class_start')->nullable();
+            $table->string('class_end')->nullable();
             $table->timestamps();
         });
     }
