@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -49,6 +50,10 @@ class UserResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s email address')
                                     ->helperText('The email address of the user.'),
+                                Select::make('roles')
+                                    ->label('Roles')
+                                    ->relationship('roles', 'name')
+                                    ->multiple()
                             ]),
                     ]),
                 Section::make('Verification & Security')
@@ -97,8 +102,13 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->tooltip('The date and time when the user was last updated.'),
+                Tables\Columns\TextColumn::make('roles')
+                    ->label('Roles')
+                    ->getStateUsing(fn($record) => $record->roles->pluck('name')->join(', '))
+                    ->sortable()
+                    ->tooltip('The roles assigned to the user.'),
             ])
-            
+
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-s-pencil')
