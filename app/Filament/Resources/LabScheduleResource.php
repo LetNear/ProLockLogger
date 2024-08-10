@@ -70,7 +70,7 @@ class LabScheduleResource extends Resource
                                 //     ->required()
                                 //     ->placeholder('Select an Instructor')
                                 //     ->default(function ($record) {
-                                //         // Ensure the instructor name is pre-populated when editing
+                                //         // Ensure the instructor name is pre-populated when editingg
                                 //         return $record ? $record->instructor_name : null;
                                 //     }),
                                 Select::make('instructor_name')
