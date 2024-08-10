@@ -7,7 +7,7 @@ Install Composer
 Open C:\xampp\php\php.ini
 Ctr + F "zip" "intl"
 remove the ";" infront of the zip and intl
-restart your Apatche and Mysql
+restart your Apatche and Mysqll
 
 ##When Pulling from repo
 ```sh
