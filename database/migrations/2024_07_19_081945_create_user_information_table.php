@@ -3,7 +3,6 @@
 use App\Models\Block;
 use App\Models\IdCard;
 use App\Models\Nfc;
-use App\Models\Role;
 use App\Models\Seat;
 use App\Models\User;
 use App\Models\YearAndProgram;
@@ -22,7 +21,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->nullable();
             $table->foreignIdFor(Nfc::class, 'id_card_id')->nullable();
-            $table->foreignIdFor(Role::class)->nullable();
             $table->foreignIdFor(Seat::class)->nullable();
             $table->string('year')->nullable();
             $table->string('program')->nullable();

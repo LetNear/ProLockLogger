@@ -53,37 +53,32 @@ class UserInformationResource extends Resource
                                     ->helperText('Choose the user for this information.')
                                     ->searchable()
                                     ->preload(10)
-                                    ->options(fn () => User::whereNotIn('id', $existingUserIds)->pluck('name', 'id')->toArray()),
-
-                                Select::make('role_id')
-                                    ->relationship('role', 'name')
-                                    ->label('Role')
-                                    ->placeholder('Select a role')
-                                    ->helperText('Choose the role for this user.')
-                                    ->searchable()
-                                    ->preload(10)
-                                    ->reactive() // Enable reactivity
-                                    ->afterStateUpdated(fn ($state, callable $set) => $set('isInstructor', $state == 2)) // Set 'isInstructor' based on role
-                                    ->afterStateHydrated(fn ($state, callable $set) => $set('isInstructor', $state == 2)), // Set 'isInstructor' when editing
+                                    ->options(fn() => User::whereNotIn('id', $existingUserIds)->pluck('name', 'id')->toArray())
+                                    ->reactive() // Make the field reactive
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $user = User::find($state);
+                                        $isInstructor = $user && $user->roles->contains('id', 2);
+                                        $set('isInstructor', $isInstructor);
+                                    }),
 
                                 Select::make('id_card_id')
                                     ->relationship('idCard', 'rfid_number')
                                     ->label('RFID Number')
                                     ->placeholder('Select an RFID number')
                                     ->helperText('Choose the RFID number for this user.')
-                                    ->searchable()
+                                    ->searchable(fn($get) => !$get('isInstructor')) // Disable searchable if instructor
                                     ->preload(10)
-                                    ->options(fn () => Nfc::whereNotIn('id', $existingIdCardIds)->pluck('rfid_number', 'id')->toArray()),
+                                    ->options(fn() => Nfc::whereNotIn('id', $existingIdCardIds)->pluck('rfid_number', 'id')->toArray()),
 
                                 Select::make('seat_id')
                                     ->relationship('seat', 'computer_id')
                                     ->label('Computer Number')
                                     ->placeholder('Select a computer number')
                                     ->helperText('Choose the computer number assigned to this user.')
-                                    ->searchable()
+                                    ->searchable(fn($get) => !$get('isInstructor')) // Disable searchable if instructor
                                     ->preload(10)
-                                    ->disabled(fn ($get) => $get('isInstructor')) // Disable if instructor
-                                    ->options(fn () => Seat::whereNotIn('id', $existingSeatIds)->pluck('computer_id', 'id')->toArray())
+                                    ->disabled(fn($get) => $get('isInstructor')) // Disable if instructor
+                                    ->options(fn() => Seat::whereNotIn('id', $existingSeatIds)->pluck('computer_id', 'id')->toArray())
                                     ->createOptionForm([
                                         Section::make('New Seat Details')
                                             ->schema([
@@ -110,9 +105,9 @@ class UserInformationResource extends Resource
                                     ->label('Block')
                                     ->placeholder('Select a block')
                                     ->helperText('Choose the block assigned to this user.')
-                                    ->searchable()
+                                    ->searchable(fn($get) => !$get('isInstructor')) // Disable searchable if instructor
                                     ->preload(10)
-                                    ->disabled(fn ($get) => $get('isInstructor')) // Disable if instructor
+                                    ->disabled(fn($get) => $get('isInstructor')) // Disable if instructor
                                     ->createOptionForm([
                                         Section::make('New Block Details')
                                             ->schema([
@@ -136,7 +131,8 @@ class UserInformationResource extends Resource
                                     ->label('Year')
                                     ->placeholder('Select the year')
                                     ->helperText('Choose the year level of the user.')
-                                    ->disabled(fn ($get) => $get('isInstructor')), // Disable if instructor
+                                    ->disabled(fn($get) => $get('isInstructor')) // Disable if instructor
+                                    ->searchable(fn($get) => !$get('isInstructor')), // Disable searchable if instructor
 
                                 Select::make('program')
                                     ->options([
@@ -148,7 +144,8 @@ class UserInformationResource extends Resource
                                     ->label('Program')
                                     ->placeholder('Select a program')
                                     ->helperText('Choose the academic program of the user.')
-                                    ->disabled(fn ($get) => $get('isInstructor')), // Disable if instructor
+                                    ->disabled(fn($get) => $get('isInstructor')) // Disable if instructor
+                                    ->searchable(fn($get) => !$get('isInstructor')), // Disable searchable if instructor
                             ]),
                     ]),
                 Section::make('Personal Information')
@@ -203,19 +200,28 @@ class UserInformationResource extends Resource
                                     ->required()
                                     ->label('Contact Number')
                                     ->placeholder('Enter the contact number')
-                                    ->helperText('The user\'s contact number.'),
+                                    ->helperText('The user\'s contact number. E.g., 09123456789')
+                                    ->numeric()
+                                    ->minLength(11) // Ensure at least 11 digits
+                                    ->maxLength(11) // Ensure no more than 11 digits
+                                    ->rules([
+                                        'required',
+                                        'string',
+                                        'regex:/^09[0-9]{9}$/', // Validate it starts with 09 and is followed by 9 digits
+                                    ]),
+                                    
+
                                 TextInput::make('complete_address')
                                     ->required()
                                     ->label('Complete Address')
                                     ->placeholder('Enter the complete address')
                                     ->helperText('The user\'s complete address.')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->rules(['required', 'string', 'min:10']), // Ensure address is at least 10 characters long
                             ]),
                     ]),
             ]);
     }
-
-
 
 
     public static function table(Table $table): Table
@@ -233,12 +239,6 @@ class UserInformationResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s RFID number.')
-                    ->alignLeft(),
-                TextColumn::make('role.name')
-                    ->label('Role')
-                    ->sortable()
-                    ->searchable()
-                    ->tooltip('The user\'s role.')
                     ->alignLeft(),
                 TextColumn::make('seat.computer_number')
                     ->label('Computer Number')
@@ -326,9 +326,6 @@ class UserInformationResource extends Resource
             ])
             ->filters([
 
-                Tables\Filters\SelectFilter::make('role_id')
-                    ->label('Role')
-                    ->options(Role::pluck('name', 'id')->toArray()),
 
                 Tables\Filters\SelectFilter::make('year')
                     ->label('Year')

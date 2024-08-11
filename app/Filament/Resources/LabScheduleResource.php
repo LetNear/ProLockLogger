@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LabScheduleResource\Pages;
-use App\Filament\Resources\LabScheduleResource\RelationManagers;
 use App\Models\LabSchedule;
-use App\Models\UserInformation;
+use App\Models\User;
+use App\Models\Block;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -15,10 +15,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\DB;
-use Ramsey\Uuid\Type\Time;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use OwenIt\Auditing\Events\Auditing;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class LabScheduleResource extends Resource
@@ -49,46 +48,11 @@ class LabScheduleResource extends Resource
                                     ->label('Subject Name')
                                     ->required()
                                     ->maxLength(255),
-                                // Select::make('instructor_name')
-                                //     ->label('Instructor')
-                                //     ->options(function ($record) {
-                                //         $assignedInstructors = LabSchedule::pluck('instructor_name')->toArray();
-                                //         $query = UserInformation::where('role_id', 2);
-
-                                //         // Include the current record's instructor_name in the options
-                                //         if ($record && $record->instructor_name) {
-                                //             $currentInstructorName = $record->instructor_name;
-                                //             $query->orWhere(DB::raw('concat(first_name, " ", last_name)'), $currentInstructorName);
-                                //         }
-
-                                //         return $query->whereNotIn(DB::raw('concat(first_name, " ", last_name)'), $assignedInstructors)
-                                //             ->get()
-                                //             ->mapWithKeys(function ($user) {
-                                //                 return [$user->first_name . ' ' . $user->last_name => $user->first_name . ' ' . $user->last_name];
-                                //             });
-                                //     })
-                                //     ->required()
-                                //     ->placeholder('Select an Instructor')
-                                //     ->default(function ($record) {
-                                //         // Ensure the instructor name is pre-populated when editingg
-                                //         return $record ? $record->instructor_name : null;
-                                //     }),
-                                Select::make('instructor_name')
+                                Select::make('instructor_id')
                                     ->label('Instructor')
-                                    ->options(function () {
-                                        return UserInformation::where('role_id', 2)
-                                            ->get()
-                                            ->mapWithKeys(function ($user) {
-                                                return [$user->first_name . ' ' . $user->last_name => $user->first_name . ' ' . $user->last_name];
-                                            });
-                                    })
+                                    ->options(User::where('role_number', 2)->pluck('name', 'id')->toArray())
                                     ->required()
-                                    ->placeholder('Select an Instructor')
-                                    ->default(function ($record) {
-                                        // Ensure the instructor name is pre-populated when editing
-                                        return $record ? $record->instructor_name : null;
-                                    }),
-
+                                    ->placeholder('Select an instructor'),
                                 Select::make('block_id')
                                     ->relationship('block', 'block')
                                     ->required(),
@@ -117,19 +81,23 @@ class LabScheduleResource extends Resource
                                         'Sunday' => 'Sunday',
                                     ])
                                     ->required(),
-                                TimePicker::make('class_start')
+                                    TimePicker::make('class_start')
                                     ->label('Class Start Time')
                                     ->required()
+                                    ->format('g:i A') // 12-hour format with AM/PM
                                     ->seconds(false),
+                                
                                 TimePicker::make('class_end')
                                     ->label('Class End Time')
                                     ->required()
+                                    ->format('g:i A') // 12-hour format with AM/PM
                                     ->seconds(false),
-                            ]),
+                            ])
+                           
                     ]),
             ]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table
@@ -142,18 +110,12 @@ class LabScheduleResource extends Resource
                 Tables\Columns\TextColumn::make('subject_code')
                     ->label('Subject Code')
                     ->searchable(),
-                // TODO: Make it SELECT
                 Tables\Columns\TextColumn::make('subject_name')
                     ->label('Subject Name')
                     ->searchable(),
-                // TODO: Make it SELECT
-                TextColumn::make('instructor_name')
+                TextColumn::make('instructor.name')
                     ->label('Instructor')
                     ->searchable(),
-                TextColumn::make('block.block')
-                    ->label('Block')
-                    ->searchable(),
-
                 TextColumn::make('block.block')
                     ->label('Block')
                     ->sortable()

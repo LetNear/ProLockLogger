@@ -35,4 +35,9 @@ class LabSchedule extends Model implements Auditable
     {
         return $this->belongsTo(UserInformation::class);
     }
+
+    public function instructor()
+    {
+        return $this->belongsTo(User::class, 'instructor_id');
+    }
 }

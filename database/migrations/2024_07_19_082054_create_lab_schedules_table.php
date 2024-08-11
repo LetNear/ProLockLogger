@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Block;
+use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\YearAndProgram;
 use Illuminate\Database\Migrations\Migration;
@@ -19,8 +20,7 @@ return new class extends Migration
   
             $table->string('subject_code')->nullable();
             $table->string('subject_name')->nullable();
-            $table->foreignIdFor(UserInformation::class, 'instructor_id')->nullable(); // Foreign key for instructor
-            $table->string('instructor_name')->nullable(); // String to store the instructor's name
+            $table->foreignIdFor(User::class, 'instructor_id')->nullable();
             $table->foreignIdFor(Block::class)->nullable();
             $table->string('year')->nullable();
             $table->string('day_of_the_week')->nullable();
