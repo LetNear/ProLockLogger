@@ -16,6 +16,10 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
+use Filament\Tables\Actions\RestoreAction;
+use Filament\Tables\Actions\ForceDeleteAction;
+use Filament\Tables\Actions\RestoreBulkAction;
+use Filament\Tables\Actions\ForceDeleteBulkAction;
 
 class UserResource extends Resource
 {
@@ -50,10 +54,10 @@ class UserResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s email address')
                                     ->helperText('The email address of the user.'),
-                                Select::make('roles')
+                                Select::make('role_number')
                                     ->label('Roles')
                                     ->relationship('roles', 'name')
-                                    ->multiple()
+                                    ->preload(3),
                             ]),
                     ]),
                 Section::make('Verification & Security')
@@ -107,8 +111,13 @@ class UserResource extends Resource
                     ->getStateUsing(fn($record) => $record->roles->pluck('name')->join(', '))
                     ->sortable()
                     ->tooltip('The roles assigned to the user.'),
+                Tables\Columns\TextColumn::make('deleted_at')
+                    ->label('Deleted At')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->tooltip('The date and time when the user was soft-deleted.'),
             ])
-
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-s-pencil')
@@ -116,15 +125,32 @@ class UserResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->icon('heroicon-s-trash')
                     ->tooltip('Delete this user'),
+                RestoreAction::make()
+                    ->icon('heroicon-s-reply')
+                    ->tooltip('Restore this user')
+                    ->visible(fn($record) => $record->trashed()),
+                ForceDeleteAction::make()
+                    ->icon('heroicon-s-x-circle')
+                    ->tooltip('Permanently delete this user')
+                    ->visible(fn($record) => $record->trashed()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->icon('heroicon-s-trash')
                         ->tooltip('Delete selected users'),
-                ]),
+                        RestoreBulkAction::make()
+                        ->icon('heroicon-s-reply')
+                        ->tooltip('Restore selected users')
+                        ->visible(fn($records) => $records && $records->contains(fn($record) => $record->trashed())),
+                    ForceDeleteBulkAction::make()
+                        ->icon('heroicon-s-x-circle')
+                        ->tooltip('Permanently delete selected users')
+                        ->visible(fn($records) => $records && $records->contains(fn($record) => $record->trashed())),
+                 ]),
             ]);
     }
+    
 
     public static function getRelations(): array
     {
