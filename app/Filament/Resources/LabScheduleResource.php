@@ -81,23 +81,23 @@ class LabScheduleResource extends Resource
                                         'Sunday' => 'Sunday',
                                     ])
                                     ->required(),
-                                    TimePicker::make('class_start')
+                                TimePicker::make('class_start')
                                     ->label('Class Start Time')
                                     ->required()
-                                    ->format('g:i A') // 12-hour format with AM/PM
+
                                     ->seconds(false),
-                                
+
                                 TimePicker::make('class_end')
                                     ->label('Class End Time')
                                     ->required()
-                                    ->format('g:i A') // 12-hour format with AM/PM
+
                                     ->seconds(false),
                             ])
-                           
+
                     ]),
             ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -125,13 +125,16 @@ class LabScheduleResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('day_of_the_week')
                     ->label('Day of the Week')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('class_start')
                     ->label('Class Start Time')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('class_end')
                     ->label('Class End Time')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
