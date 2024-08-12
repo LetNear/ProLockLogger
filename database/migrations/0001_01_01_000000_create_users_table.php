@@ -20,9 +20,9 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->string('google_id')->nullable()->unique();
             $table->foreignIdFor(Role::class, 'role_number')->nullable();
-            $table->rememberToken();
+            $table->rememberToken()->nullable();
             $table->timestamps();
-            $table->softDeletes(); 
+
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

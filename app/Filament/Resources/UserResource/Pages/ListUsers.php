@@ -16,4 +16,17 @@ class ListUsers extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    public static function emitRefreshEvent()
+    {
+        static::getResource()::emit('refreshTable');
+    }
+
+    protected function getListeners(): array
+    {
+        return array_merge(
+            parent::getListeners(),
+            ['refreshTable' => '$refresh']
+        );
+    }
 }
