@@ -31,22 +31,25 @@ class StudentImporter extends Importer
     public function resolveRecord(): ?User
     {
         FacadesLog::info('Importing student data:', $this->data);
-
-        // Update or create the User record
-        $user = User::updateOrCreate(
-            ['email' => $this->data['email']], // Ensure the key matches the CSV header
-            [
+    
+        // Check if the user already exists
+        $user = User::where('email', $this->data['email'])->first();
+    
+        if (!$user) {
+            // Create a new User record if it doesn't exist
+            $user = User::create([
                 'name' => $this->data['name'], // Ensure the key matches the CSV header
+                'email' => $this->data['email'], // Ensure the key matches the CSV header
                 'role_number' => 3, // Set role_number for students
-            ]
-        );
-
-        // Assign the "Student" role using Spatie Permission
-        $roleName = $this->getRoleNameByNumber($user->role_number);
-        if ($roleName) {
-            $user->syncRoles($roleName);
+            ]);
+    
+            // Assign the "Student" role using Spatie Permission
+            $roleName = $this->getRoleNameByNumber($user->role_number);
+            if ($roleName) {
+                $user->syncRoles($roleName);
+            }
         }
-
+    
         // Update or create the UserInformation record
         UserInformation::updateOrCreate(
             ['user_id' => $user->id],
@@ -54,10 +57,9 @@ class StudentImporter extends Importer
                 'user_number' => $this->data['user_number'], // Ensure key matches CSV
             ]
         );
-
+    
         return $user;
     }
-
     protected function getRoleNameByNumber(int $roleNumber): ?string
     {
         $roles = [
