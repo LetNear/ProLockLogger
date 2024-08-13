@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->nullable();
             $table->foreignIdFor(Nfc::class, 'id_card_id')->nullable();
             $table->foreignIdFor(Seat::class)->nullable();
-            $table->string('student_number')->nullable();
+            $table->string('user_number')->nullable();
             $table->string('year')->nullable();
             $table->string('program')->nullable();
             $table->foreignIdFor(Block::class)->nullable();

@@ -103,7 +103,7 @@ class UserInformationResource extends Resource
                                 ])
                                 ->disabled(fn($get) => $get('disableUserIdCard') || $get('isInstructor')),
 
-                            TextInput::make('user_id_card_number')
+                            TextInput::make('user_number')
                                 ->label('User ID Card Number')
                                 ->placeholder('Enter the user ID card number')
                                 ->helperText('The user\'s ID card number.')
@@ -257,7 +257,7 @@ class UserInformationResource extends Resource
                     ->searchable()
                     ->tooltip('The user\'s RFID number.')
                     ->alignLeft(),
-                TextColumn::make('student_number')
+                TextColumn::make('user_number')
                     ->label('User ID Card Number')
                     ->sortable()
                     ->searchable()

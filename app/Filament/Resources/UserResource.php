@@ -92,7 +92,7 @@ class UserResource extends Resource
             ->headerActions([
                 ImportAction::make()
                     ->importer(UserImporter::class)
-                    ->label('Import Students')
+                    ->label('Import Instructors')
                     
             ])
             ->columns([
@@ -112,17 +112,21 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->tooltip('The date and time when the user was created.'),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Updated At')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->tooltip('The date and time when the user was last updated.'),
-                Tables\Columns\TextColumn::make('roles')
+                    Tables\Columns\TextColumn::make('role_number')
                     ->label('Roles')
-                    ->getStateUsing(fn($record) => $record->roles->pluck('name')->join(', '))
+                    ->getStateUsing(function ($record) {
+                        $roles = [
+                            1 => 'Administrator',
+                            2 => 'Faculty',
+                            3 => 'Student',
+                        ];
+                
+                        return $roles[$record->role_number] ?? 'Unknown';
+                    })
                     ->sortable()
                     ->tooltip('The roles assigned to the user.'),
+                
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

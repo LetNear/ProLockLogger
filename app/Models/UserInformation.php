@@ -18,7 +18,7 @@ class UserInformation extends Model implements Auditable
         'role',
         'seat_id',
         'year',
-        'student_number',
+        'user_number',
         'program',
         'block_id',
         'first_name',
