@@ -1,9 +1,10 @@
 <?php 
+
 namespace App\Filament\Imports;
 
 use App\Models\User;
 use App\Models\UserInformation;
-use App\Models\Block;
+use Spatie\Permission\Models\Role;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -25,7 +26,6 @@ class UserImporter extends Importer
             ImportColumn::make('userInformation.user_number')
                 ->requiredMapping()
                 ->rules(['required', 'max:20']),
-                
         ];
     }
 
@@ -38,11 +38,15 @@ class UserImporter extends Importer
             ['email' => $this->data['email']], // Ensure the key matches the CSV header
             [
                 'name' => $this->data['name'], // Ensure the key matches the CSV header
-                'role_number' => 2, // Set role_number to 1 on successful import
+                'role_number' => 2, // Set role_number based on your import logic
             ]
         );
 
-       
+        // Assign role based on role_number using Spatie Permission
+        $roleName = $this->getRoleNameByNumber($user->role_number);
+        if ($roleName) {
+            $user->syncRoles($roleName);
+        }
 
         // Update or create the UserInformation record
         UserInformation::updateOrCreate(
@@ -55,7 +59,16 @@ class UserImporter extends Importer
         return $user;
     }
 
-   
+    protected function getRoleNameByNumber(int $roleNumber): ?string
+    {
+        $roles = [
+            1 => 'Administrator',
+            2 => 'Faculty',
+            3 => 'Student',
+        ];
+
+        return $roles[$roleNumber] ?? null;
+    }
 
     public static function getCompletedNotificationBody(Import $import): string
     {

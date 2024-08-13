@@ -13,8 +13,9 @@ class UserPolicy
     public function viewAny(User $user): bool
     {
         // determines if the navigation resource is shown.
-        // return $user->hasAnyRole(['Administrator', 'Student']);
+        return $user->hasAnyRole(['Administrator', 'Faculty']);
         return $user->hasRole('Administrator');
+        // return $user->hasRole('Instructor');
     }
 
     /**
@@ -24,7 +25,8 @@ class UserPolicy
     {
         // determines if the user information can be viewed.
         // return $user->hasAnyRole(['Administrator' ]);
-        return $user->hasRole('Administrator');
+        // return $user->hasRole('Administrator');
+        return $user->hasAnyRole(['Administrator', 'Faculty']);
 
     }
 

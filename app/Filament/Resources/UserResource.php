@@ -1,13 +1,11 @@
-<?php
-
+<?php 
 namespace App\Filament\Resources;
 
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
+use Filament\Actions\Imports\Models\Import;
 use Filament\Forms;
-use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -17,14 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
-use Filament\Tables\Actions\RestoreAction;
-use Filament\Tables\Actions\ForceDeleteAction;
-use Filament\Tables\Actions\RestoreBulkAction;
-use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Actions\ImportAction;
-use Filament\Tables\Actions\Action;
-use Illuminate\Database\Eloquent\Factories\Relationship;
-use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -88,12 +80,16 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->poll('5s')
+            ->poll('5s')
             ->headerActions([
                 ImportAction::make()
                     ->importer(UserImporter::class)
                     ->label('Import Instructors')
-                    
+                    ->visible(fn() => Auth::user()->hasRole('Administrator')), // Only visible to Administrators
+                // ImportAction::make()
+                //     ->importer(UserImporter::class)
+                //     ->label('Import Students')
+                //     ->visible(fn() => Auth::user()->hasRole('Administrator')), // Only visible to Administrators
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -112,7 +108,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->tooltip('The date and time when the user was created.'),
-                    Tables\Columns\TextColumn::make('role_number')
+                Tables\Columns\TextColumn::make('role_number')
                     ->label('Roles')
                     ->getStateUsing(function ($record) {
                         $roles = [
@@ -125,8 +121,6 @@ class UserResource extends Resource
                     })
                     ->sortable()
                     ->tooltip('The roles assigned to the user.'),
-                
-                
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
