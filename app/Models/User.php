@@ -60,6 +60,11 @@ class User extends Authenticatable implements Auditable
         return $this->hasOne(UserInformation::class);
     }
 
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_number');
+    }
+
     
 
 }

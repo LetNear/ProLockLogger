@@ -37,6 +37,8 @@ class UserPolicy
     {
         // return $user->hasRole('Administrator');
         return $user->hasRole('Administrator');
+        // return $user->hasAnyRole(['Administrator', 'Faculty']);
+
     }
 
     /**

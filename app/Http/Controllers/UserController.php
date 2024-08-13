@@ -80,5 +80,35 @@ class UserController extends Controller
             'fingerprint_id' => $user->fingerprint_id
         ], 200);
     }
+
+    public function getUsersByRole()
+    {
+        // Retrieve all users with role_id of 2
+        $users = User::where('role_number', 2)
+                     ->get(['name', 'email']);
+        
+        // Return the users' name and email with a 200 response
+        return response()->json($users, 200);
+    }
+
+    public function updateFingerprintByEmail(Request $request)
+{
+    // Validate the incoming request data
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+        'fingerprint_id' => 'required|string|max:255',
+    ]);
+
+    // Find the user by email
+    $user = User::where('email', $request->email)->firstOrFail();
+
+    // Update the user's fingerprint_id
+    $user->fingerprint_id = $request->fingerprint_id;
+    $user->save();
+
+    // Return a JSON response with the updated user and status code 200
+    return response()->json($user, 200);
+}
+
     
 }

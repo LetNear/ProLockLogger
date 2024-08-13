@@ -7,6 +7,8 @@ use App\Http\Controllers\UserController;
 Route::apiResource('user', UserController::class);
 Route::get('users/{email}', [UserController::class, 'getUserByEmail']);
 Route::get('getuserbyfingerprint/{fingerprint_id}', [UserController::class, 'getUserByFingerprint']);
+Route::get('users/role/{role_id}', [UserController::class, 'getUsersByRole']);
+Route::put('/users/update-fingerprint', [UserController::class, 'updateFingerprintByEmail']);
 Route::get('users', [UserController::class, 'index']);
 Route::post('users', [UserController::class, 'store']);
 Route::get('users/{id}', [UserController::class, 'show']);
