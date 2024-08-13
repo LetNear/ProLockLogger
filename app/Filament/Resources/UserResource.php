@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
@@ -55,6 +56,11 @@ class UserResource extends Resource
                                     ->label('Roles')
                                     ->relationship('roles', 'name')
                                     ->preload(3),
+                                TextInput::make('fingerprint_id')
+                                    ->label('Fingerprint ID')
+                                    ->maxLength(255)
+                                    ->placeholder('Enter the user\'s fingerprint ID')
+                                    ->helperText('The fingerprint ID of the user.'),
                             ]),
                     ]),
                 Section::make('Verification & Security')
@@ -121,6 +127,12 @@ class UserResource extends Resource
                     })
                     ->sortable()
                     ->tooltip('The roles assigned to the user.'),
+                    TextColumn::make('fingerprint_id')
+                    ->label('Fingerprint ID')
+                    ->searchable()
+                    ->sortable()
+                    ->tooltip('The fingerprint ID of the user.'),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

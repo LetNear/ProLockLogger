@@ -19,6 +19,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->string('google_id')->nullable()->unique();
+            $table->string('fingerprint_id')->nullable()->unique();
             $table->foreignIdFor(Role::class, 'role_number')->nullable();
             $table->rememberToken()->nullable();
             $table->timestamps();

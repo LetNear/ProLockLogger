@@ -18,15 +18,13 @@ class UserController extends Controller
         // Validate the incoming request data
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'google_id' => 'required|string|max:255|unique:users',
+            'fingerprint_id' => 'required|string|max:255|unique:users',
         ]);
 
-        // Create a new user and hash the password before saving
+        // Create a new user with the provided name and fingerprint_id
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
-            'google_id' => $request->google_id  ,
+            'fingerprint_id' => $request->fingerprint_id,
         ]);
 
         // Return a JSON response with the created user and status code 201
@@ -44,8 +42,7 @@ class UserController extends Controller
         // Validate the incoming request data
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:8',
+            'fingerprint_id' => 'sometimes|required|string|max:255|unique:users,fingerprint_id,' . $id,
         ]);
 
         // Find the user and update their details
@@ -53,10 +50,7 @@ class UserController extends Controller
 
         // Update user attributes if present in the request
         $user->name = $request->input('name', $user->name);
-        $user->email = $request->input('email', $user->email);
-        if ($request->has('password')) {
-            $user->password = Hash::make($request->password);
-        }
+        $user->fingerprint_id = $request->input('fingerprint_id', $user->fingerprint_id);
         $user->save();
 
         return response()->json($user, 200);
@@ -70,14 +64,21 @@ class UserController extends Controller
         return response()->json(null, 204);
     }
 
-    public function getUserbyEmail($email)
+    public function getUserByFingerprint($fingerprint_id)
     {
-        $user = User::where('email', $email)->first();
-
+        // Search for the user by fingerprint_id
+        $user = User::where('fingerprint_id', $fingerprint_id)->first();
+        
+        // If the user is not found, return a 404 response
         if ($user === null) {
             return response()->json(['message' => 'User not found'], 404);
         }
-
-        return response()->json($user, 200);
+        
+        // If the user is found, return the user data with a 200 response
+        return response()->json([
+            'name' => $user->name,
+            'fingerprint_id' => $user->fingerprint_id
+        ], 200);
     }
+    
 }
