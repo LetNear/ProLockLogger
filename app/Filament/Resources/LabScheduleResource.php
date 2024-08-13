@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\LabScheduleImporter;
 use App\Filament\Resources\LabScheduleResource\Pages;
 use App\Models\LabSchedule;
 use App\Models\User;
@@ -13,10 +14,9 @@ use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use OwenIt\Auditing\Events\Auditing;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
@@ -84,16 +84,12 @@ class LabScheduleResource extends Resource
                                 TimePicker::make('class_start')
                                     ->label('Class Start Time')
                                     ->required()
-
                                     ->seconds(false),
-
                                 TimePicker::make('class_end')
                                     ->label('Class End Time')
                                     ->required()
-
                                     ->seconds(false),
-                            ])
-
+                            ]),
                     ]),
             ]);
     }
@@ -101,16 +97,20 @@ class LabScheduleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ImportAction::make()
+                    ->importer(LabScheduleImporter::class)
+                    ->label('Import Schedule'),
+            ])
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
-
-                Tables\Columns\TextColumn::make('subject_code')
+                TextColumn::make('subject_code')
                     ->label('Subject Code')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('subject_name')
+                TextColumn::make('subject_name')
                     ->label('Subject Name')
                     ->searchable(),
                 TextColumn::make('instructor.name')
@@ -123,24 +123,24 @@ class LabScheduleResource extends Resource
                 TextColumn::make('year')
                     ->label('Year')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('day_of_the_week')
+                TextColumn::make('day_of_the_week')
                     ->label('Day of the Week')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('class_start')
+                TextColumn::make('class_start')
                     ->label('Class Start Time')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('class_end')
+                TextColumn::make('class_end')
                     ->label('Class End Time')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label('Updated At')
                     ->dateTime()
                     ->sortable()

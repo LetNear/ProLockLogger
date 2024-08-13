@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignIdFor(Seat::class)->nullable();
             $table->string('user_number')->nullable();
             $table->string('year')->nullable();
-            $table->string('program')->nullable();
+
             $table->foreignIdFor(Block::class)->nullable();
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();

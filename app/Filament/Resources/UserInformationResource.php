@@ -143,18 +143,6 @@ class UserInformationResource extends Resource
                                 ->disabled(fn($get) => $get('disableUserIdCard') || $get('isInstructor'))
                                 ->searchable(fn($get) => !$get('isInstructor')),
 
-                            Select::make('program')
-                                ->options([
-                                    'Bachelor of Science in Information Technology' => 'Bachelor of Science in Information Technology',
-                                    'Bachelor of Science in Computer Science' => 'Bachelor of Science in Computer Science',
-                                    'Bachelor of Science in Information Systems' => 'Bachelor of Science in Information Systems',
-                                    'Bachelor of Library and Information Science' => 'Bachelor of Library and Information Science',
-                                ])
-                                ->label('Program')
-                                ->placeholder('Select a program')
-                                ->helperText('Choose the academic program of the user.')
-                                ->disabled(fn($get) => $get('disableUserIdCard') || $get('isInstructor'))
-                                ->searchable(fn($get) => !$get('isInstructor')),
                         ]),
                 ]),
             Section::make('Personal Information')
@@ -280,12 +268,6 @@ class UserInformationResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s year level.')
-                    ->alignLeft(),
-                TextColumn::make('program')
-                    ->label('Program')
-                    ->sortable()
-                    ->searchable()
-                    ->tooltip('The user\'s academic program.')
                     ->alignLeft(),
                 TextColumn::make('first_name')
                     ->label('First Name')
