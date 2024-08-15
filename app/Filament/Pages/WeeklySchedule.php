@@ -10,6 +10,13 @@ class WeeklySchedule extends Page
 {
     protected static string $view = 'filament.pages.weekly-schedule';
 
+
+    protected static ?string $title = 'Schedule';
+
+    protected static ?string $label = 'Schedule';
+
+    protected static ?string $navigationGroup = 'Laboratory Management';
+    
     public $weekSchedule = [];
 
     public function mount(): void

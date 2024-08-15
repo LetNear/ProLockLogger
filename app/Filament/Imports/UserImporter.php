@@ -1,18 +1,21 @@
-<?php 
+<?php
 
 namespace App\Filament\Imports;
 
 use App\Models\User;
 use App\Models\UserInformation;
-use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log as FacadesLog;
+use Illuminate\Support\Facades\Session;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserImporter extends Importer
 {
     protected static ?string $model = User::class;
+    protected array $duplicateEmails = [];
+    protected array $invalidEmails = [];
+    protected array $duplicateUserNumbers = [];
 
     public static function getColumns(): array
     {
@@ -32,35 +35,53 @@ class UserImporter extends Importer
     public function resolveRecord(): ?User
     {
         FacadesLog::info('Importing user data:', $this->data);
-    
-        // Check if the user already exists
-        $user = User::where('email', $this->data['email'])->first();
-    
-        if (!$user) {
-            // Create a new User record if it doesn't exist
-            $user = User::create([
-                'name' => $this->data['name'], // Ensure the key matches the CSV header
-                'email' => $this->data['email'], // Ensure the key matches the CSV header
-                'role_number' => 2, // Set role_number based on your import logic
-            ]);
-    
-            // Assign role based on role_number using Spatie Permission
-            $roleName = $this->getRoleNameByNumber($user->role_number);
-            if ($roleName) {
-                $user->syncRoles($roleName);
-            }
+
+        // Validate email format
+        if (!$this->isValidEmail($this->data['email'])) {
+            $this->invalidEmails[] = $this->data['email'];
+            return null; // Skip processing for this user
         }
-    
-        // Update or create the UserInformation record
+
+        // Check for existing email
+        $user = User::where('email', $this->data['email'])->first();
+        if ($user) {
+            // Collect duplicate emails
+            $this->duplicateEmails[] = $this->data['email'];
+            return null; // Skip processing for this user
+        }
+
+        // Check for duplicate user_number
+        $userInfo = UserInformation::where('user_number', $this->data['user_number'])->first();
+        if ($userInfo) {
+            // Collect duplicate user_numbers
+            $this->duplicateUserNumbers[] = $this->data['user_number'];
+            return null; // Skip processing for this user
+        }
+
+        $user = User::create([
+            'name' => $this->data['name'],
+            'email' => $this->data['email'],
+            'role_number' => 2,
+        ]);
+
+        $roleName = $this->getRoleNameByNumber($user->role_number);
+        if ($roleName) {
+            $user->syncRoles($roleName);
+        }
+
         UserInformation::updateOrCreate(
             ['user_id' => $user->id],
-            [
-                'user_number' => $this->data['user_number'], // Ensure key matches CSV
-            ]
+            ['user_number' => $this->data['user_number']]
         );
-    
+
         return $user;
     }
+
+    protected function isValidEmail(string $email): bool
+    {
+        return str_ends_with($email, '@my.cspc.edu.ph');
+    }
+
     protected function getRoleNameByNumber(int $roleNumber): ?string
     {
         $roles = [
@@ -70,6 +91,22 @@ class UserImporter extends Importer
         ];
 
         return $roles[$roleNumber] ?? null;
+    }
+
+    public function afterImport()
+    {
+        // Store errors in session for display
+        if (!empty($this->duplicateEmails)) {
+            Session::flash('duplicateEmails', $this->duplicateEmails);
+        }
+
+        if (!empty($this->invalidEmails)) {
+            Session::flash('invalidEmails', $this->invalidEmails);
+        }
+
+        if (!empty($this->duplicateUserNumbers)) {
+            Session::flash('duplicateUserNumbers', $this->duplicateUserNumbers);
+        }
     }
 
     public static function getCompletedNotificationBody(Import $import): string

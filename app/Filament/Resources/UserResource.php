@@ -1,4 +1,5 @@
 <?php 
+
 namespace App\Filament\Resources;
 
 use App\Filament\Imports\UserImporter;
@@ -18,6 +19,7 @@ use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class UserResource extends Resource
 {
@@ -52,16 +54,30 @@ class UserResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s email address')
                                     ->helperText('The email address of the user.'),
+                                    // ->rules(function () {
+                                    //     $rules = ['required', 'email'];
+                                    //     if (request()->routeIs('filament.resources.users.create')) {
+                                    //         $rules[] = 'unique:users,email';
+                                    //     } else {
+                                    //         $userId = request()->route('record');
+                                    //         $rules[] = "unique:users,email,$userId";
+                                    //     }
+                                    //     return $rules;
+                                    // }),
+
+                                    // TODO make validations
                                 Select::make('role_number')
                                     ->label('Roles')
                                     ->relationship('roles', 'name')
-                                    ->preload(3),
+                                    ->preload(3)
+                                    ->required(),
                                 TextInput::make('fingerprint_id')
                                     ->label('Fingerprint ID')
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s fingerprint ID')
                                     ->helperText('The fingerprint ID of the user.'),
                             ]),
+                            
                     ]),
                 Section::make('Verification & Security')
                     ->schema([
@@ -75,14 +91,13 @@ class UserResource extends Resource
                                     ->password()
                                     ->placeholder('Enter a new password')
                                     ->dehydrated(fn($state) => filled($state))
-                                    ->required(fn(string $context): bool => $context === 'create')
                                     ->maxLength(255)
                                     ->helperText('The password for the user. Leave blank to keep the current password.'),
                             ]),
                     ]),
-            ]);
+                ]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table

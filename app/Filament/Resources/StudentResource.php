@@ -53,6 +53,7 @@ class StudentResource extends Resource
                                     ->placeholder('Enter the student\'s email address')
                                     ->helperText('The email address of the student.'),
                                 Select::make('role_number')
+                                    ->relationship('role', 'name')
                                     ->label('Roles')
                                     ->default(3)
                                     ->disabled(),

@@ -32,6 +32,11 @@ class Seat extends Model implements Auditable
         return $this->belongsTo(UserInformation::class);
     }
 
+    public function block()
+    {
+        return $this->belongsTo(Block::class);
+    }
+
     
 
     use HasFactory;

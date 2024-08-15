@@ -5,7 +5,6 @@ use App\Models\IdCard;
 use App\Models\Nfc;
 use App\Models\Seat;
 use App\Models\User;
-use App\Models\YearAndProgram;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +18,10 @@ return new class extends Migration
     {
         Schema::create('user_information', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->nullable();
+            $table->foreignIdFor(User::class)
+                ->nullable()
+                ->constrained()
+                ->onDelete('cascade'); // Cascade delete for user
             $table->foreignIdFor(Nfc::class, 'id_card_id')->nullable();
             $table->foreignIdFor(Seat::class)->nullable();
             $table->string('user_number')->nullable();
