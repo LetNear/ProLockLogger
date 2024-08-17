@@ -15,7 +15,7 @@ class Nfc extends Model implements Auditable
 
     public function userInformation()
     {
-        return $this->hasOne(UserInformation::class);
+        return $this->hasOne(UserInformation::class, 'id_card_id');
     }
     use HasFactory;
     use AuditingAuditable;

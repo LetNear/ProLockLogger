@@ -57,11 +57,6 @@ class StudentResource extends Resource
                                     ->label('Roles')
                                     ->default(3)
                                     ->disabled(),
-                                TextInput::make('fingerprint_id')
-                                    ->label('Fingerprint ID')
-                                    ->maxLength(255)
-                                    ->placeholder('Enter the student\'s fingerprint ID')
-                                    ->helperText('The fingerprint ID of the student.'),
                             ]),
                     ]),
                 Section::make('Verification & Security')
@@ -120,11 +115,7 @@ class StudentResource extends Resource
                     ->getStateUsing(fn($record) => 'Student')
                     ->sortable()
                     ->tooltip('The roles assigned to the student.'),
-                TextColumn::make('fingerprint_id')
-                    ->label('Fingerprint ID')
-                    ->searchable()
-                    ->sortable()
-                    ->tooltip('The fingerprint ID of the student.'),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
