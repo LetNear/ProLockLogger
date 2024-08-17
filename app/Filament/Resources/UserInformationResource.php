@@ -331,6 +331,15 @@ class UserInformationResource extends Resource
             ]);
     }
 
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListUserInformation::route('/'),
+            'create' => Pages\CreateUserInformation::route('/create'),
+            'edit' => Pages\EditUserInformation::route('/{record}/edit'),
+        ];
+    }
+
     // protected static function getNavigationIcon(): string
     // {
     //     return 'heroicon-o-information-circle';
