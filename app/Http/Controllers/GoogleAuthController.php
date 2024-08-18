@@ -17,8 +17,8 @@ class GoogleAuthController extends Controller
     public function callbackGoogle()
     {
         // Get the user information from Google
-        $googleUser = Socialite::driver('google')->user();
-        
+        $googleUser = Socialite::driver('google')->stateless()->user();
+
         // Check if a user with the email exists in the database
         $user = User::where('email', $googleUser->getEmail())->first();
 
@@ -28,7 +28,7 @@ class GoogleAuthController extends Controller
                 $user->google_id = $googleUser->getId();
                 $user->save();
             }
-            
+
             // Log the user in
             Auth::login($user);
 
