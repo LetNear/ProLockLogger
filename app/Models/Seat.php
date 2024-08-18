@@ -12,8 +12,10 @@ class Seat extends Model implements Auditable
 
     protected $fillable = [
         'computer_id',
-        'instructor_name',
-        'year_section',
+        'instructor_id',
+        'year',
+        'block_id',
+        'student_id',
         'lab_attendance_id',
     ];
 
@@ -37,7 +39,16 @@ class Seat extends Model implements Auditable
         return $this->belongsTo(Block::class);
     }
 
-    
+    public function student()
+    {
+        return $this->belongsTo(UserInformation::class, 'student_id');
+    }
+    public function instructor()
+    {
+        return $this->belongsTo(User::class, 'instructor_id');
+    }
+
+
 
     use HasFactory;
     use AuditingAuditable;

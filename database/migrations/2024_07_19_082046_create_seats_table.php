@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('instructor_name')->nullable(); // String to store the instructor's name
             $table->string('year')->nullable();
             $table->foreignIdFor(Block::class)->nullable();
+            $table->foreignIdFor(UserInformation::class, 'student_id')->nullable(); // Foreign key for student
             $table->timestamps();
         });
     }

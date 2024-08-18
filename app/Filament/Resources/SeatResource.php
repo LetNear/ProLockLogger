@@ -6,6 +6,7 @@ use App\Filament\Resources\SeatResource\Pages;
 use App\Filament\Resources\SeatResource\RelationManagers;
 use App\Models\Seat;
 use App\Models\User;
+use App\Models\UserInformation;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -25,29 +26,30 @@ class SeatResource extends Resource
     protected static ?string $title = 'Seat';
 
     protected static ?string $label = 'Seat';
-    
+
     protected static ?string $navigationGroup = 'Laboratory Management';
-    
+
+
     public static function form(Form $form): Form
     {
         return $form
+        
             ->schema([
                 Forms\Components\Section::make('Seat Details')
                     ->schema([
-                        Forms\Components\Grid::make(2) // 2-column layout
+                        Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\Select::make('computer_id') // Correct column name
+                                Forms\Components\Select::make('computer_id')
                                     ->relationship('computer', 'computer_number')
                                     ->options(function ($record) {
                                         $assignedComputers = Seat::pluck('computer_id')->toArray();
                                         $query = \App\Models\Computer::query();
-                                        
-                                        // Include the current record's computer_id in the options
+
                                         if ($record) {
                                             $currentComputerId = $record->computer_id;
                                             $query->orWhere('id', $currentComputerId);
                                         }
-    
+
                                         return $query->whereNotIn('id', $assignedComputers)
                                             ->get()
                                             ->mapWithKeys(function ($computer) {
@@ -57,112 +59,129 @@ class SeatResource extends Resource
                                     ->required()
                                     ->label('Computer Number')
                                     ->placeholder('Select Computer Number'),
-    
-                                Forms\Components\Select::make('instructor_name') // Correct column name
+
+                                    Forms\Components\Select::make('instructor_id')
+                                     // Use instructor_id
                                     ->options(function ($record) {
-                                        // Only show the current logged-in instructor
                                         if (auth()->check() && auth()->user()->role_number == 2) {
+                                          
+                                            // If the user is an instructor, provide only their ID and name
                                             return [
                                                 auth()->user()->id => auth()->user()->name,
                                             ];
                                         }
-    
-                                        return [];
+                                        
+                                        // Otherwise, provide all instructors
+                                        return User::where('role_number', 2) // Fetch users with role_number 2
+                                            ->pluck('name', 'id'); // Pluck name and ID
                                     })
                                     ->required()
                                     ->label('Instructor')
                                     ->placeholder('Select an Instructor')
                                     ->default(function ($record) {
-                                        // Set the default instructor to the currently logged-in user if creating
+                                        
+                                        // Set the default value to the logged-in user if they are an instructor
                                         return auth()->check() && auth()->user()->role_number == 2
                                             ? auth()->user()->id
                                             : null;
-                                    })
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        $instructor = User::find($state);
-                                        if ($instructor) {
-                                            $set('instructor_name', $instructor->name); // Save the name
-                                        }
                                     }),
-    
-                                    Forms\Components\Select::make('year')
-                                    ->required()
+                                
+                                    
+                                
+                                
+
+                                Select::make('year')
                                     ->options([
                                         '1' => '1st Year',
                                         '2' => '2nd Year',
                                         '3' => '3rd Year',
                                         '4' => '4th Year',
                                     ])
+                                    ->required()
                                     ->label('Year')
-                                    ->placeholder('Select the year'),
-                                
-                                    Forms\Components\Select::make('block_id')
+                                    ->placeholder('Select the year')
+                                    ->reactive()
+                                    ->afterStateUpdated(fn($state, callable $set) => $set('student_id', null)),
+
+                                Forms\Components\Select::make('block_id')
                                     ->required()
                                     ->relationship('block', 'block')
-                                    
-                                    ->label('block ')
-                                    ->placeholder('Enter the block '),
+                                    ->label('Block')
+                                    ->placeholder('Enter the block')
+                                    ->reactive()
+                                    ->afterStateUpdated(fn($state, callable $set) => $set('student_id', null)),
 
-                                    // make a select for the student to be assigned to the seat
-                                    Forms\Components\Select::make('student_id')
+                                Forms\Components\Select::make('student_id')
                                     ->label('Student')
                                     ->options(function ($get) {
                                         $year = $get('year');
-                                        $block = $get('block');
-                                
+                                        $block = $get('block_id');
+
                                         if ($year && $block) {
                                             return \App\Models\UserInformation::where('year', $year)
-                                                ->where('block', $block)
+                                                ->where('block_id', $block)
                                                 ->whereHas('user', function ($query) {
                                                     $query->where('role_number', 3);
                                                 })
-                                                ->pluck('first_name', 'id');
+                                                ->with('user')
+                                                ->get()
+                                                ->pluck('user.name', 'user.id');
                                         }
-                                
+
                                         return [];
                                     })
                                     ->searchable()
                                     ->required()
                                     ->placeholder('Select Student')
-                                    ->reactive(), // This makes the select react to changes in other fields.
+                                    ->reactive()
+                                    ->default(fn($record) => $record->student_id ?? null),
                             ]),
                     ])
                     ->collapsible(),
             ])
             ->columns(1);
     }
-    
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('computer_id') // Correct column name
-                    ->searchable()
+                Tables\Columns\TextColumn::make('computer.computer_number')
                     ->label('Computer Number')
+                    ->sortable()
+                    ->searchable()
                     ->tooltip('The unique number assigned to the computer.'),
-                Tables\Columns\TextColumn::make('instructor_name') // Display instructor's name
-                    ->searchable()
+
+                Tables\Columns\TextColumn::make('instructor.name') // Show instructor's name
                     ->label('Instructor')
-                    ->tooltip('The instructor assigned to the seat plan.'),
-                Tables\Columns\TextColumn::make('year_section')
+                    ->sortable()
                     ->searchable()
-                    ->label('Year Section')
-                    ->tooltip('The year and section assigned to the seat plan.'),
-                TextColumn::make('year')
+                    ->tooltip('The instructor assigned to the seat plan.'),
+
+                Tables\Columns\TextColumn::make('year')
                     ->label('Year')
+                    ->sortable()
+                    ->searchable()
                     ->tooltip('The year assigned to the seat plan.'),
-                TextColumn::make('block')
+
+                Tables\Columns\TextColumn::make('block.block') // Show block name
                     ->label('Block')
+                    ->sortable()
+                    ->searchable()
                     ->tooltip('The block assigned to the seat plan.'),
-                TextColumn::make('student_id')
+
+                Tables\Columns\TextColumn::make('student.user.name') // Show student's name
                     ->label('Student')
+                    ->sortable()
+                    ->searchable()
                     ->tooltip('The student assigned to the seat plan.'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->label('Created At')
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -172,25 +191,26 @@ class SeatResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->tooltip('Edit this seat') // Tooltip for the Edit action
-                    ->icon('heroicon-s-pencil') // Optional: Add an icon for visual appeal
-                    ->color('primary'), // Optional: Set color
+                    ->tooltip('Edit this seat')
+                    ->icon('heroicon-s-pencil')
+                    ->color('primary'),
+
                 Tables\Actions\DeleteAction::make()
-                    ->tooltip('Delete this seat') // Tooltip for the Delete action
-                    ->icon('heroicon-s-trash') // Optional: Add an icon for visual appeal
-                    ->color('danger'), // Optional: Set color
+                    ->tooltip('Delete this seat')
+                    ->icon('heroicon-s-trash')
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->tooltip('Delete selected seats') // Tooltip for bulk delete
-                        ->color('danger'), // Optional: Set color
+                        ->tooltip('Delete selected seats')
+                        ->color('danger'),
                 ]),
             ])
             ->searchable()
-            ->defaultSort('created_at', 'desc'); // Default sorting
+            ->defaultSort('created_at', 'desc');
     }
-    
+
     public static function getRelations(): array
     {
         return [

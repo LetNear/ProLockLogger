@@ -3,6 +3,7 @@
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\Home;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\SeatController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -29,3 +30,8 @@ Route::post('/admin/logout', [LoginController::class, 'logout'])->name('filament
 Route::get('/notepad', function () {
     return "<a href='notepad://'> Notepade </a>";
 });
+
+Route::post('/assign-seat', [SeatController::class, 'assignSeat'])->name('assign.seat');
+
+// Route for removing a student from a seat
+Route::post('/remove-student', [SeatController::class, 'removeStudent'])->name('remove.student');
