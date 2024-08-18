@@ -110,5 +110,24 @@ class UserController extends Controller
     return response()->json($user, 200);
 }
 
+public function getUserByEmail($email)
+{
+    // Search for the user by email
+    $user = User::where('email', $email)->first();
+
+    // If the user is not found, return a 404 response
+    if ($user === null) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    // If the user is found, return the user data with a 200 response
+    return response()->json([
+        'name' => $user->name,
+        'email' => $user->email,
+        'fingerprint_id' => $user->fingerprint_id,
+    ], 200);
+}
+
+
     
 }
