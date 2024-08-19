@@ -58,15 +58,15 @@ class UserInformationController extends Controller
     {
         // Validate incoming request
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
+            'first_name' => '|string|max:255',
             'middle_name' => 'nullable|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'last_name' => '|string|max:255',
             'suffix' => 'nullable|string|max:50',
-            'date_of_birth' => 'required|date',
-            'gender' => 'required|string|max:10',
-            'contact_number' => 'required|string|max:15',
-            'complete_address' => 'required|string|max:255',
-            'email' => 'required|email' // To identify the user
+            'date_of_birth' => '|date',
+            'gender' => '|string|max:10',
+            'contact_number' => '|string|max:15',
+            'complete_address' => '|string|max:255',
+            'email' => '|email' // To identify the user
         ]);
     
         // If validation fails, return errors
