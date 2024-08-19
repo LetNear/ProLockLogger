@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserInformation;
+use Illuminate\Support\Facades\Validator;
 
 class UserInformationController extends Controller
 {
@@ -51,4 +52,54 @@ class UserInformationController extends Controller
             'role_number' => $user->role_number,
         ], 200);
     }
+
+
+    public function updateUserDetails(Request $request)
+    {
+        // Validate incoming request
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'suffix' => 'nullable|string|max:50',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|string|max:10',
+            'contact_number' => 'required|string|max:15',
+            'complete_address' => 'required|string|max:255',
+            'email' => 'required|email' // To identify the user
+        ]);
+    
+        // If validation fails, return errors
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+    
+        // Find the user by email in the 'users' table
+        $user = User::where('email', $request->input('email'))->first();
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    
+        // Find the user information by user ID
+        $userInformation = UserInformation::where('user_id', $user->id)->first();
+        if (!$userInformation) {
+            return response()->json(['error' => 'User information not found'], 404);
+        }
+    
+        // Update the user details
+        $userInformation->first_name = $request->input('first_name');
+        $userInformation->middle_name = $request->input('middle_name');
+        $userInformation->last_name = $request->input('last_name');
+        $userInformation->suffix = $request->input('suffix');
+        $userInformation->date_of_birth = $request->input('date_of_birth');
+        $userInformation->gender = $request->input('gender');
+        $userInformation->contact_number = $request->input('contact_number');
+        $userInformation->complete_address = $request->input('complete_address');
+        $userInformation->save();
+    
+        // Return success response
+        return response()->json(['message' => 'User details updated successfully'], 200);
+    }
+    
+
 }
