@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\LabSchedule;
 use Filament\Pages\Page;
 use App\Models\Seat;
 use App\Models\UserInformation;
@@ -13,6 +14,8 @@ class SeatPlanPage extends Page
     public $students;
     public $selectedStudent;
     public $selectedSeat;
+    public $selectedSchedule;
+    public $instructorSubjects = [];
 
     protected static string $view = 'filament.pages.seat-plan-page';
 
@@ -25,6 +28,12 @@ class SeatPlanPage extends Page
         $this->students = UserInformation::whereHas('user', function ($query) {
             $query->where('role_number', 3);
         })->whereNull('seat_id')->get();
+
+        // Fetch the instructor's subjects if logged in as instructor
+        if (auth()->check() && auth()->user()->role_number == 2) {
+            $this->instructorSubjects = LabSchedule::where('instructor_id', auth()->user()->id)
+                ->get(['subject_code', 'subject_name', 'block_id', 'year']);
+        }
     }
 
     // Select a seat to assign a student
@@ -59,7 +68,7 @@ class SeatPlanPage extends Page
         DB::transaction(function () use ($seatId) {
             // Find the seat
             $seat = Seat::find($seatId);
-    
+
             if ($seat) {
                 // Check if there is an assigned student
                 if ($seat->student) {
@@ -70,16 +79,36 @@ class SeatPlanPage extends Page
                         $student->save();
                     }
                 }
-    
+
                 // Delete the seat record
                 $seat->delete();
             }
         });
-    
+
         // Refresh the page data
         $this->mount();
     }
-    
-    
 
+    public function loadSeatPlanDetails()
+    {
+        if ($this->selectedSchedule) {
+            $scheduleDetails = json_decode($this->selectedSchedule, true);
+
+            if (isset($scheduleDetails['block']) && isset($scheduleDetails['year'])) {
+                $this->seats = Seat::where('block_id', $scheduleDetails['block'])
+                    ->where('year', $scheduleDetails['year'])
+                    ->with(['computer', 'student'])
+                    ->get();
+            }
+        } else {
+            $this->seats = collect(); // Clear seats if no schedule is selected
+        }
+    }
+
+    public function updatedSelectedSchedule($value)
+    {
+        $this->loadSeatPlanDetails();
+    }
 }
+
+
