@@ -3,15 +3,16 @@
     <div class="seat-plan">
         <h2>Seat Plan</h2>
         <!-- Grid Wrapper -->
-        <div class="seat-grid">
+        <div class="seat-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
             @forelse ($seats as $seat)
                 <!-- Seat Item -->
                 <div class="seat-item {{ $seat->userInformation ? 'occupied' : 'available' }}"
-                     wire:click="{{ $seat->userInformation ? 'removeStudentFromSeat(' . $seat->id . ')' : 'selectSeat(' . $seat->id . ')' }}">
+                     wire:click="{{ $seat->userInformation ? 'removeStudentFromSeat(' . $seat->id . ')' : 'selectSeat(' . $seat->id . ')' }}"
+                     style="min-height: 100px; border: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: {{ $seat->userInformation ? '#f8d7da' : '#d4edda' }};">
                     <p>Seat {{ $seat->computer_id }}</p>
                     @if ($seat->userInformation)
                         <p>{{ $seat->userInformation->user->name }}</p>
-                        <button class="remove-button" wire:click.stop="removeStudentFromSeat({{ $seat->id }})">Remove</button>
+                        <button class="remove-button" wire:click.stop="removeStudentFromSeat({{ $seat->id }})" style="margin-top: 10px;">Remove</button>
                     @else
                         <p>Available</p>
                     @endif
