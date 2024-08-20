@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SeatController;

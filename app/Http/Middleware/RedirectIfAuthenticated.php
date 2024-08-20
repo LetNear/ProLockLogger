@@ -9,11 +9,12 @@ class RedirectIfAuthenticated
 {
     public function handle($request, Closure $next)
     {
-        if (Auth::guard('web')->check()) {
+        if (Auth::check()) {
             return redirect()->route('filament.admin.pages.dashboard');
         }
 
         return $next($request);
     }
 }
+
 
