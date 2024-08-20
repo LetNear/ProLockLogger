@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -8,10 +9,11 @@ class RedirectIfAuthenticated
 {
     public function handle($request, Closure $next)
     {
-        if (Auth::guard('web')->check()) { // Ensure correct guard is used
-            return redirect()->route('filament.admin.pages.dashboard'); // Redirect to your dashboard route
+        if (Auth::guard('web')->check()) {
+            return redirect()->route('filament.admin.pages.dashboard');
         }
 
         return $next($request);
     }
 }
+
