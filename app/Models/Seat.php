@@ -41,14 +41,27 @@ class Seat extends Model implements Auditable
 
     public function student()
     {
-        return $this->belongsTo(UserInformation::class, 'student_id');
+        return $this->belongsTo(User::class, 'student_id');
     }
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');
     }
 
+    public static function boot()
+    {
+        parent::boot();
 
+        static::deleting(function ($seat) {
+            // Handle related deletions or updates here
+            if ($seat->student) {
+                $seat->student->update(['seat_id' => null]);
+            }
+
+            // Add logic to handle the deletion of associated data if needed
+            // For example, you might want to update or delete related records
+        });
+    }
 
     use HasFactory;
     use AuditingAuditable;

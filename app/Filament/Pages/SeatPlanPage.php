@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
@@ -18,10 +19,10 @@ class SeatPlanPage extends Page
     public function mount()
     {
         // Fetch all seats with related student info
-        $this->seats = Seat::with('userInformation')->get();
+        $this->seats = Seat::with(['computer', 'student'])->get();
 
-        // Fetch only students with role_number = 3 (Students)
-        $this->students = UserInformation::whereHas('user', function($query) {
+        // Fetch only students with role_number = 3 (Students) and who are not assigned to any seat
+        $this->students = UserInformation::whereHas('user', function ($query) {
             $query->where('role_number', 3);
         })->whereNull('seat_id')->get();
     }
@@ -42,12 +43,12 @@ class SeatPlanPage extends Page
                 $student->save();
 
                 // Update the seat to reflect the assigned student
-                $this->selectedSeat->user_information_id = $student->id;
+                $this->selectedSeat->student_id = $student->user_id; // Ensure you are updating the correct field
                 $this->selectedSeat->save();
             });
 
             // Reset the selected seat and refresh the data
-            $this->selectedSeat = null;
+            $this->reset(['selectedSeat', 'selectedStudent']);
             $this->mount();
         }
     }
@@ -56,20 +57,29 @@ class SeatPlanPage extends Page
     public function removeStudentFromSeat($seatId)
     {
         DB::transaction(function () use ($seatId) {
+            // Find the seat
             $seat = Seat::find($seatId);
-
-            if ($seat && $seat->user_information_id) {
-                $student = UserInformation::find($seat->user_information_id);
-                $student->seat_id = null;
-                $student->save();
-
-                // Clear the seat's student assignment
-                $seat->user_information_id = null;
-                $seat->save();
+    
+            if ($seat) {
+                // Check if there is an assigned student
+                if ($seat->student) {
+                    // Remove the student's seat assignment
+                    $student = UserInformation::find($seat->student->id);
+                    if ($student) {
+                        $student->seat_id = null;
+                        $student->save();
+                    }
+                }
+    
+                // Delete the seat record
+                $seat->delete();
             }
         });
-
-        // Refresh the page
+    
+        // Refresh the page data
         $this->mount();
     }
+    
+    
+
 }

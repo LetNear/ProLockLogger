@@ -111,30 +111,39 @@ class SeatResource extends Resource
                                     ->reactive()
                                     ->afterStateUpdated(fn($state, callable $set) => $set('student_id', null)),
 
-                                Forms\Components\Select::make('student_id')
+                                    Forms\Components\Select::make('student_id')
                                     ->label('Student')
                                     ->options(function ($get) {
                                         $year = $get('year');
                                         $block = $get('block_id');
-
+                                
                                         if ($year && $block) {
+                                            // Get the IDs of students already assigned to a seat
+                                            $assignedStudents = \App\Models\Seat::pluck('student_id')->toArray();
+                                
                                             return \App\Models\UserInformation::where('year', $year)
                                                 ->where('block_id', $block)
                                                 ->whereHas('user', function ($query) {
                                                     $query->where('role_number', 3);
                                                 })
+                                                ->whereNotIn('user_id', $assignedStudents) // Exclude students already assigned to a seat
                                                 ->with('user')
                                                 ->get()
-                                                ->pluck('user.name', 'user.id');
+                                                ->mapWithKeys(function ($userInformation) {
+                                                    return [$userInformation->user->id => $userInformation->user->name];
+                                                });
                                         }
-
+                                
                                         return [];
                                     })
                                     ->searchable()
                                     ->required()
                                     ->placeholder('Select Student')
                                     ->reactive()
-                                    ->default(fn($record) => $record->student_id ?? null),
+                                    ->default(fn($record) => $record->student_id ?? null)
+                                
+                                
+                                
                             ]),
                     ])
                     ->collapsible(),
@@ -170,7 +179,7 @@ class SeatResource extends Resource
                     ->searchable()
                     ->tooltip('The block assigned to the seat plan.'),
 
-                Tables\Columns\TextColumn::make('student.user.name') // Show student's name
+                Tables\Columns\TextColumn::make('student.name') // Show student's name
                     ->label('Student')
                     ->sortable()
                     ->searchable()
