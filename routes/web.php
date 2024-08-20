@@ -8,15 +8,19 @@ use App\Http\Middleware\RedirectIfAuthenticated;
 // Root Route
 Route::get('/', function () {
     return view('auth.login');
-})->middleware(RedirectIfAuthenticated::class);  // Apply RedirectIfAuthenticated middleware
+})->middleware(RedirectIfAuthenticated::class);
 
 // Authentication Routes
-Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.auth');
-Route::get('auth/google/call-back', [GoogleAuthController::class, 'callbackGoogle']);
+Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.auth')
+    ->middleware(['guest', RedirectIfAuthenticated::class]); // Apply both guest and custom middleware
+
+Route::get('auth/google/call-back', [GoogleAuthController::class, 'callbackGoogle'])
+    ->name('google.callback')
+    ->middleware(['guest', RedirectIfAuthenticated::class]); // Apply both guest and custom middleware
 
 // Login Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')
-    ->middleware(['guest', RedirectIfAuthenticated::class]);  // Apply guest and RedirectIfAuthenticated middleware
+    ->middleware(['guest', RedirectIfAuthenticated::class]); // Apply both guest and custom middleware
 
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 
