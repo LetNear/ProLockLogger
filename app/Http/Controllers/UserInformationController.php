@@ -22,6 +22,7 @@ class UserInformationController extends Controller
             return [
                 'user_number' => $userInformation->user_number,
                 'user_name' => $userInformation->user ? $userInformation->user->name : null, // Adjust 'name' if necessary
+                'id_card_id' => $userInformation->id_card_id,
             ];
         });
     
