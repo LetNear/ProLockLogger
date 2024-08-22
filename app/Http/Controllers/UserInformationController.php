@@ -119,7 +119,7 @@ class UserInformationController extends Controller
         // Validate the request data
         $validated = $request->validate([
             'user_number' => 'required|string|exists:user_informations,user_number',
-            'id_card_id'  => 'required|integer|exists:nfcs,id',
+            'id_card_id'  => 'required|string|exists:nfcs,id',
         ]);
 
         // Find the user information by user_number
