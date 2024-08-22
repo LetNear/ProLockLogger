@@ -114,26 +114,31 @@ class UserInformationController extends Controller
     }
     
 
-    public function updateIdCard(Request $request): JsonResponse
+    public function updateIdCardId(Request $request)
     {
-        // Validate the request data
-        $validated = $request->validate([
-            'user_number' => 'required|string|exists:user_informations,user_number',
-            'id_card_id'  => 'required|string|exists:nfcs,id',
+        // Validate incoming request
+        $validator = Validator::make($request->all(), [
+            'user_number' => 'required|string|max:255',
+            'id_card_id' => 'required|string|max:255'
         ]);
 
-        // Find the user information by user_number
-        $userInfo = UserInformation::where('user_number', $validated['user_number'])->first();
+        // If validation fails, return errors
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
-        if (!$userInfo) {
-            return response()->json(['message' => 'User not found'], 404);
+        // Find the user information by user_number
+        $userInformation = UserInformation::where('user_number', $request->input('user_number'))->first();
+        if (!$userInformation) {
+            return response()->json(['error' => 'User not found'], 404);
         }
 
         // Update the id_card_id
-        $userInfo->id_card_id = $validated['id_card_id'];
-        $userInfo->save();
+        $userInformation->id_card_id = $request->input('id_card_id');
+        $userInformation->save();
 
-        return response()->json(['message' => 'ID card ID updated successfully']);
+        // Return success response
+        return response()->json(['message' => 'ID card updated successfully'], 200);
     }
 
 }
