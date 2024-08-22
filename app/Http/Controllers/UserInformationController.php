@@ -158,6 +158,36 @@ class UserInformationController extends Controller
         return response()->json(['message' => 'ID card updated successfully'], 200);
     }
 
+    public function getIdCardId(Request $request): JsonResponse
+    {
+        // Validate the id_card_id parameter
+        $request->validate([
+            'id_card_id' => 'required|string',
+        ]);
+
+        // Find the NFC record by id_card_id
+        $nfc = Nfc::where('rfid_number', $request->input('id_card_id'))->first();
+
+        if (!$nfc) {
+            return response()->json(['error' => 'NFC record not found'], 404);
+        }
+
+        // Find the user information associated with the NFC record
+        $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
+
+        if (!$userInformation) {
+            return response()->json(['error' => 'User information not found'], 404);
+        }
+
+        // Get the user details
+        $user = $userInformation->user;
+
+        return response()->json([
+            'user_number' => $userInformation->user_number,
+            'user_name' => $user ? $user->name : 'Unknown',
+        ]);
+    }
+
 }
 
   // Find the NFC record by rfid_number
