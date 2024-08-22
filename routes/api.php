@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FingerprintController;
 use App\Http\Controllers\LabScheduleController;
 use App\Http\Controllers\NfcTagController;
 use App\Http\Controllers\UserController;
@@ -19,3 +20,8 @@ Route::put('users/{id}', [UserController::class, 'update']);
 Route::delete('users/{id}', [UserController::class, 'destroy']);
 Route::apiResource('nfc-tags', NfcTagController::class);
 Route::apiResource('lab-schedules', LabScheduleController::class);
+
+Route::get('/fingerprints', [FingerprintController::class, 'index']);
+Route::post('/fingerprints', [FingerprintController::class, 'store']);
+
+Route::get('/userinformation', [UserInformationController::class, 'index']);

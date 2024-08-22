@@ -1,13 +1,13 @@
 <div>
-    <!-- Dropdown for selecting instructor's subject -->
-    @if (!empty($instructorSubjects))
-        <div class="subject-dropdown">
-            <h3>Select Subject:</h3>
-            <select wire:model="selectedSchedule">
-                <option value="">Select Subject</option>
-                @foreach ($instructorSubjects as $subject)
-                    <option value="{{ json_encode(['block' => $subject->block_id, 'year' => $subject->year]) }}">
-                        {{ $subject->subject_code }} - {{ $subject->subject_name }} ({{ $subject->block_id }} - {{ $subject->year }})
+    <!-- Dropdown for selecting instructor's block and year -->
+    @if (!empty($instructorBlocksAndYears))
+        <div class="block-year-dropdown">
+            <h3>Select Block and Year:</h3>
+            <select wire:model="selectedBlockYear">
+                <option value="">Select Block and Year</option>
+                @foreach ($instructorBlocksAndYears as $year => $block)
+                    <option value="{{ $year }} - {{ $block->block }}">
+                        {{$year}} - {{$block->block}}
                     </option>
                 @endforeach
             </select>
@@ -22,12 +22,9 @@
         <div class="seat-grid"
             style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
             @foreach (range(1, 14) as $index)
-                @php
-                    // Find the seat by its computer number
-                    $seat = $seats->firstWhere(
-                        fn($seat) => $seat->computer && $seat->computer->computer_number == $index,
-                    );
-                @endphp
+            @php
+            $seat = $seats ? $seats->firstWhere('computer.computer_number', $index) : null;
+        @endphp
 
                 <div class="seat-item {{ $seat && $seat->student ? 'occupied' : 'available' }}"
                     style="min-height: 100px; border: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: {{ $seat && $seat->student ? '#f8d7da' : '#d4edda' }};"
@@ -49,10 +46,7 @@
             style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px;">
             @foreach (range(15, 28) as $index)
                 @php
-                    // Find the seat by its computer number
-                    $seat = $seats->firstWhere(
-                        fn($seat) => $seat->computer && $seat->computer->computer_number == $index,
-                    );
+                    $seat = $seats->firstWhere('computer.computer_number', $index);
                 @endphp
 
                 <div class="seat-item {{ $seat && $seat->student ? 'occupied' : 'available' }}"
@@ -71,7 +65,6 @@
         </div>
     </div>
 
-    <!-- Conditional: Only render if selectedSeat is set -->
     @if ($selectedSeat)
         <div class="assign-student" style="margin-top: 20px;">
             <h3>Assign a Student to Seat {{ $selectedSeat->computer->computer_number ?? 'N/A' }}</h3>

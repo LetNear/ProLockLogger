@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\Validator;
 
 class UserInformationController extends Controller
 {
+
+    public function index()
+    {
+        // Retrieve all user numbers
+        $userNumbers = UserInformation::pluck('user_number');
+
+        // Return as JSON response
+        return response()->json([
+            'user_numbers' => $userNumbers
+        ]);
+    }
     public function getUserDetailsViaEmail($email)
     {
         // Search for the user by email

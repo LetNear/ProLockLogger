@@ -1,11 +1,12 @@
 <?php
 
+
 namespace App\Filament\Pages;
 
 use App\Models\LabSchedule;
-use Filament\Pages\Page;
 use App\Models\Seat;
 use App\Models\UserInformation;
+use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
 class SeatPlanPage extends Page
@@ -14,35 +15,62 @@ class SeatPlanPage extends Page
     public $students;
     public $selectedStudent;
     public $selectedSeat;
-    public $selectedSchedule;
-    public $instructorSubjects = [];
+    public $selectedBlockYear;
+    public $instructorBlocksAndYears = [];
 
     protected static string $view = 'filament.pages.seat-plan-page';
 
     public function mount()
     {
-        // Fetch all seats with related student info
-        $this->seats = Seat::with(['computer', 'student'])->get();
+        // Ensure that seats is always an empty collection by default
+        $this->seats = collect();
 
-        // Fetch only students with role_number = 3 (Students) and who are not assigned to any seat
         $this->students = UserInformation::whereHas('user', function ($query) {
             $query->where('role_number', 3);
         })->whereNull('seat_id')->get();
-
-        // Fetch the instructor's subjects if logged in as instructor
         if (auth()->check() && auth()->user()->role_number == 2) {
-            $this->instructorSubjects = LabSchedule::where('instructor_id', auth()->user()->id)
-                ->get(['subject_code', 'subject_name', 'block_id', 'year']);
+            $this->instructorBlocksAndYears = LabSchedule::where('instructor_id', auth()->user()->id)
+                ->get()
+                ->pluck('block', 'year');
+        }
+        
+
+        $this->seats = Seat::where('instructor_id', auth()->user()->id)
+            ->get()
+            ->groupBy(['block_id', 'year'])
+        ;
+
+        dd($this->seats);
+
+
+    }
+
+    public function updatedSelectedBlockYear($value)
+    {
+        $this->loadSeatPlanDetails();
+    }
+
+    public function loadSeatPlanDetails()
+    {
+        if ($this->selectedBlockYear) {
+            list($block, $year) = explode('-', $this->selectedBlockYear);
+
+            // Fetch the seats with the related student and computer data
+            $this->seats = Seat::where('block_id', $block)
+                ->where('year', $year)
+                ->where('instructor_id', auth()->user()->id)
+                ->with(['computer_id', 'student_id'])
+                ->get();
+        } else {
+            $this->seats = collect();
         }
     }
 
-    // Select a seat to assign a student
     public function selectSeat($seatId)
     {
         $this->selectedSeat = Seat::find($seatId);
     }
 
-    // Assign a student to the selected seat
     public function assignStudentToSeat()
     {
         if ($this->selectedStudent && $this->selectedSeat) {
@@ -51,64 +79,30 @@ class SeatPlanPage extends Page
                 $student->seat_id = $this->selectedSeat->id;
                 $student->save();
 
-                // Update the seat to reflect the assigned student
-                $this->selectedSeat->student_id = $student->user_id; // Ensure you are updating the correct field
+                $this->selectedSeat->student_id = $student->user_id;
                 $this->selectedSeat->save();
             });
 
-            // Reset the selected seat and refresh the data
             $this->reset(['selectedSeat', 'selectedStudent']);
-            $this->mount();
+            $this->loadSeatPlanDetails();
         }
     }
 
-    // Remove a student from a seat
     public function removeStudentFromSeat($seatId)
     {
         DB::transaction(function () use ($seatId) {
-            // Find the seat
             $seat = Seat::find($seatId);
 
-            if ($seat) {
-                // Check if there is an assigned student
-                if ($seat->student) {
-                    // Remove the student's seat assignment
-                    $student = UserInformation::find($seat->student->id);
-                    if ($student) {
-                        $student->seat_id = null;
-                        $student->save();
-                    }
+            if ($seat && $seat->student) {
+                $student = UserInformation::find($seat->student->id);
+                if ($student) {
+                    $student->seat_id = null;
+                    $student->save();
                 }
-
-                // Delete the seat record
                 $seat->delete();
             }
         });
 
-        // Refresh the page data
-        $this->mount();
-    }
-
-    public function loadSeatPlanDetails()
-    {
-        if ($this->selectedSchedule) {
-            $scheduleDetails = json_decode($this->selectedSchedule, true);
-
-            if (isset($scheduleDetails['block']) && isset($scheduleDetails['year'])) {
-                $this->seats = Seat::where('block_id', $scheduleDetails['block'])
-                    ->where('year', $scheduleDetails['year'])
-                    ->with(['computer', 'student'])
-                    ->get();
-            }
-        } else {
-            $this->seats = collect(); // Clear seats if no schedule is selected
-        }
-    }
-
-    public function updatedSelectedSchedule($value)
-    {
         $this->loadSeatPlanDetails();
     }
 }
-
-

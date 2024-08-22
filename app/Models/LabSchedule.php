@@ -13,7 +13,7 @@ class LabSchedule extends Model implements Auditable
     use AuditingAuditable;
 
     protected $fillable = [
-        
+
         'subject_code',
         'subject_name',
         'instructor_name',
@@ -23,7 +23,11 @@ class LabSchedule extends Model implements Auditable
         'day_of_the_week',
         'class_start',
         'class_end',
-        
+
+    ];
+
+    protected $with = [
+        'block',
     ];
 
     public function block()
@@ -39,5 +43,10 @@ class LabSchedule extends Model implements Auditable
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');
+    }
+
+    public function seats()
+    {
+        return $this->hasMany(Seat::class);
     }
 }

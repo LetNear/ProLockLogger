@@ -13,6 +13,7 @@ class Seat extends Model implements Auditable
     protected $fillable = [
         'computer_id',
         'instructor_id',
+        'instructor_name',
         'year',
         'block_id',
         'student_id',
@@ -46,6 +47,11 @@ class Seat extends Model implements Auditable
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');
+    }
+
+    public function labSchedule()
+    {
+        return $this->belongsTo(LabSchedule::class);
     }
 
     public static function boot()
