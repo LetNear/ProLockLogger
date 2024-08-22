@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Nfc;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserInformation;
@@ -119,25 +120,29 @@ class UserInformationController extends Controller
         // Validate incoming request
         $validator = Validator::make($request->all(), [
             'user_number' => 'required|string|max:255',
-            'id_card_id' => 'required|string|max:255'
+            'rfid_number' => 'required|string' // Use rfid_number to find the NFC record
         ]);
-
-        // If validation fails, return errors
+    
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
+    
+        // Find the NFC record by rfid_number
+        $nfc = Nfc::where('rfid_number', $request->input('rfid_number'))->first();
+        if (!$nfc) {
+            return response()->json(['error' => 'NFC record not found'], 404);
+        }
+    
         // Find the user information by user_number
         $userInformation = UserInformation::where('user_number', $request->input('user_number'))->first();
         if (!$userInformation) {
             return response()->json(['error' => 'User not found'], 404);
         }
-
-        // Update the id_card_id
-        $userInformation->id_card_id = $request->input('id_card_id');
+    
+        // Update the id_card_id with the ID from NFC record
+        $userInformation->id_card_id = $nfc->id;
         $userInformation->save();
-
-        // Return success response
+    
         return response()->json(['message' => 'ID card updated successfully'], 200);
     }
 
