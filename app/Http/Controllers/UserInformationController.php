@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 
 class UserInformationController extends Controller
 {
@@ -112,5 +113,27 @@ class UserInformationController extends Controller
         return response()->json(['message' => 'User details updated successfully'], 200);
     }
     
+
+    public function storeIdCard(Request $request): JsonResponse
+    {
+        // Validate the request data
+        $validated = $request->validate([
+            'user_number' => 'required|string|exists:user_informations,user_number',
+            'id_card_id'  => 'required|integer|exists:nfcs,id',
+        ]);
+
+        // Find the user information by user_number
+        $userInfo = UserInformation::where('user_number', $validated['user_number'])->first();
+
+        if (!$userInfo) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Update the id_card_id
+        $userInfo->id_card_id = $validated['id_card_id'];
+        $userInfo->save();
+
+        return response()->json(['message' => 'ID card ID updated successfully']);
+    }
 
 }
