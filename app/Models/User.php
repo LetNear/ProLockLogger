@@ -72,4 +72,10 @@ class User extends Authenticatable implements Auditable, FilamentUser
     {
         return $this->hasAnyRole('Administrator', 'Faculty');
     }
+
+    public function getNameAttribute()
+{
+    // Assuming the name attribute exists in the User model
+    return $this->attributes['name'];
+}
 }

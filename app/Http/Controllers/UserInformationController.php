@@ -14,13 +14,19 @@ class UserInformationController extends Controller
 
     public function index()
     {
-        // Retrieve all user numbers
-        $userNumbers = UserInformation::pluck('user_number');
-
+        // Retrieve all user information records with related user data
+        $userInformations = UserInformation::with('user')->get();
+    
+        // Map the data to include user_number and user_name
+        $data = $userInformations->map(function ($userInformation) {
+            return [
+                'user_number' => $userInformation->user_number,
+                'user_name' => $userInformation->user ? $userInformation->user->name : null, // Adjust 'name' if necessary
+            ];
+        });
+    
         // Return as JSON response
-        return response()->json([
-            'user_numbers' => $userNumbers
-        ]);
+        return response()->json($data);
     }
     public function getUserDetailsViaEmail($email)
     {
