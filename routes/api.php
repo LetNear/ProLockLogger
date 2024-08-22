@@ -25,4 +25,4 @@ Route::get('/fingerprints', [FingerprintController::class, 'index']);
 Route::post('/fingerprints', [FingerprintController::class, 'store']);
 
 Route::get('/userinformation', [UserInformationController::class, 'index']);
-Route::post('/user-information/id-card', [UserInformationController::class, 'storeIdCard']);
+Route::put('/user-information/id-card', [UserInformationController::class, 'updateIdCard']);

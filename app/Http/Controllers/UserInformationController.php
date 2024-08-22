@@ -114,7 +114,7 @@ class UserInformationController extends Controller
     }
     
 
-    public function storeIdCard(Request $request): JsonResponse
+    public function updateIdCard(Request $request): JsonResponse
     {
         // Validate the request data
         $validated = $request->validate([
