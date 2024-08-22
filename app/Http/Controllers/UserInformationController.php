@@ -120,17 +120,21 @@ class UserInformationController extends Controller
         // Validate incoming request
         $validator = Validator::make($request->all(), [
             'user_number' => 'required|string|max:255',
-            'rfid_number' => 'required|string' // Use rfid_number to find the NFC record
+            'id_card_id' => 'required|string' // Use id_card_id to find or create the NFC record
         ]);
     
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
     
-        // Find the NFC record by rfid_number
-        $nfc = Nfc::where('rfid_number', $request->input('rfid_number'))->first();
+        // Check if the NFC record exists
+        $nfc = Nfc::where('rfid_number', $request->input('id_card_id'))->first();
+    
         if (!$nfc) {
-            return response()->json(['error' => 'NFC record not found'], 404);
+            // Create a new NFC record if it doesn't exist
+            $nfc = Nfc::create([
+                'rfid_number' => $request->input('id_card_id')
+            ]);
         }
     
         // Find the user information by user_number
@@ -139,7 +143,7 @@ class UserInformationController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
     
-        // Update the id_card_id with the ID from NFC record
+        // Update the id_card_id with the ID from the NFC record
         $userInformation->id_card_id = $nfc->id;
         $userInformation->save();
     
@@ -147,3 +151,19 @@ class UserInformationController extends Controller
     }
 
 }
+
+  // Find the NFC record by rfid_number
+        // $nfc = Nfc::where('rfid_number', $request->input('rfid_number'))->first();
+        // if (!$nfc) {
+        //     return response()->json(['error' => 'NFC record not found'], 404);
+        // }
+    
+        // // Find the user information by user_number
+        // $userInformation = UserInformation::where('user_number', $request->input('user_number'))->first();
+        // if (!$userInformation) {
+        //     return response()->json(['error' => 'User not found'], 404);
+        // }
+    
+        // // Update the id_card_id with the ID from NFC record
+        // $userInformation->id_card_id = $nfc->id;
+        // $userInformation->save();
