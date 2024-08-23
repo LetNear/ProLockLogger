@@ -58,14 +58,22 @@ class UserInformationResource extends Resource
                                         $set('isRestricted', $roleNumber == 1 || $roleNumber == 2);
                                     }),
 
-                                Select::make('id_card_id')
+                                    Select::make('id_card_id')
                                     ->relationship('idCard', 'rfid_number')
                                     ->label('RFID Number')
                                     ->placeholder('Select an RFID number')
                                     ->helperText('Choose the RFID number for this user.')
                                     ->searchable()
                                     ->preload(10)
+                                    ->options(function () {
+                                        // Get all RFID numbers already assigned to a user
+                                        $assignedIds = UserInformation::whereNotNull('id_card_id')->pluck('id_card_id');
+                                
+                                        // Fetch RFID numbers that are not assigned yet
+                                        return Nfc::whereNotIn('id', $assignedIds)->pluck('rfid_number', 'id')->toArray();
+                                    })
                                     ->disabled(fn($get) => $get('isRestricted')),
+                                
 
                                 Select::make('seat_id')
                                     ->relationship('seat', 'computer_id')
