@@ -267,6 +267,18 @@ class UserInformationController extends Controller
         return response()->json(['message' => 'ID card updated successfully'], 200);
     }
 
+    public function getUserInformationByUserNumber($user_number)
+    {
+        // Find the user information by user_number
+        $userInformation = UserInformation::where('user_number', $user_number)->first();
+
+        if (!$userInformation) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        return response()->json(['user_information' => $userInformation], 200);
+    }
+
 }
 
 // Find the NFC record by rfid_number
