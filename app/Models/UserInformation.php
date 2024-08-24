@@ -20,7 +20,7 @@ class UserInformation extends Model implements Auditable
         'seat_id',
         'year',
         'user_number',
-       
+
         'block_id',
         'first_name',
         'middle_name',

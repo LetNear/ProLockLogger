@@ -28,3 +28,4 @@ Route::get('/userinformation', [UserInformationController::class, 'index']);
 Route::put('/user-information/id-card', [UserInformationController::class, 'updateIdCardId']);
 Route::get('/userinformation/id-card', [UserInformationController::class, 'getIdCardId']);
 Route::get('/user-information/by-id-card', [UserInformationController::class, 'getUserInformationByIdCardId']);
+Route::put('/user-information/update-id-card', [UserInformationController::class, 'updateIdCardIdByUserNumber']);
