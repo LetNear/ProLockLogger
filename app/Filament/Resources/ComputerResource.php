@@ -24,7 +24,7 @@ class ComputerResource extends Resource
     protected static ?string $label = 'Computer';
 
     protected static ?string $navigationGroup = 'Laboratory Management';
-    
+
     public static function form(Form $form): Form
     {
         return $form
@@ -40,7 +40,12 @@ class ComputerResource extends Resource
                                     ->minValue(1)
                                     ->placeholder('Enter the computer number')
                                     ->helperText('The unique number assigned to the computer.')
-                                    ->disabled(fn ($record) => $record !== null),
+                                    ->rules([
+                                        'required',
+                                        'max:20',
+                                        'unique:computers,computer_number', // Ensure uniqueness in the 'user_informations' table for the 'serial_number' column
+                                    ])
+                                    ->disabled(fn($record) => $record !== null),
                                 Forms\Components\TextInput::make('brand')
                                     ->label('Brand')
                                     ->required()
@@ -58,7 +63,13 @@ class ComputerResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('Enter the serial number')
-                                    ->helperText('The unique serial number of the computer.'),
+                                    ->helperText('The unique serial number of the computer.')
+                                    ->rules([
+                                        'required',
+                                        'max:255',
+                                        'unique:computers,serial_number', // Ensure uniqueness in the 'user_informations' table for the 'serial_number' column
+                                    ])
+
                             ]),
                     ]),
             ]);
@@ -105,7 +116,7 @@ class ComputerResource extends Resource
                             ->label('Brand')
                             ->placeholder('Filter by brand'),
                     ])
-                    ->query(fn (Builder $query, array $data) => $query->where('brand', 'like', "%{$data['brand']}%")),
+                    ->query(fn(Builder $query, array $data) => $query->where('brand', 'like', "%{$data['brand']}%")),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

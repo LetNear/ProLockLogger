@@ -187,7 +187,50 @@ class UserInformationController extends Controller
             'user_name' => $user ? $user->name : 'Unknown',
         ]);
     }
+    public function getUserInformationByIdCardId(Request $request): JsonResponse
+    {
+        // Validate the id_card_id parameter
+        $request->validate([
+            'id_card_id' => 'required|string',
+        ]);
 
+        // Find the NFC record by id_card_id (rfid_number)
+        $nfc = Nfc::where('rfid_number', $request->input('id_card_id'))->first();
+
+        // Check if the NFC record exists
+        if (!$nfc) {
+            return response()->json(['error' => 'NFC record not found'], 404);
+        }
+
+        // Find the user information associated with the NFC record
+        $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
+
+        // Check if the user information exists
+        if (!$userInformation) {
+            return response()->json(['error' => 'User information not found'], 404);
+        }
+
+        // Get the user details from the related user model
+        $user = $userInformation->user;
+
+        // Prepare the response data
+        $response = [
+            'user_number' => $userInformation->user_number,
+            'user_name' => $user ? $user->name : 'Unknown',
+            'email' => $user ? $user->email : 'Unknown',
+            'first_name' => $userInformation->first_name ?? $user->first_name,
+            'middle_name' => $userInformation->middle_name ?? $user->middle_name,
+            'last_name' => $userInformation->last_name ?? $user->last_name,
+            'suffix' => $userInformation->suffix ?? $user->suffix,
+            'date_of_birth' => $userInformation->date_of_birth ?? $user->date_of_birth,
+            'gender' => $userInformation->gender ?? $user->gender,
+            'contact_number' => $userInformation->contact_number ?? $user->contact_number,
+            'complete_address' => $userInformation->complete_address ?? $user->complete_address,
+        ];
+
+        // Return the user information as a JSON response
+        return response()->json($response, 200);
+    }
 }
 
   // Find the NFC record by rfid_number

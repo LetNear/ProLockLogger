@@ -33,64 +33,63 @@ class SeatResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-        
             ->schema([
                 Forms\Components\Section::make('Seat Details')
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
+                                // Computer Select with Dynamic Availability
                                 Forms\Components\Select::make('computer_id')
+                                    ->label('Computer Number')
                                     ->relationship('computer', 'computer_number')
-                                    ->options(function ($record) {
-                                        $assignedComputers = Seat::pluck('computer_id')->toArray();
-                                        $query = \App\Models\Computer::query();
-
-                                        if ($record) {
-                                            $currentComputerId = $record->computer_id;
-                                            $query->orWhere('id', $currentComputerId);
-                                        }
-
-                                        return $query->whereNotIn('id', $assignedComputers)
+                                    ->options(function ($get) {
+                                        // Get the selected instructor, year, and block
+                                        $instructorId = $get('instructor_id');
+                                        $year = $get('year');
+                                        $blockId = $get('block_id');
+                                        
+                                        // Get assigned computers in the same year/block/instructor combination
+                                        $assignedComputers = Seat::where('instructor_id', $instructorId)
+                                            ->where('year', $year)
+                                            ->where('block_id', $blockId)
+                                            ->pluck('computer_id')
+                                            ->toArray();
+                                        
+                                        // Query computers not assigned
+                                        return \App\Models\Computer::whereNotIn('id', $assignedComputers)
                                             ->get()
                                             ->mapWithKeys(function ($computer) {
                                                 return [$computer->id => $computer->computer_number];
                                             });
                                     })
                                     ->required()
-                                    ->label('Computer Number')
-                                    ->placeholder('Select Computer Number'),
-
-                                    Forms\Components\Select::make('instructor_id')
-                                     // Use instructor_id
-                                    ->options(function ($record) {
-                                        if (auth()->check() && auth()->user()->role_number == 2) {
-                                          
-                                            // If the user is an instructor, provide only their ID and name
-                                            return [
-                                                auth()->user()->id => auth()->user()->name,
-                                            ];
-                                        }
-                                        
-                                        // Otherwise, provide all instructors
-                                        return User::where('role_number', 2) // Fetch users with role_number 2
-                                            ->pluck('name', 'id'); // Pluck name and ID
-                                    })
-                                    ->required()
-                                    ->label('Instructor')
-                                    ->placeholder('Select an Instructor')
-                                    ->default(function ($record) {
-                                        
-                                        // Set the default value to the logged-in user if they are an instructor
-                                        return auth()->check() && auth()->user()->role_number == 2
-                                            ? auth()->user()->id
-                                            : null;
+                                    ->placeholder('Select Computer Number')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('student_id', null); // Reset student select when computer changes
                                     }),
-                                
-                                    
-                                
-                                
-
-                                Select::make('year')
+    
+                                // Instructor Select
+                                Forms\Components\Select::make('instructor_id')
+                                    ->label('Instructor')
+                                    ->options(function () {
+                                        // If the user is an instructor, limit options to their own record
+                                        if (auth()->user()->role_number == 2) {
+                                            return [auth()->user()->id => auth()->user()->name];
+                                        }
+                                        // Otherwise, list all instructors
+                                        return User::where('role_number', 2)->pluck('name', 'id');
+                                    })
+                                    ->default(auth()->user()->role_number == 2 ? auth()->user()->id : null)
+                                    ->required()
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('computer_id', null); // Reset computer select when instructor changes
+                                    }),
+    
+                                // Year Select
+                                Forms\Components\Select::make('year')
+                                    ->label('Year')
                                     ->options([
                                         '1' => '1st Year',
                                         '2' => '2nd Year',
@@ -98,58 +97,56 @@ class SeatResource extends Resource
                                         '4' => '4th Year',
                                     ])
                                     ->required()
-                                    ->label('Year')
-                                    ->placeholder('Select the year')
                                     ->reactive()
-                                    ->afterStateUpdated(fn($state, callable $set) => $set('student_id', null)),
-
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('computer_id', null); // Reset computer select when year changes
+                                    }),
+    
+                                // Block Select
                                 Forms\Components\Select::make('block_id')
-                                    ->required()
-                                    ->relationship('block', 'block')
                                     ->label('Block')
-                                    ->placeholder('Enter the block')
+                                    ->relationship('block', 'block')
+                                    ->required()
                                     ->reactive()
-                                    ->afterStateUpdated(fn($state, callable $set) => $set('student_id', null)),
-
-                                    Forms\Components\Select::make('student_id')
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('computer_id', null); // Reset computer select when block changes
+                                    }),
+    
+                                // Student Select
+                                Forms\Components\Select::make('student_id')
                                     ->label('Student')
                                     ->options(function ($get) {
                                         $year = $get('year');
-                                        $block = $get('block_id');
-                                
-                                        if ($year && $block) {
-                                            // Get the IDs of students already assigned to a seat
-                                            $assignedStudents = \App\Models\Seat::pluck('student_id')->toArray();
-                                
-                                            return \App\Models\UserInformation::where('year', $year)
-                                                ->where('block_id', $block)
+                                        $blockId = $get('block_id');
+                                        
+                                        if ($year && $blockId) {
+                                            // Get students already assigned to a seat
+                                            $assignedStudents = Seat::pluck('student_id')->toArray();
+                                            
+                                            return UserInformation::where('year', $year)
+                                                ->where('block_id', $blockId)
                                                 ->whereHas('user', function ($query) {
                                                     $query->where('role_number', 3);
                                                 })
-                                                ->whereNotIn('user_id', $assignedStudents) // Exclude students already assigned to a seat
+                                                ->whereNotIn('user_id', $assignedStudents)
                                                 ->with('user')
                                                 ->get()
                                                 ->mapWithKeys(function ($userInformation) {
                                                     return [$userInformation->user->id => $userInformation->user->name];
                                                 });
                                         }
-                                
+    
                                         return [];
                                     })
                                     ->searchable()
                                     ->required()
-                                    ->placeholder('Select Student')
-                                    ->reactive()
-                                    ->default(fn($record) => $record->student_id ?? null)
-                                
-                                
-                                
+                                    ->placeholder('Select Student'),
                             ]),
                     ])
                     ->collapsible(),
-            ])
-            ->columns(1);
+            ]);
     }
+    
 
     public static function table(Table $table): Table
     {
