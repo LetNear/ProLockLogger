@@ -18,6 +18,7 @@ class RecentLogs extends Model implements Auditable
         'year',
         'time_in',
         'time_out',
+        'rfid_number',
     ];
 
     public function user()

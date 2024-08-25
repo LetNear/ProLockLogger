@@ -35,3 +35,5 @@ Route::get('/user-information/{user_number}', [UserInformationController::class,
 
 Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
 Route::get('/recent-logs', [RecentLogsController::class, 'index']);
+Route::post('/time-in', [RecentLogsController::class, 'recordTimeIn']);
+Route::post('/time-out', [RecentLogsController::class, 'recordTimeOut']);
