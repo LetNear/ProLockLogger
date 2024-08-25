@@ -1,0 +1,93 @@
+  2024-08-18 06:10:35 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-18 06:10:35 Filament\Actions\Imports\Jobs\ImportCsv .. 434.32ms DONE
+  2024-08-18 06:10:35 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-18 06:10:35 Filament\Notifications\DatabaseNotification  60.12ms DONE
+  2024-08-18 06:10:35 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-18 06:10:35 Filament\Notifications\Events\DatabaseNotificationsSent  19.53ms DONE
+  2024-08-18 06:17:50 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-18 06:17:50 Filament\Actions\Imports\Jobs\ImportCsv .. 738.09ms DONE
+  2024-08-18 06:17:51 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-18 06:17:51 Filament\Notifications\DatabaseNotification  42.94ms DONE
+  2024-08-18 06:17:51 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-18 06:17:51 Filament\Notifications\Events\DatabaseNotificationsSent  22.21ms DONE
+  2024-08-18 06:18:15 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-18 06:18:15 Filament\Actions\Imports\Jobs\ImportCsv .. 517.75ms DONE
+  2024-08-18 06:18:15 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-18 06:18:15 Filament\Notifications\DatabaseNotification  69.48ms DONE
+  2024-08-18 06:18:15 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-18 06:18:15 Filament\Notifications\Events\DatabaseNotificationsSent  18.77ms DONE
+  2024-08-18 06:58:09 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-18 06:58:10 Filament\Actions\Imports\Jobs\ImportCsv .. 312.26ms DONE
+  2024-08-18 06:58:10 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-18 06:58:10 Filament\Notifications\DatabaseNotification  12.94ms DONE
+  2024-08-18 06:58:10 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-18 06:58:10 Filament\Notifications\Events\DatabaseNotificationsSent  13.98ms DONE
+  2024-08-18 06:58:46 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-18 06:58:46 Filament\Actions\Imports\Jobs\ImportCsv .. 144.10ms DONE
+  2024-08-18 06:58:46 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-18 06:58:46 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-18 06:58:46 Filament\Notifications\DatabaseNotification  15.76ms DONE
+  2024-08-18 06:58:46 Filament\Notifications\Events\DatabaseNotificationsSent  21.48ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[HY000] [2002] Connection refused (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+42 vendor frames [22m
+
+  43  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[HY000] [2002] Connection refused (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+42 vendor frames [22m
+
+  43  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[HY000] [2002] Connection refused (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+42 vendor frames [22m
+
+  43  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
