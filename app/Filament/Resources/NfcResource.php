@@ -56,6 +56,11 @@ class NfcResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('custom_button')
+                ->label('View Details')
+                ->icon('heroicon-o-external-link')
+                ->url(fn (Nfc $record) => route('nfc.details', $record)) // Route to the URL
+                ->color('primary'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

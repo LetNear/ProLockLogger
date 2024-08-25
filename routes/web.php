@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NfcTagController;
 use App\Http\Controllers\SeatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -31,3 +32,7 @@ Route::post('/admin/logout', [LoginController::class, 'logout'])->name('filament
 // Seat Assignment Routes
 Route::post('/assign-seat', [SeatController::class, 'assignSeat'])->name('assign.seat');
 Route::post('/remove-student', [SeatController::class, 'removeStudent'])->name('remove.student');
+
+
+Route::get('prolock://', [NfcTagController::class, 'show'])
+    ->name('nfc.details');
