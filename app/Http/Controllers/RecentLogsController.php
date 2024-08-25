@@ -46,7 +46,7 @@ class RecentLogsController extends Controller
         $validated = $request->validate([
             'rfid_number' => 'required|string',
             'time_in' => 'required|date_format:H:i',
-            'year' => 'required|integer', // Include the year in the request validation
+          
         ]);
 
         // Find the NFC record by rfid_number
@@ -103,7 +103,7 @@ class RecentLogsController extends Controller
             'updated_at' => now(),
         ]);
 
-        
+
 
         return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
     }
