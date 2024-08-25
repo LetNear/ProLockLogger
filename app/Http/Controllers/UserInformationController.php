@@ -218,7 +218,7 @@ class UserInformationController extends Controller
             'user_number' => $userInformation->user_number,
             'user_name' => $user ? $user->name : 'Unknown',
             'year' => $userInformation->year,
-            'block' => $userInformation->block,
+            'block' => $userInformation->block. 'block',
             'email' => $user ? $user->email : 'Unknown',
             'first_name' => $userInformation->first_name ?? $user->first_name,
             'middle_name' => $userInformation->middle_name ?? $user->middle_name,
