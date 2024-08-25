@@ -88,7 +88,7 @@ class UserController extends Controller
     {
         // Retrieve all users with role_number of 2
         $users = User::where('role_number', 2)
-                     ->get(['name', 'email', 'role_number']);
+                     ->get(['name', 'email', 'role_number', 'fingerprint_id']);
 
         // Return the users' name, email, and role_number with a 200 response
         return response()->json($users, 200);
