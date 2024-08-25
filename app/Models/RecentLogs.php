@@ -38,4 +38,9 @@ class RecentLogs extends Model implements Auditable
     {
         return $this->belongsTo(UserInformation::class, 'user_id');
     }
+
+    public function nfc()
+    {
+        return $this->belongsTo(Nfc::class, 'rfid_number');
+    }
 }

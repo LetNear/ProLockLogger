@@ -26,7 +26,8 @@ class RecentLogsController extends Controller
                     'year' => $log->year,
                     'time_in' => $log->time_in,
                     'time_out' => $log->time_out,
-                    'id_card_id' => $log->userInformation->id_card_id ?? 'Unknown', // Add id_card_id here
+                  
+                    'UID' => $log->nfc->rfid_number ?? 'Unknown', // Add rfid_number here
                 ];
             });
 
