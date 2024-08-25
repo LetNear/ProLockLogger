@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\RecentLogs;
@@ -14,10 +13,10 @@ class RecentLogsController extends Controller
      */
     public function index(): JsonResponse
     {
-        // Eager load the user, role, and block relationships
-        $recentLogs = RecentLogs::with(['user', 'block'])
+        // Eager load the user, block, and userInformation relationships
+        $recentLogs = RecentLogs::with(['user', 'block', 'userInformation'])
             ->whereHas('user', function ($query) {
-                $query->where('role_id', 3);
+                $query->where('role_id', 3); // Change role_id to 3 if needed
             })
             ->get()
             ->map(function ($log) {
@@ -27,6 +26,7 @@ class RecentLogsController extends Controller
                     'year' => $log->year,
                     'time_in' => $log->time_in,
                     'time_out' => $log->time_out,
+                    'id_card_id' => $log->userInformation->id_card_id ?? 'Unknown', // Add id_card_id here
                 ];
             });
 

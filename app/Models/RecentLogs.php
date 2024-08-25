@@ -34,4 +34,8 @@ class RecentLogs extends Model implements Auditable
     {
         return $this->belongsTo(Block::class, 'block_id');
     }
+    public function userInformation()
+    {
+        return $this->belongsTo(UserInformation::class, 'user_id');
+    }
 }
