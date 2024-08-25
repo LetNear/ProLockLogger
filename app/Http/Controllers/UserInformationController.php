@@ -217,6 +217,8 @@ class UserInformationController extends Controller
         $response = [
             'user_number' => $userInformation->user_number,
             'user_name' => $user ? $user->name : 'Unknown',
+            'year_level' => $userInformation->year_level,
+            'course' => $userInformation->course,
             'email' => $user ? $user->email : 'Unknown',
             'first_name' => $userInformation->first_name ?? $user->first_name,
             'middle_name' => $userInformation->middle_name ?? $user->middle_name,

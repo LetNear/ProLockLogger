@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\Block;
 use App\Models\LabAttendance;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +17,13 @@ return new class extends Migration
     {
         Schema::create('recent_logs', function (Blueprint $table) {
             $table->id();
-            
-            $table->foreignIdFor(LabAttendance::class)->nullable();
+            $table->foreignIdFor(User::class, 'user_name')->nullable();
+            $table->foreignIdFor(Role::class, 'role')->nullable();
+            $table->foreignIdFor(Block::class, 'block')->nullable();
+            $table->string('year')->nullable();
+            $table->string('time_in')->nullable();
+            $table->string('time_out')->nullable();
+      
             $table->timestamps();
         });
     }

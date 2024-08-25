@@ -25,5 +25,9 @@ class Block extends Model
     {
         return $this->hasOne(Seat::class);
     }
+    public function recentLogs()
+    {
+        return $this->hasMany(RecentLogs::class);
+    }
     
 }
