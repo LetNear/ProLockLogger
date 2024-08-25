@@ -54,7 +54,11 @@ class RecentLogsController extends Controller
 >>>>>>> c8621e26d69ee61a2d3e2783916fce8dcae18a04
 =======
             'year' => 'required|integer',
+<<<<<<< HEAD
 >>>>>>> 50da0aed57b34485f0fad175080465580c480441
+=======
+            
+>>>>>>> ffe830ca7cd4c52f91102e31193e2a152b569cb4
         ]);
 
         // Find the NFC record by rfid_number
