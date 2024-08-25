@@ -13,12 +13,12 @@ class RecentLogs extends Model implements Auditable
 
     protected $fillable = [
         'user_id',
-        'role_id',
+      
         'block_id',
         'year',
         'time_in',
         'time_out',
-        'rfid_number',
+        'id_card_id',
     ];
 
     public function user()

@@ -17,6 +17,16 @@ class Nfc extends Model implements Auditable
     {
         return $this->hasOne(UserInformation::class, 'id_card_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function block()
+    {
+        return $this->belongsTo(Block::class);
+    }
     use HasFactory;
     use AuditingAuditable;
 }
