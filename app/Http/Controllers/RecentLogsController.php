@@ -102,6 +102,7 @@ class RecentLogsController extends Controller
             'time_out' => $validated['time_out'],
             'updated_at' => now(),
         ]);
+
         
 
         return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
