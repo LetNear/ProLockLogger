@@ -17,7 +17,7 @@ class RecentLogsController extends Controller
         // Eager load the user, role, and block relationships
         $recentLogs = RecentLogs::with(['user', 'block'])
             ->whereHas('user', function ($query) {
-                $query->where('role_id', 2);
+                $query->where('role_id', 3);
             })
             ->get()
             ->map(function ($log) {
