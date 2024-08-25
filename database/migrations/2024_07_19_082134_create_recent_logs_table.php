@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('year')->nullable();
             $table->string('time_in')->nullable();
             $table->string('time_out')->nullable();
+            $table->string('rfid_number')->nullable();
       
             $table->timestamps();
         });
