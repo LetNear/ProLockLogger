@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LabSchedule;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -89,6 +90,27 @@ class LabScheduleController extends Controller
         $labSchedule->delete();
 
         return response()->json(['message' => 'Lab schedule deleted'], 200);
+    }
+
+    public function getFacultyScheduleByFingerprintId($fingerprint_id)
+    {
+        // Find the instructor by fingerprint ID and role_number 2 (Faculty)
+        $instructor = User::where('fingerprint_id', $fingerprint_id)
+                          ->where('role_number', 2)
+                          ->first();
+
+        if (!$instructor) {
+            return response()->json(['message' => 'Instructor not found'], 404);
+        }
+
+        // Get the lab schedules for the instructor
+        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)->get();
+
+        if ($labSchedules->isEmpty()) {
+            return response()->json(['message' => 'No schedules found for this instructor'], 404);
+        }
+
+        return response()->json($labSchedules, 200);
     }
 }
 
