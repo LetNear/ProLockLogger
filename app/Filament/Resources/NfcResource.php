@@ -57,7 +57,7 @@ class NfcResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('Register NFC')
-                ->label('View Details')
+                ->label('Register NFC')
                
                 ->url('prolock://')
                 
