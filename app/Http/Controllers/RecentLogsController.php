@@ -56,10 +56,10 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'NFC UID not found.'], 404);
         }
 
-        // Create a new log entry, saving user_name and block_name
+        // Create a new log entry
         $log = RecentLogs::create([
-            'user_name' => $nfc->user->name, // Saving the user's name
-            'block_name' => $nfc->block->block, // Saving the block name
+            'user_id' => $nfc->user_id, // Assuming NFC is associated with a user
+            'block_id' => $nfc->block_id, // Assuming NFC is associated with a block
             'year' => $validated['year'], // Use the provided year
             'time_in' => $validated['time_in'],
             'id_card_id' => $nfc->id, // Assuming id_card_id refers to NFC ID
