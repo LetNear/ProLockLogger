@@ -56,10 +56,11 @@ class NfcResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('custom_button')
+                Tables\Actions\Action::make('Register NFC')
                 ->label('View Details')
                
-                ->url(fn (Nfc $record) => route('nfc.details', $record)) // Route to the URL
+                ->url('prolock://')
+                
                 ->color('primary'),
             ])
             ->bulkActions([
