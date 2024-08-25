@@ -3,6 +3,7 @@
 use App\Http\Controllers\FingerprintController;
 use App\Http\Controllers\LabScheduleController;
 use App\Http\Controllers\NfcTagController;
+use App\Http\Controllers\RecentLogsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserInformationController;
 
@@ -33,3 +34,4 @@ Route::get('/user-information/{user_number}', [UserInformationController::class,
 
 
 Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
+Route::get('/recent-logs', [RecentLogsController::class, 'index']);

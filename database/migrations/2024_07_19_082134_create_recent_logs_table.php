@@ -17,9 +17,9 @@ return new class extends Migration
     {
         Schema::create('recent_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class, 'user_name')->nullable();
-            $table->foreignIdFor(Role::class, 'role')->nullable();
-            $table->foreignIdFor(Block::class, 'block')->nullable();
+            $table->foreignIdFor(User::class, 'user_id')->nullable();
+            $table->foreignIdFor(Role::class, 'role_id')->nullable();
+            $table->foreignIdFor(Block::class, 'block_id')->nullable();
             $table->string('year')->nullable();
             $table->string('time_in')->nullable();
             $table->string('time_out')->nullable();
