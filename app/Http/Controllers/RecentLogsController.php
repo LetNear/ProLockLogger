@@ -47,10 +47,14 @@ class RecentLogsController extends Controller
             'rfid_number' => 'required|string',
             'time_in' => 'required|date_format:H:i',
 <<<<<<< HEAD
+<<<<<<< HEAD
     
 =======
           
 >>>>>>> c8621e26d69ee61a2d3e2783916fce8dcae18a04
+=======
+            'year' => 'required|integer',
+>>>>>>> 50da0aed57b34485f0fad175080465580c480441
         ]);
 
         // Find the NFC record by rfid_number
