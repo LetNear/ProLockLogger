@@ -20,6 +20,7 @@ class RecentLogsController extends Controller
             ->whereHas('user', function ($query) {
                 $query->where('role_id', 3); // Ensure role_id is set to 3
             })
+            
             ->get()
             ->map(function ($log) {
                 return [
