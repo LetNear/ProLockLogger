@@ -19,7 +19,7 @@ return new class extends Migration
         });
 
         // Insert blocks A - D
-        $blocks = ['A', 'B', 'C', 'D'];
+        $blocks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
         foreach ($blocks as $block) {
             DB::table('blocks')->insert([
