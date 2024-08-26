@@ -44,6 +44,7 @@ class RecentLogsController extends Controller
      */
     public function createRecordTimeInByUID(Request $request): JsonResponse
     {
+<<<<<<< HEAD
         // Validate the input data
         $validated = $request->validate([
             'rfid_number' => 'required|string',
@@ -67,25 +68,39 @@ class RecentLogsController extends Controller
             'year' => 'required|integer',
 >>>>>>> 5f1b86cf005b2054593f25901c05dc0353a52cfd
         ]);
+=======
+        try {
+            // Validate the input data
+            $validated = $request->validate([
+                'rfid_number' => 'required|string',
+                'time_in' => 'required|date_format:H:i', // Ensure the time is in HH:mm format
+                'year' => 'required|integer',
+            ]);
+>>>>>>> b7ac19e1d81b17d63bf72254912a3d381bc5004e
     
-        // Find the NFC record by rfid_number
-        $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
+            // Find the NFC record by rfid_number
+            $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
     
-        if (!$nfc) {
-            return response()->json(['message' => 'NFC UID not found.'], 404);
+            if (!$nfc) {
+                return response()->json(['message' => 'NFC UID not found.'], 404);
+            }
+    
+            // Create a new log entry
+            $log = RecentLogs::create([
+                'user_id' => $nfc->user_id,
+                'block_id' => $nfc->block_id,
+                'year' => $validated['year'],
+                'time_in' => $validated['time_in'],
+                'id_card_id' => $nfc->id,
+            ]);
+    
+            return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
+    
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
-    
-        // Create a new log entry
-        $log = RecentLogs::create([
-            'user_id' => $nfc->user_id, // Assuming NFC is associated with a user
-            'block_id' => $nfc->block_id, // Assuming NFC is associated with a block
-            'year' => $validated['year'], // Use the provided year
-            'time_in' => $validated['time_in'],
-            'id_card_id' => $nfc->id, // Assuming id_card_id refers to NFC ID
-        ]);
-    
-        return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
     }
+    
     
 
     /**
