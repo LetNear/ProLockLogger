@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\LabSchedule;
@@ -96,8 +97,29 @@ class LabScheduleController extends Controller
     {
         // Find the instructor by fingerprint ID and role_number 2 (Faculty)
         $instructor = User::where('fingerprint_id', $fingerprint_id)
-                          ->where('role_number', 2)
-                          ->first();
+            ->where('role_number', 2)
+            ->first();
+
+        if (!$instructor) {
+            return response()->json(['message' => 'Instructor not found'], 404);
+        }
+
+        // Get the lab schedules for the instructor
+        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)->get();
+
+        if ($labSchedules->isEmpty()) {
+            return response()->json(['message' => 'No schedules found for this instructor'], 404);
+        }
+
+        return response()->json($labSchedules, 200);
+    }
+
+    public function getFacultyScheduleByEmail($email)
+    {
+        // Find the instructor by email and role_number 2 (Faculty)
+        $instructor = User::where('email', $email)
+            ->where('role_number', 2)
+            ->first();
 
         if (!$instructor) {
             return response()->json(['message' => 'Instructor not found'], 404);
@@ -113,5 +135,3 @@ class LabScheduleController extends Controller
         return response()->json($labSchedules, 200);
     }
 }
-
-

@@ -97,6 +97,7 @@ class UserInformationController extends Controller
 
         // Find the user by email in the 'users' table
         $user = User::where('email', $request->input('email'))->first();
+        
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);
         }
