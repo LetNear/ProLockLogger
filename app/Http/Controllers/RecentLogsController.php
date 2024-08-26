@@ -20,7 +20,7 @@ class RecentLogsController extends Controller
             ->whereHas('user', function ($query) {
                 $query->where('role_id', 3); // Ensure role_id is set to 3
             })
-            
+
             ->get()
             ->map(function ($log) {
                 return [
@@ -44,31 +44,13 @@ class RecentLogsController extends Controller
      */
     public function createRecordTimeInByUID(Request $request): JsonResponse
     {
-<<<<<<< HEAD
+
         // Validate the input data
         $validated = $request->validate([
             'rfid_number' => 'required|string',
-<<<<<<< HEAD
             'time_in' => 'required|date_format:H:i',
-<<<<<<< HEAD
-<<<<<<< HEAD
-    
-=======
-          
->>>>>>> c8621e26d69ee61a2d3e2783916fce8dcae18a04
-=======
             'year' => 'required|integer',
-<<<<<<< HEAD
->>>>>>> 50da0aed57b34485f0fad175080465580c480441
-=======
-            
->>>>>>> ffe830ca7cd4c52f91102e31193e2a152b569cb4
-=======
-            'time_in' => 'required', // Ensure the time is in HH:mm format
-            'year' => 'required|integer',
->>>>>>> 5f1b86cf005b2054593f25901c05dc0353a52cfd
         ]);
-=======
         try {
             // Validate the input data
             $validated = $request->validate([
@@ -76,15 +58,13 @@ class RecentLogsController extends Controller
                 'time_in' => 'required|date_format:H:i', // Ensure the time is in HH:mm format
                 'year' => 'required|integer',
             ]);
->>>>>>> b7ac19e1d81b17d63bf72254912a3d381bc5004e
-    
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-    
+
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-    
+
             // Create a new log entry
             $log = RecentLogs::create([
                 'user_id' => $nfc->user_id,
@@ -93,15 +73,15 @@ class RecentLogsController extends Controller
                 'time_in' => $validated['time_in'],
                 'id_card_id' => $nfc->id,
             ]);
-    
+
             return response()->json(['message' => 'Time-In recorded successfullllly.', 'log' => $log], 201);
-    
+
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-    
-    
+
+
 
     /**
      * Record time-out using the NFC UID.
@@ -143,4 +123,3 @@ class RecentLogsController extends Controller
         return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
     }
 }
- 
