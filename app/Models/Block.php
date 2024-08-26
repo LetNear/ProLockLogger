@@ -14,7 +14,7 @@ class Block extends Model
     ];
     public function userInformation()
     {
-        return $this->hasOne(UserInformation::class);
+        return $this->hasMany(UserInformation::class);
     }
 
     public function labSchedules()
