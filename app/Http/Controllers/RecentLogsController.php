@@ -94,7 +94,7 @@ class RecentLogsController extends Controller
                 'id_card_id' => $nfc->id,
             ]);
     
-            return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
+            return response()->json(['message' => 'Time-In recorded successfullllly.', 'log' => $log], 201);
     
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
