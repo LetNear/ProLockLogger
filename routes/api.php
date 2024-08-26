@@ -33,7 +33,12 @@ Route::put('/user-information/update-id-card', [UserInformationController::class
 Route::get('/user-information/{user_number}', [UserInformationController::class, 'getUserInformationByUserNumber']);
 
 
-Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
+
 Route::get('/recent-logs', [RecentLogsController::class, 'index']);
 Route::put('/time-in', [RecentLogsController::class, 'recordTimeIn']);
 Route::put('/time-out', [RecentLogsController::class, 'recordTimeOut']);
+
+
+Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
+Route::get('/lab-schedules/email/{email}', [LabScheduleController::class, 'getFacultyScheduleByEmail']);
+
