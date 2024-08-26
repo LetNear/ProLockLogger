@@ -20,7 +20,7 @@ Route::get('users/{id}', [UserController::class, 'show']);
 Route::put('users/{id}', [UserController::class, 'update']);
 Route::delete('users/{id}', [UserController::class, 'destroy']);
 Route::apiResource('nfc-tags', NfcTagController::class);
-Route::apiResource('lab-schedules', LabScheduleController::class);
+
 
 Route::get('/fingerprints', [FingerprintController::class, 'index']);
 Route::post('/fingerprints', [FingerprintController::class, 'store']);
@@ -35,5 +35,5 @@ Route::get('/user-information/{user_number}', [UserInformationController::class,
 
 Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
 Route::get('/recent-logs', [RecentLogsController::class, 'index']);
-Route::put('/logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID'])->name('logs.time_in');
-Route::put('/logs/time-out', [RecentLogsController::class, 'createRecordTimeOutByUID'])->name('logs.time_out');
+Route::put('/time-in', [RecentLogsController::class, 'recordTimeIn']);
+Route::put('/time-out', [RecentLogsController::class, 'recordTimeOut']);
