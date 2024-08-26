@@ -47,7 +47,7 @@ class RecentLogsController extends Controller
         // Validate the input data
         $validated = $request->validate([
             'rfid_number' => 'required|string',
-            'time_in' => 'required|date_format:H:i', // Ensure the time is in HH:mm format
+            'time_in' => 'required', // Ensure the time is in HH:mm format
             'year' => 'required|integer',
         ]);
     
