@@ -16,7 +16,6 @@ class LabSchedule extends Model implements Auditable
 
         'subject_code',
         'subject_name',
-        'instructor_name',
         'block_id',
         'instructor_id',
         'year',
