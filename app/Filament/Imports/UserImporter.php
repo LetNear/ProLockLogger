@@ -26,7 +26,10 @@ class UserImporter extends Importer
             ImportColumn::make('email')
                 ->requiredMapping()
                 ->rules(['required', 'email', 'max:255']),
-            ImportColumn::make('userInformation.user_number')
+            ImportColumn::make('user_number')
+            ->fillRecordUsing(function ($record, $state) {
+                return;
+            })
                 ->requiredMapping()
                 ->rules(['required', 'max:20']),
         ];
