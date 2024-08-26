@@ -35,8 +35,8 @@ Route::get('/user-information/{user_number}', [UserInformationController::class,
 
 
 Route::get('/recent-logs', [RecentLogsController::class, 'index']);
-Route::post('/api/logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
-Route::put('/api/logs/time-out', [RecentLogsController::class, 'createRecordTimeOutByUID']);
+Route::post('/logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
+Route::put('/logs/time-out', [RecentLogsController::class, 'createRecordTimeOutByUID']);
 
 
 Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
