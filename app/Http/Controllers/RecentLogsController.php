@@ -77,8 +77,8 @@ class RecentLogsController extends Controller
     
         // Create a new log entry
         $log = RecentLogs::create([
-            // 'user_id' => $nfc->user_id, // Assuming NFC is associated with a user
-            // 'block_id' => $nfc->block_id, // Assuming NFC is associated with a block
+            'user_id' => $nfc->user_id, // Assuming NFC is associated with a user
+            'block_id' => $nfc->block_id, // Assuming NFC is associated with a block
             'year' => $validated['year'], // Use the provided year
             'time_in' => $validated['time_in'],
             'id_card_id' => $nfc->id, // Assuming id_card_id refers to NFC ID
