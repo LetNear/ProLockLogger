@@ -37,7 +37,7 @@ class RecentLogsController extends Controller
     }
 
     /**
-     * Record time-in using the NFC UID.
+     * Record time-in using the NFC 
      *
      * @param Request $request
      * @return JsonResponse
