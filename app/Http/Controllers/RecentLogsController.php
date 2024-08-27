@@ -54,7 +54,7 @@ class RecentLogsController extends Controller
             'rfid_number' => 'required|string',
             'time_in' => 'required|date_format:H:i',
             'year' => 'required|integer',
-            'role_id' => 'required|integer|exists:roles,id',
+            'role_id' => 'required|integer',
         ]);
 
         try {
