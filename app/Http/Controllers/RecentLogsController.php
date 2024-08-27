@@ -53,6 +53,7 @@ class RecentLogsController extends Controller
             'time_in' => 'required|date_format:H:i',
             'year' => 'required|integer',
             'role_id' => 'required|integer',
+            'user_name' => 'required|string',
         ]);
 
         try {
@@ -78,6 +79,7 @@ class RecentLogsController extends Controller
                 'time_in' => $validated['time_in'],
                 'id_card_id' => $nfc->id,
                 'role_id' => $validated['role_id'],
+                'user_name' => $validated['user_name'],
             ]);
 
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
