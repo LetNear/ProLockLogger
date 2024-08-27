@@ -17,7 +17,7 @@ class UserInformationController extends Controller
         // Retrieve all user information records with related user data and NFC data
         $userInformations = UserInformation::with('user', 'idCard')
             ->whereHas('user', function ($query) {
-                $query->where('role_id', 3); // Ensure that the user has role_id of 3
+                $query->where('role_number', 3); // Ensure that the user has role_id of 3
             })
             ->get();
     
