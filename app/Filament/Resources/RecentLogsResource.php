@@ -74,7 +74,7 @@ class RecentLogsResource extends Resource
                     Tables\Columns\TextColumn::make('user_number')
                         ->label('User')
                         ->sortable(),
-                    Tables\Columns\TextColumn::make('role.name')
+                    Tables\Columns\TextColumn::make('role_id')
                         ->label('Role')
                         ->sortable(),
                     Tables\Columns\TextColumn::make('block.block')
