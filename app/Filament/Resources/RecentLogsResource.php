@@ -69,6 +69,7 @@ class RecentLogsResource extends Resource
         public static function table(Table $table): Table
         {
             return $table
+            ->poll('2s')
                 ->columns([
                     Tables\Columns\TextColumn::make('user_number')
                         ->label('User')
