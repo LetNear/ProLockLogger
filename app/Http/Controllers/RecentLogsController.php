@@ -71,7 +71,7 @@ class RecentLogsController extends Controller
                 'block_id' => $nfc->block_id,
                 'year' => $validated['year'],
                 'time_in' => $validated['time_in'],
-                'id_card_id' => $nfc->id,
+                'rfid_number' => $nfc->id,
             ]);
 
             return response()->json(['message' => 'Time-In recorded successfullllly.', 'log' => $log], 201);
