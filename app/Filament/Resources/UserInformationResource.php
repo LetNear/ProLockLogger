@@ -184,6 +184,7 @@ class UserInformationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->poll('2s')
             ->columns([
                 TextColumn::make('user.name')
                     ->label('User')
