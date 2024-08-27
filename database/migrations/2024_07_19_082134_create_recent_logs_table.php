@@ -21,6 +21,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Block::class, 'block_id')->nullable();
             $table->foreignIdFor(Nfc::class, 'id_card_id')->nullable();
+            $table->foreignIdFor(Role::class, 'role_id')->nullable();
             $table->string('user_number')->nullable();
             $table->string('year')->nullable();
             $table->string('time_in')->nullable();

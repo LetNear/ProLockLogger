@@ -31,9 +31,10 @@ class RecentLogsController extends Controller
                     'time_in' => $log->time_in,
                     'time_out' => $log->time_out,
                     'UID' => $log->nfc->rfid_number ?? 'Unknown',
-                    'user_number' => $log->user_number, // Changed to user_number
+                    'user_number' => $log->user_number, 
                     'block_id' => $log->block_id,
                     'id_card_id' => $log->id_card_id,
+                    'role_id' => $log->role_id, // Include role_id in the response
                 ];
             });
 
@@ -53,6 +54,7 @@ class RecentLogsController extends Controller
             'rfid_number' => 'required|string',
             'time_in' => 'required|date_format:H:i',
             'year' => 'required|integer',
+            'role_id' => 'required|integer|exists:roles,id', // Validate role_id
         ]);
 
         try {
@@ -72,11 +74,12 @@ class RecentLogsController extends Controller
 
             // Create a new log entry
             $log = RecentLogs::create([
-                'user_number' => $userInformation->user_number, // Changed to user_number
+                'user_number' => $userInformation->user_number,
                 'block_id' => $userInformation->block_id,
                 'year' => $validated['year'],
                 'time_in' => $validated['time_in'],
                 'id_card_id' => $nfc->id,
+                'role_id' => $validated['role_id'], // Store role_id
             ]);
 
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
@@ -96,6 +99,7 @@ class RecentLogsController extends Controller
         $validated = $request->validate([
             'rfid_number' => 'required|string',
             'time_out' => 'required|date_format:H:i',
+
         ]);
 
         try {
@@ -118,6 +122,7 @@ class RecentLogsController extends Controller
 
             $log->update([
                 'time_out' => $validated['time_out'],
+
                 'updated_at' => now(),
             ]);
 

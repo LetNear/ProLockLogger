@@ -13,6 +13,7 @@ class RecentLogs extends Model implements Auditable
     protected $fillable = [
         'user_number',
         'block_id',
+        'role_id',
         'year',
         'time_in',
         'time_out',
@@ -38,10 +39,10 @@ class RecentLogs extends Model implements Auditable
 
     
     // If necessary, define these in the User model, not here.
-    // public function role()
-    // {
-    //     return $this->belongsTo(Role::class, 'role_id');
-    // }
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
     
     // public function userInformation()
     // {
