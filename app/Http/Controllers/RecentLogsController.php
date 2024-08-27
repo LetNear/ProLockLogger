@@ -34,6 +34,7 @@ class RecentLogsController extends Controller
                     'user_number' => $log->user_number, // Changed to user_number
                     'block_id' => $log->block_id,
                     'id_card_id' => $log->id_card_id,
+                    'role_id' => $log->role_id,
                 ];
             });
 
@@ -53,6 +54,7 @@ class RecentLogsController extends Controller
             'rfid_number' => 'required|string',
             'time_in' => 'required|date_format:H:i',
             'year' => 'required|integer',
+            'role_id' => 'required|integer|exists:roles,id',
         ]);
 
         try {
@@ -77,6 +79,7 @@ class RecentLogsController extends Controller
                 'year' => $validated['year'],
                 'time_in' => $validated['time_in'],
                 'id_card_id' => $nfc->id,
+                'role_id' => $validated['role_id'],
             ]);
 
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
