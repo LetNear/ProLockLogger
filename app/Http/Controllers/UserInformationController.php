@@ -15,8 +15,12 @@ class UserInformationController extends Controller
     public function index()
     {
         // Retrieve all user information records with related user data and NFC data
-        $userInformations = UserInformation::with('user', 'idCard')->get();
-
+        $userInformations = UserInformation::with('user', 'idCard')
+            ->whereHas('user', function ($query) {
+                $query->where('role_id', 3); // Ensure that the user has role_id of 3
+            })
+            ->get();
+    
         // Map the data to include user_number, user_name, and rfid_number (from NFC)
         $data = $userInformations->map(function ($userInformation) {
             return [
@@ -25,7 +29,7 @@ class UserInformationController extends Controller
                 'id_card_id' => $userInformation->idCard ? $userInformation->idCard->rfid_number : null, // Map to rfid_number
             ];
         });
-
+    
         // Return as JSON response
         return response()->json($data);
     }
