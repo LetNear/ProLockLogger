@@ -35,7 +35,7 @@ Route::get('/user-information/{user_number}', [UserInformationController::class,
 
 
 Route::get('/recent-logs', [RecentLogsController::class, 'index']);
-Route::post('/logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
+Route::put('/logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 Route::put('/logs/time-out', [RecentLogsController::class, 'createRecordTimeOutByUID']);
 
 
