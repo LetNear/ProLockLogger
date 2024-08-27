@@ -28,7 +28,7 @@ Route::post('/fingerprints', [FingerprintController::class, 'store']);
 Route::get('/userinformation', [UserInformationController::class, 'index']);
 Route::put('/user-information/id-card', [UserInformationController::class, 'updateIdCardId']);
 Route::get('/userinformation/id-card', [UserInformationController::class, 'getIdCardId']);
-Route::get('/user-information/by-id-card', [UserInformationController::class, 'getUserInformationByIdCardId']);
+Route::get('/user-information/by-id-card', [UserInformationController::class, 'getUserInformationByIdCardId']); 
 Route::put('/user-information/update-id-card', [UserInformationController::class, 'updateIdCardIdByUserNumber']);
 Route::get('/user-information/{user_number}', [UserInformationController::class, 'getUserInformationByUserNumber']);
 
@@ -41,4 +41,7 @@ Route::put('/logs/time-out', [RecentLogsController::class, 'createRecordTimeOutB
 
 Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
 Route::get('/lab-schedules/email/{email}', [LabScheduleController::class, 'getFacultyScheduleByEmail']);
+
+// Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
+Route::put('/recent-logs/update-time-in', [RecentLogsController::class, 'updateLogsByUIDForTimeIn']);
 
