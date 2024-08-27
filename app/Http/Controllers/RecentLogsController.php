@@ -23,7 +23,7 @@ class RecentLogsController extends Controller
             ->get()
             ->map(function ($log) {
                 return [
-                    'user_name' => $log->userInformation->user->name ?? 'Unknown',
+                    'user_name' => $log->user_name ?? ($log->userInformation->user->name ?? 'Unknown'), // Use user_name from the table or fallback to the relationship
                     'block_name' => $log->block->block ?? 'Unknown',
                     'year' => $log->year,
                     'time_in' => $log->time_in,
