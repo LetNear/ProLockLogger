@@ -2,8 +2,10 @@
 
 use App\Models\Block;
 use App\Models\LabAttendance;
+use App\Models\Nfc;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\UserInformation;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,9 +19,9 @@ return new class extends Migration
     {
         Schema::create('recent_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class, 'user_id')->nullable();
-            $table->foreignIdFor(Role::class, 'role_id')->nullable();
             $table->foreignIdFor(Block::class, 'block_id')->nullable();
+            $table->foreignIdFor(Nfc::class, 'id_card_id')->nullable();
+            $table->foreignIdFor(UserInformation::class, 'user_number')->nullable();
             $table->string('year')->nullable();
             $table->string('time_in')->nullable();
             $table->string('time_out')->nullable();

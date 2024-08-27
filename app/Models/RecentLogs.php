@@ -11,7 +11,7 @@ class RecentLogs extends Model implements Auditable
     use HasFactory, AuditingAuditable;
 
     protected $fillable = [
-        'user_id',
+        'user_number',
         'block_id',
         'year',
         'time_in',
@@ -19,10 +19,7 @@ class RecentLogs extends Model implements Auditable
         'id_card_id',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+
 
     public function block()
     {
@@ -33,6 +30,12 @@ class RecentLogs extends Model implements Auditable
     {
         return $this->belongsTo(Nfc::class, 'id_card_id');
     }
+
+    public function userInformation()
+    {
+        return $this->belongsTo(UserInformation::class, 'user_number');
+    }
+
     
     // If necessary, define these in the User model, not here.
     // public function role()
