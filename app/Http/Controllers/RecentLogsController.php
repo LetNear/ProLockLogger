@@ -121,7 +121,45 @@ class RecentLogsController extends Controller
         return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
     }
 
-    public function updateLogsByUIDForTimeIn(Request $request): JsonResponse
+    public function updateLogsByUIDForTimeOut(Request $request): JsonResponse
+    {
+        // Validate the input data
+        $validated = $request->validate([
+            'rfid_number' => 'required|string',
+            'time_out' => 'required|date_format:H:i',
+        ]);
+    
+        try {
+            // Find the NFC record by rfid_number
+            $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
+    
+            if (!$nfc) {
+                return response()->json(['message' => 'NFC UID not found.'], 404);
+            }
+    
+            // Find the existing log entry by NFC id_card_id and update the time_out
+            $log = RecentLogs::where('id_card_id', $nfc->id)
+                ->whereNotNull('time_in') // Ensure the log has a time_in
+                ->whereNull('time_out') // Ensure the log doesn't have a time_out already
+                ->first();
+    
+            if (!$log) {
+                return response()->json(['message' => 'No matching record found to update time-out.'], 404);
+            }
+    
+            $log->update([
+                'time_out' => $validated['time_out'],
+                'updated_at' => now(),
+            ]);
+    
+            return response()->json(['message' => 'Time-Out updated successfully.', 'log' => $log], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
+    }
+    
+
+    public function createLogsByUID(Request $request): JsonResponse
     {
         // Validate the input data
         $validated = $request->validate([
@@ -137,21 +175,24 @@ class RecentLogsController extends Controller
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
 
-            // Find the existing log entry by NFC id_card_id and update the time_in
-            $log = RecentLogs::where('id_card_id', $nfc->id)
-                ->whereNull('time_out') // Ensure the log doesn't have a time_out already
-                ->first();
+            // Find associated user information
+            $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
 
-            if (!$log) {
-                return response()->json(['message' => 'No matching record found to update time-in.'], 404);
+            if (!$userInformation) {
+                return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
             }
 
-            $log->update([
+            // Create a new log entry
+            $log = RecentLogs::create([
+                'user_id' => $userInformation->user_id,
+                'block_id' => $userInformation->block_id,
+                'year' => $userInformation->year,
                 'time_in' => $validated['time_in'],
-                'updated_at' => now(),
+                'id_card_id' => $nfc->id,
             ]);
 
-            return response()->json(['message' => 'Time-In updated successfully.', 'log' => $log], 200);
+            return response()->json(['message' => 'Log created successfully.', 'log' => $log], 201);
+
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
