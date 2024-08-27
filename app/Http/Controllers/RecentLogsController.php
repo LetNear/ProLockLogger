@@ -81,8 +81,6 @@ class RecentLogsController extends Controller
         }
     }
 
-
-
     /**
      * Record time-out using the NFC UID.
      *
@@ -110,7 +108,7 @@ class RecentLogsController extends Controller
             ->first();
 
         if (!$log) {
-            return response()->json(['message' => 'No matching time-in record found.'], 404);
+            return response()->json(['message' => 'No matching time-in record foundddd.'], 404);
         }
 
         $log->update([
