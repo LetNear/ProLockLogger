@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RecentLogs;
 use App\Models\Nfc;
+use App\Models\UserInformation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -43,43 +44,46 @@ class RecentLogsController extends Controller
      * @return JsonResponse
      */
     public function createRecordTimeInByUID(Request $request): JsonResponse
-    {
+{
+    // Validate the input data
+    $validated = $request->validate([
+        'rfid_number' => 'required|string',
+        'time_in' => 'required|date_format:H:i', // Ensure the time is in HH:mm format
+        'year' => 'required|integer',
+    ]);
 
-        // Validate the input data
-        $validated = $request->validate([
-            'rfid_number' => 'required|string',
-            'time_in' => 'required|date_format:H:i',
-            'year' => 'required|integer',
-        ]);
-        try {
-            // Validate the input data
-            $validated = $request->validate([
-                'rfid_number' => 'required|string',
-                'time_in' => 'required|date_format:H:i', // Ensure the time is in HH:mm format
-                'year' => 'required|integer',
-            ]);
-            // Find the NFC record by rfid_number
-            $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
+    try {
+        // Find the NFC record by rfid_number
+        $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
 
-            if (!$nfc) {
-                return response()->json(['message' => 'NFC UID not found.'], 404);
-            }
-
-            // Create a new log entry
-            $log = RecentLogs::create([
-                'user_id' => $nfc->user_id,
-                'block_id' => $nfc->block_id,
-                'year' => $validated['year'],
-                'time_in' => $validated['time_in'],
-                'rfid_number' => $nfc->id,
-            ]);
-
-            return response()->json(['message' => 'Time-In recorded successfullllly.', 'log' => $log], 201);
-
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        if (!$nfc) {
+            return response()->json(['message' => 'NFC UID not found.'], 404);
         }
+
+        // Find the related UserInformation record
+        $userInformation = $nfc->userInformation()->where('year', $validated['year'])->first();
+
+        if (!$userInformation) {
+            return response()->json(['message' => 'User information not found for the given year.'], 404);
+        }
+
+        // Create a new log entry
+        $log = RecentLogs::create([
+            'user_id' => $userInformation->user_id,
+            'block_id' => $userInformation->block_id,
+            'year' => $userInformation->year,
+            'time_in' => $validated['time_in'],
+            'id_card_id' => $nfc->id, // This is the ID from the NFC model
+        ]);
+
+        return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
+
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
     }
+}
+
+    
 
     /**
      * Record time-out using the NFC UID.
