@@ -71,7 +71,7 @@ class RecentLogsResource extends Resource
             return $table
             ->poll('2s')
                 ->columns([
-                    Tables\Columns\TextColumn::make('user_number')
+                    Tables\Columns\TextColumn::make('user_name')
                         ->label('User')
                         ->sortable(),
                     Tables\Columns\TextColumn::make('role_id')
