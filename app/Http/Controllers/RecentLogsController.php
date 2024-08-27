@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RecentLogs;
 use App\Models\Nfc;
+use App\Models\UserInformation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
