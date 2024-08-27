@@ -70,7 +70,7 @@ class RecentLogsResource extends Resource
         {
             return $table
                 ->columns([
-                    Tables\Columns\TextColumn::make('user.name')
+                    Tables\Columns\TextColumn::make('user_number')
                         ->label('User')
                         ->sortable(),
                     Tables\Columns\TextColumn::make('role.name')
