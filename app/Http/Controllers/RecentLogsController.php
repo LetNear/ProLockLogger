@@ -18,10 +18,8 @@ class RecentLogsController extends Controller
     public function index(): JsonResponse
     {
         // Eager load the block, nfc, and userInformation relationships
-        $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation'])
-            ->whereHas('userInformation.user', function ($query) {
-                $query->where('role_id', 3); // Ensure role_id is set to 3
-            })
+        $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user'])
+            ->where('role_id', 3) // Filter by role_id directly in the RecentLogs model
             ->get()
             ->map(function ($log) {
                 return [
@@ -31,13 +29,13 @@ class RecentLogsController extends Controller
                     'time_in' => $log->time_in,
                     'time_out' => $log->time_out,
                     'UID' => $log->nfc->rfid_number ?? 'Unknown',
-                    'user_number' => $log->user_number, // Changed to user_number
+                    'user_number' => $log->user_number,
                     'block_id' => $log->block_id,
                     'id_card_id' => $log->id_card_id,
-                    'role_id' => $log->role_id,
+                    'role_name' => $log->role->name ?? 'Unknown', // Added role name for clarity
                 ];
             });
-
+    
         return response()->json($recentLogs);
     }
 
