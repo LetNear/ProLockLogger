@@ -23,13 +23,13 @@ class RecentLogsController extends Controller
             ->get()
             ->map(function ($log) {
                 return [
-                    'user_name' => $log->userInformation->user->name ?? 'Unknown', // Transpose user_number to user_name
+                    'user_name' => $log->userInformation->user->name ?? 'Unknown',
                     'block_name' => $log->block->block ?? 'Unknown',
                     'year' => $log->year,
                     'time_in' => $log->time_in,
                     'time_out' => $log->time_out,
                     'UID' => $log->nfc->rfid_number ?? 'Unknown',
-                    'user_number' => $log->userInformation->user->name ?? 'Unknown', // Use the user's name instead of user_number
+                    'user_number' => $log->user_number,
                     'block_id' => $log->block_id,
                     'id_card_id' => $log->id_card_id,
                     'role_name' => $log->role->name ?? 'Unknown', // Added role name for clarity
@@ -38,7 +38,6 @@ class RecentLogsController extends Controller
     
         return response()->json($recentLogs);
     }
-    
 
     /**
      * Record time-in using the NFC UID.
