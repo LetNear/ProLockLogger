@@ -13,7 +13,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-image: url("/img/Frame1.png");
+            background-image: url("/img/Frame2.png");
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
