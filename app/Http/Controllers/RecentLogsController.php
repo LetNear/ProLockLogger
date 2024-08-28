@@ -129,4 +129,50 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    /**
+     * Get recent logs by NFC UID (rfid_number).
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getRecentLogsByUID(Request $request): JsonResponse
+    {
+        // Validate the input data
+        $validated = $request->validate([
+            'rfid_number' => 'required|string',
+        ]);
+
+        try {
+            // Find the NFC record by rfid_number
+            $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
+
+            if (!$nfc) {
+                return response()->json(['message' => 'NFC UID not found.'], 404);
+            }
+
+            // Fetch recent logs associated with this NFC UID
+            $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user'])
+                ->where('id_card_id', $nfc->id)
+                ->get()
+                ->map(function ($log) {
+                    return [
+                        'user_name' => $log->user_name ?? $log->userInformation->user->name ?? 'Unknown',
+                        'block_name' => $log->block->block ?? 'Unknown',
+                        'year' => $log->year,
+                        'time_in' => $log->time_in,
+                        'time_out' => $log->time_out,
+                        'UID' => $log->nfc->rfid_number ?? 'Unknown',
+                        'user_number' => $log->user_number,
+                        'block_id' => $log->block_id,
+                        'id_card_id' => $log->id_card_id,
+                        'role_name' => $log->role->name ?? 'Unknown', // Assuming you have a role relationship
+                    ];
+                });
+
+            return response()->json($recentLogs, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
+    }
+}
 }

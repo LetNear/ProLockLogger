@@ -45,4 +45,5 @@ Route::get('/lab-schedules/email/{email}', [LabScheduleController::class, 'getFa
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
 Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);
+Route::get('/recent-logs/by-uid', [RecentLogsController::class, 'getRecentLogsByUID']);
 
