@@ -40,7 +40,7 @@ class SeatPlanPage extends Page
             ->groupBy(['block_id', 'year'])
         ;
 
-        dd($this->seats);
+
 
 
     }
