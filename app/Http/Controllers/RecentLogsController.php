@@ -207,7 +207,6 @@ class RecentLogsController extends Controller
                 'block_id' => $userInformation->block_id,
                 'year' => null, // Set the year to null
                 'time_in' => $validated['time_in'],
-                'id_card_id' => $userInformation->id_card_id,
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
                 'fingerprint_id' => $validated['fingerprint_id'],
