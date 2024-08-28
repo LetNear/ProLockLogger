@@ -37,13 +37,20 @@ Route::get('/user-information/{user_number}', [UserInformationController::class,
 Route::get('/recent-logs', [RecentLogsController::class, 'index']);
 Route::put('/logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 Route::put('/logs/time-out', [RecentLogsController::class, 'createRecordTimeOutByUID']);
+Route::put('/logs/time-in/fingerprint', [RecentLogsController::class, 'createRecordTimeInByFingerprintId']);
+Route::put('/logs/time-out/fingerprint', [RecentLogsController::class, 'createRecordTimeOutByFingerprintId']);
+Route::get('/recent-logs/by-uid', [RecentLogsController::class, 'getRecentLogsByUID']);
+Route::get('/recent-logs/by-fingerid', [RecentLogsController::class, 'getRecentLogsByFingerprintId']);
 
 
 Route::get('/lab-schedules/faculty/{fingerprint_id}', [LabScheduleController::class, 'getFacultyScheduleByFingerprintId']);
 Route::get('/lab-schedules/email/{email}', [LabScheduleController::class, 'getFacultyScheduleByEmail']);
 
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
-Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
-Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);
-Route::get('/recent-logs/by-uid', [RecentLogsController::class, 'getRecentLogsByUID']);
+// Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
+// Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);
+
+// // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
+// Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
+// Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);
 
