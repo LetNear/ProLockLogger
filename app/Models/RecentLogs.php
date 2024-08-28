@@ -18,6 +18,7 @@ class RecentLogs extends Model implements Auditable
         'time_in',
         'time_out',
         'id_card_id',
+        'fingerprint_id',
     ];
 
 
