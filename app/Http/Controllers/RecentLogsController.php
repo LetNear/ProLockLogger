@@ -175,4 +175,4 @@ class RecentLogsController extends Controller
         }
     }
 }
-}
+
