@@ -210,7 +210,7 @@ class RecentLogsController extends Controller
                 'id_card_id' => $userInformation->id_card_id,
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
-                'finger_id' => $validated['fingerprint_id'],
+                'fingerprint_id' => $validated['fingerprint_id'],
             ]);
 
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
