@@ -22,4 +22,9 @@ class LabAttendance extends Model implements Auditable
         'logdate',
         'instructor',
     ];
+
+    public function recentLog()
+    {
+        return $this->belongsTo(RecentLogs::class, 'user_id', 'user_number');
+    }
 }

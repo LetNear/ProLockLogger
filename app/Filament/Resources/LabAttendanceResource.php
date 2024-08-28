@@ -92,6 +92,15 @@ class LabAttendanceResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('instructor')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('recentLog.user_number')
+                    ->label('Recent Log User Number')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('recentLog.block.block')
+                    ->label('Recent Log Block')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('recentLog.role.name')
+                    ->label('Recent Log Role')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -113,6 +122,7 @@ class LabAttendanceResource extends Resource
                 ]),
             ]);
     }
+    
 
     public static function getRelations(): array
     {
