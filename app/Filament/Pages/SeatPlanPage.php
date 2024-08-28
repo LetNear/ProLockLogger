@@ -1,8 +1,7 @@
 <?php
-
-
 namespace App\Filament\Pages;
 
+use App\Models\Block;
 use App\Models\LabSchedule;
 use App\Models\Seat;
 use App\Models\UserInformation;
@@ -22,49 +21,91 @@ class SeatPlanPage extends Page
 
     public function mount()
     {
-        // Ensure that seats is always an empty collection by default
+        // Initialize properties
         $this->seats = collect();
+        $this->students = collect();
+        $this->selectedBlockYear = null;
+        $this->selectedStudent = null;
+        $this->selectedSeat = null;
 
+        // Fetch students without seats assigned
         $this->students = UserInformation::whereHas('user', function ($query) {
             $query->where('role_number', 3);
         })->whereNull('seat_id')->get();
+
+        // Fetch instructor's blocks and years
         if (auth()->check() && auth()->user()->role_number == 2) {
             $this->instructorBlocksAndYears = LabSchedule::where('instructor_id', auth()->user()->id)
+                ->join('blocks', 'lab_schedules.block_id', '=', 'blocks.id')
+                ->select('blocks.block as block_name', 'lab_schedules.year')
+                ->distinct()
                 ->get()
-                ->pluck('block', 'year');
+                ->mapWithKeys(function ($item) {
+                    return [$item->block_name . '-' . $item->year => $item->block_name . ' - ' . $item->year];
+                });
         }
-        
-
-        $this->seats = Seat::where('instructor_id', auth()->user()->id)
-            ->get()
-            ->groupBy(['block_id', 'year'])
-        ;
-
-
-
-
     }
 
     public function updatedSelectedBlockYear($value)
     {
+        // Load seat plan details when the selectedBlockYear changes
         $this->loadSeatPlanDetails();
     }
 
     public function loadSeatPlanDetails()
     {
-        if ($this->selectedBlockYear) {
-            list($block, $year) = explode('-', $this->selectedBlockYear);
-
-            // Fetch the seats with the related student and computer data
-            $this->seats = Seat::where('block_id', $block)
-                ->where('year', $year)
-                ->where('instructor_id', auth()->user()->id)
-                ->with(['computer_id', 'student_id'])
-                ->get();
+        if (!empty($this->selectedBlockYear)) {
+            // Debug output to verify initial selectedBlockYear value
+          
+    
+            // Ensure there's a dash separating block and year
+            if (strpos($this->selectedBlockYear, '-') !== false) {
+                // Split the string by the dash
+                $parts = explode('-', $this->selectedBlockYear);
+    
+                // Ensure we have exactly two parts
+                if (count($parts) == 2) {
+                    $blockName = trim($parts[0]);
+                    $year = trim($parts[1]);
+                } else {
+                    $blockName = $this->selectedBlockYear;
+                    $year = null;
+                }
+            } else {
+                $blockName = $this->selectedBlockYear;
+                $year = null;
+            }
+    
+            // Debug output to verify extracted blockName and year
+           
+    
+            // Fetch the block ID based on the block name
+            $block = Block::where('block', $blockName)->first();
+            $blockId = $block ? $block->id : null;
+    
+            // Debug output to verify blockId
+         
+    
+            if ($blockId) {
+                // Fetch seats based on block ID and year
+                $this->seats = Seat::where('block_id', $blockId)
+                                   ->where(function($query) use ($year) {
+                                       if ($year) {
+                                           $query->where('year', $year);
+                                       }
+                                   })
+                                   ->get();
+            } else {
+                $this->seats = collect(); // or handle as needed
+            }
+    
+            // Debug output to verify seats
+         
         } else {
-            $this->seats = collect();
+            $this->seats = collect(); // or handle as needed
         }
     }
+    
 
     public function selectSeat($seatId)
     {
@@ -99,7 +140,8 @@ class SeatPlanPage extends Page
                     $student->seat_id = null;
                     $student->save();
                 }
-                $seat->delete();
+                $seat->student_id = null;
+                $seat->save();
             }
         });
 

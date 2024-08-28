@@ -3,12 +3,10 @@
     @if (!empty($instructorBlocksAndYears))
         <div class="block-year-dropdown">
             <h3>Select Block and Year:</h3>
-            <select wire:model="selectedBlockYear">
+            <select wire:model="selectedBlockYear" wire:change="loadSeatPlanDetails">
                 <option value="">Select Block and Year</option>
-                @foreach ($instructorBlocksAndYears as $year => $block)
-                    <option value="{{ $year }} - {{ $block->block }}">
-                        {{$year}} - {{$block->block}}
-                    </option>
+                @foreach ($instructorBlocksAndYears as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
                 @endforeach
             </select>
         </div>
@@ -22,9 +20,9 @@
         <div class="seat-grid"
             style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
             @foreach (range(1, 14) as $index)
-            @php
-            $seat = $seats ? $seats->firstWhere('computer.computer_number', $index) : null;
-        @endphp
+                @php
+                    $seat = $seats ? $seats->firstWhere('computer.computer_number', $index) : null;
+                @endphp
 
                 <div class="seat-item {{ $seat && $seat->student ? 'occupied' : 'available' }}"
                     style="min-height: 100px; border: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: {{ $seat && $seat->student ? '#f8d7da' : '#d4edda' }};"
@@ -46,7 +44,7 @@
             style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px;">
             @foreach (range(15, 28) as $index)
                 @php
-                    $seat = $seats->firstWhere('computer.computer_number', $index);
+                    $seat = $seats ? $seats->firstWhere('computer.computer_number', $index) : null;
                 @endphp
 
                 <div class="seat-item {{ $seat && $seat->student ? 'occupied' : 'available' }}"
