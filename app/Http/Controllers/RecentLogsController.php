@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RecentLogs;
 use App\Models\Nfc;
+use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -194,7 +195,7 @@ class RecentLogsController extends Controller
 
         try {
             // Find the user information by fingerprint_id
-            $userInformation = UserInformation::where('fingerprint_id', $validated['fingerprint_id'])->first();
+            $userInformation = User::where('fingerprint_id', $validated['fingerprint_id'])->first();
 
             if (!$userInformation) {
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
@@ -233,7 +234,7 @@ class RecentLogsController extends Controller
 
         try {
             // Find the user information by fingerprint_id
-            $userInformation = UserInformation::where('fingerprint_id', $validated['fingerprint_id'])->first();
+            $userInformation = User::where('fingerprint_id', $validated['fingerprint_id'])->first();
 
             if (!$userInformation) {
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
@@ -269,7 +270,7 @@ class RecentLogsController extends Controller
 
         try {
             // Find the user information by fingerprint_id
-            $userInformation = UserInformation::where('fingerprint_id', $validated['fingerprint_id'])->first();
+            $userInformation = User::where('fingerprint_id', $validated['fingerprint_id'])->first();
 
             if (!$userInformation) {
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
