@@ -315,22 +315,26 @@ class RecentLogsController extends Controller
         ]);
 
         try {
-            // Find the user by email
-            $user = User::where('email', $validated['email'])
-                ->where('role_number', 3) // Assuming role_number 3 indicates a student
-                ->first();
+            // Find the user information by email
+            $user = User::where('email', $validated['email'])->first();
 
             if (!$user) {
-                return response()->json(['message' => 'Student not found.'], 404);
+                return response()->json(['message' => 'Student not found'], 404);
             }
 
-            // Get the total count of logs for the user
-            $logCount = RecentLogs::where('id_card_id', $user->id_card_id)
-                ->count();
+            // Fetch the user information record
+            $userInformation = $user->userInformation;
+
+            if (!$userInformation) {
+                return response()->json(['message' => 'User information not found'], 404);
+            }
+
+            // Get the count of logs for the student
+            $logCount = RecentLogs::where('user_number', $userInformation->user_number)->count();
 
             return response()->json([
                 'email' => $validated['email'],
-                'log_count' => $logCount
+                'log_count' => $logCount,
             ], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
