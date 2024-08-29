@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LabSchedule;
 use App\Models\Nfc;
 use Illuminate\Http\Request;
 use App\Models\User;
