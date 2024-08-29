@@ -39,15 +39,15 @@ class UserInformationController extends Controller
     {
         // Search for the user by email
         $user = User::where('email', $email)->first();
-
+    
         // If the user is not found, return a 404 response
         if ($user === null) {
             return response()->json(['message' => 'User not found'], 404);
         }
-
+    
         // Get user information, assuming user_information is linked to users
         $userInformation = UserInformation::where('user_id', $user->id)->first();
-
+    
         // If user information is not found, return default user details
         if ($userInformation === null) {
             return response()->json([
@@ -61,9 +61,11 @@ class UserInformationController extends Controller
                 'complete_address' => $user->complete_address,
                 'email' => $user->email,
                 'role_number' => $user->role_number,
+                'year' => $user->year,
+                'block' => $user->block ? $user->block->block : null, // Get the block name here
             ], 200);
         }
-
+    
         // If user information is found, return the user information
         return response()->json([
             'first_name' => $userInformation->first_name ?? $user->first_name,
@@ -76,8 +78,11 @@ class UserInformationController extends Controller
             'complete_address' => $userInformation->complete_address ?? $user->complete_address,
             'email' => $user->email,
             'role_number' => $user->role_number,
+            'year' => $userInformation->year ?? $user->year,
+            'block' => $userInformation->block ? $userInformation->block->block : null, // Get the block name here
         ], 200);
     }
+    
 
 
     public function updateUserDetails(Request $request)
