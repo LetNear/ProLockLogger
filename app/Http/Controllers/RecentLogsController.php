@@ -300,4 +300,40 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
+     /**
+     * Get the total count of logs for a student by email.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getTotalLogsCountByEmail(Request $request): JsonResponse
+    {
+        // Validate the input data
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        try {
+            // Find the user by email
+            $user = User::where('email', $validated['email'])
+                ->where('role_number', 3) // Assuming role_number 3 indicates a student
+                ->first();
+
+            if (!$user) {
+                return response()->json(['message' => 'Student not found.'], 404);
+            }
+
+            // Get the total count of logs for the user
+            $logCount = RecentLogs::where('id_card_id', $user->id_card_id)
+                ->count();
+
+            return response()->json([
+                'email' => $validated['email'],
+                'log_count' => $logCount
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
+    }
 }
