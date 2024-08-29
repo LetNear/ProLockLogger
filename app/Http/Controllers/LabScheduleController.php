@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LabSchedule;
 use App\Models\User;
+use App\Models\UserInformation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -190,5 +191,46 @@ class LabScheduleController extends Controller
         ], 200);
     }
 
+    /**
+     * Get the total count of lab schedules for a student based on email.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getStudentScheduleCountByEmail(Request $request)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Retrieve the email from the request
+        $email = $request->query('email');
+
+        // Find the student by email
+        $student = UserInformation::whereHas('user', function ($query) use ($email) {
+            $query->where('email', $email);
+        })->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        // Count the lab schedules based on block_id and year
+        $scheduleCount = LabSchedule::where('block_id', $student->block_id)
+            ->where('year', $student->year)
+            ->count();
+
+        return response()->json([
+            'student' => $email,
+            'schedule_count' => $scheduleCount
+        ], 200);
+    }
 }
+
+
+
