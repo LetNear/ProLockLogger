@@ -163,21 +163,21 @@ class LabScheduleController extends Controller
         $instructor = User::where('email', $email)
             ->where('role_number', 2)
             ->first();
-    
+
         if (!$instructor) {
             return response()->json(['message' => 'Instructor not found'], 404);
         }
-    
+
         // Get the next lab schedule for the instructor
         $nextSchedule = LabSchedule::where('instructor_id', $instructor->id)
             ->where('class_start', '>', now()) // Ensure it's a future schedule
             ->orderBy('class_start', 'asc')
             ->first();
-    
+
         if (!$nextSchedule) {
             return response()->json(['message' => 'No upcoming schedules found for this instructor'], 404);
         }
-    
+
         return response()->json([
             'instructor' => $instructor->name,
             'email' => $email,
@@ -249,6 +249,29 @@ class LabScheduleController extends Controller
 
         return response()->json($labSchedules, 200);
     }
+    public function getStudentScheduleByEmail($email)
+    {
+        // Find the student by email
+        $student = UserInformation::whereHas('user', function ($query) use ($email) {
+            $query->where('email', $email);
+        })->first();
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        // Get the lab schedules based on block_id and year
+        $labSchedules = LabSchedule::where('block_id', $student->block_id)
+            ->where('year', $student->year)
+            ->get();
+
+        if ($labSchedules->isEmpty()) {
+            return response()->json(['message' => 'No schedules found for this student'], 404);
+        }
+
+        return response()->json($labSchedules, 200);
+    }
+
 }
 
 
