@@ -314,7 +314,6 @@ class UserInformationController extends Controller
     }
 }
 
-}
 
 // Find the NFC record by rfid_number
 // $nfc = Nfc::where('rfid_number', $request->input('rfid_number'))->first();
