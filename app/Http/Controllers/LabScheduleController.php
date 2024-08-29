@@ -230,6 +230,25 @@ class LabScheduleController extends Controller
             'schedule_count' => $scheduleCount
         ], 200);
     }
+
+    public function getLabScheduleDataByFingerprintId($fingerprint_id)
+    {
+        // Find the instructor by fingerprint ID
+        $instructor = User::where('fingerprint_id', $fingerprint_id)->first();
+
+        if (!$instructor) {
+            return response()->json(['message' => 'Instructor not found'], 404);
+        }
+
+        // Get the lab schedules for the instructor
+        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)->get();
+
+        if ($labSchedules->isEmpty()) {
+            return response()->json(['message' => 'No schedules found for this instructor'], 404);
+        }
+
+        return response()->json($labSchedules, 200);
+    }
 }
 
 

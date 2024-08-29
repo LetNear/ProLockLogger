@@ -56,6 +56,9 @@ Route::get('/instructor/schedule-count/{email}', [LabScheduleController::class, 
 Route::get('instructor/next-schedule/{email}', [LabScheduleController::class, 'getNextScheduleTimeByEmail']);
 Route::get('/student-schedule-count', [LabScheduleController::class, 'getStudentScheduleCountByEmail']);
 Route::get('/total-logs-count', [RecentLogsController::class, 'getTotalLogsCountByEmail']);
+
+
+Route::get('/lab-schedules/fingerprint/{fingerprint_id}', [LabScheduleController::class, 'getLabScheduleDataByFingerprintId']);
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 // Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
 // Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);
