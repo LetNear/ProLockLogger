@@ -155,4 +155,40 @@ class LabScheduleController extends Controller
             'schedule_count' => $scheduleCount
         ], 200);
     }
+
+    public function getNextScheduleTimeByEmail($email)
+    {
+        // Find the instructor by email and role_number 2 (Faculty)
+        $instructor = User::where('email', $email)
+            ->where('role_number', 2)
+            ->first();
+    
+        if (!$instructor) {
+            return response()->json(['message' => 'Instructor not found'], 404);
+        }
+    
+        // Get the next lab schedule for the instructor
+        $nextSchedule = LabSchedule::where('instructor_id', $instructor->id)
+            ->where('class_start', '>', now()) // Ensure it's a future schedule
+            ->orderBy('class_start', 'asc')
+            ->first();
+    
+        if (!$nextSchedule) {
+            return response()->json(['message' => 'No upcoming schedules found for this instructor'], 404);
+        }
+    
+        return response()->json([
+            'instructor' => $instructor->name,
+            'email' => $email,
+            'next_schedule' => [
+                'subject_code' => $nextSchedule->subject_code,
+                'subject_name' => $nextSchedule->subject_name,
+                'class_start' => $nextSchedule->class_start,
+                'class_end' => $nextSchedule->class_end,
+                'day_of_the_week' => $nextSchedule->day_of_the_week
+            ]
+        ], 200);
+    }
+
+
 }
