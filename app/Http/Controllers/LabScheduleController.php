@@ -134,4 +134,25 @@ class LabScheduleController extends Controller
 
         return response()->json($labSchedules, 200);
     }
+
+    public function getInstructorScheduleCountByEmail($email)
+    {
+        // Find the instructor by email and role_number 2 (Faculty)
+        $instructor = User::where('email', $email)
+            ->where('role_number', 2)
+            ->first();
+
+        if (!$instructor) {
+            return response()->json(['message' => 'Instructor not found'], 404);
+        }
+
+        // Get the count of lab schedules for the instructor
+        $scheduleCount = LabSchedule::where('instructor_id', $instructor->id)->count();
+
+        return response()->json([
+            'instructor' => $instructor->name,
+            'email' => $email,
+            'schedule_count' => $scheduleCount
+        ], 200);
+    }
 }

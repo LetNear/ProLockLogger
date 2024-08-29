@@ -52,7 +52,7 @@ Route::get('/lab-schedules/email/{email}', [LabScheduleController::class, 'getFa
 
 
 Route::get('/student-count/{email}', [UserInformationController::class, 'getStudentCountByInstructorEmail']);
-
+Route::get('/instructor/schedule-count/{email}', [LabScheduleController::class, 'getInstructorScheduleCountByEmail']);
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 // Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
 // Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);
