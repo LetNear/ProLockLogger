@@ -286,6 +286,34 @@ class UserInformationController extends Controller
         return response()->json(['user_information' => $userInformation], 200);
     }
 
+    public function getStudentCountByInstructorEmail($email)
+    {
+        // Find the instructor by email
+        $instructor = User::where('email', $email)->first();
+
+        if (!$instructor) {
+            return response()->json(['error' => 'Instructor not found'], 404);
+        }
+
+        // Get all the lab schedules for the instructor
+        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)->get();
+
+        // Initialize the student count
+        $studentCount = 0;
+
+        // Iterate through each lab schedule to count students
+        foreach ($labSchedules as $schedule) {
+            $count = UserInformation::where('year', $schedule->year)
+                ->where('block_id', $schedule->block_id)
+                ->count();
+
+            $studentCount += $count;
+        }
+
+        return response()->json(['student_count' => $studentCount], 200);
+    }
+}
+
 }
 
 // Find the NFC record by rfid_number
