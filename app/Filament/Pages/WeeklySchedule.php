@@ -18,7 +18,7 @@ class WeeklySchedule extends Page
 
     public function mount(): void
     {
-        // Load the schedules with related course data
+        // Load the schedules with related course and instructor data
         $this->weekSchedule = LabSchedule::with(['course', 'instructor', 'block'])
             ->get()
             ->groupBy('day_of_the_week')
@@ -28,6 +28,7 @@ class WeeklySchedule extends Page
                         return [
                             'course_code' => $slot->course->course_code ?? 'N/A',
                             'course_name' => $slot->course->course_name ?? 'N/A',
+                            'instructor_name' => $slot->instructor->name ?? 'N/A',  // Add instructor name
                             'class_start' => $slot->class_start,
                             'class_end' => $slot->class_end,
                         ];
