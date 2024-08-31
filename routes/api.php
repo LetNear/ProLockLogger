@@ -13,7 +13,7 @@ Route::get('userInfo/{email}', [UserInformationController::class, 'getUserDetail
 Route::put('/userInfo/update', [UserInformationController::class, 'updateUserDetails']);
 
 
-Route::get('getuserbyfingerprint/{fingerprint_id}', [UserController::class, 'getUserByFingerprint']);
+Route::get('getuserbyfingerprint/{fingerprint_id}', [UserController::class, 'getUsersByFingerprint']);
 Route::get('users/role/{role_id}', [UserController::class, 'getUsersByRole']);
 
 
