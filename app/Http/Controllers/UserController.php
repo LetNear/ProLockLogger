@@ -69,14 +69,14 @@ class UserController extends Controller
 
     public function getUsersByFingerprint($fingerprint_id)
     {
-        // Use whereJsonContains with wildcard syntax to search across all users' fingerprint_ids
-        $users = User::whereJsonContains('fingerprint_id->*.fingerprint_id', $fingerprint_id)->get();
-
+        // Query to find users with the specific fingerprint_id in the nested JSON array
+        $users = User::whereRaw("JSON_CONTAINS(fingerprint_id, ?, '$')", [json_encode(['fingerprint_id' => $fingerprint_id])])->get();
+    
         // If no users are found, return a 404 response
         if ($users->isEmpty()) {
             return response()->json(['message' => 'No users found with this fingerprint ID'], 404);
         }
-
+    
         // Format the response to include relevant user information
         $usersData = $users->map(function ($user) {
             return [
@@ -85,10 +85,11 @@ class UserController extends Controller
                 'role_number' => $user->role_number,
             ];
         });
-
+    
         // Return the list of users with a 200 response
         return response()->json($usersData, 200);
     }
+    
 
 
 
