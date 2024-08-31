@@ -79,7 +79,7 @@ class UserResource extends Resource
                                             ->label('Fingerprint ID')
                                             ->placeholder('Enter a fingerprint ID')
                                     ])
-                                    ->minItems(2)
+                                    ->minItems(1)
                                     ->maxItems(2)
                                     ->helperText('Add exactly two fingerprint IDs.')
 
