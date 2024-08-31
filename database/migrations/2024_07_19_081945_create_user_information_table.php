@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Block;
+use App\Models\Course;
 use App\Models\IdCard;
 use App\Models\Nfc;
 use App\Models\Seat;
@@ -26,8 +27,8 @@ return new class extends Migration
             $table->foreignIdFor(Seat::class)->nullable();
             $table->string('user_number')->nullable();
             $table->string('year')->nullable();
-
             $table->foreignIdFor(Block::class)->nullable();
+            $table->foreignIdFor(Course::class)->nullable(); // Add course_id column
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();

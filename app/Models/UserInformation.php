@@ -20,7 +20,7 @@ class UserInformation extends Model implements Auditable
         'seat_id',
         'year',
         'user_number',
-
+        'course_id',
         'block_id',
         'first_name',
         'middle_name',
@@ -67,5 +67,10 @@ class UserInformation extends Model implements Auditable
     public function labSchedules()
     {
         return $this->hasMany(LabSchedule::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 }

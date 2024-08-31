@@ -58,7 +58,7 @@ class UserInformationResource extends Resource
                                         $set('isRestricted', $roleNumber == 1 || $roleNumber == 2);
                                     }),
 
-                                    Select::make('id_card_id')
+                                Select::make('id_card_id')
                                     ->relationship('idCard', 'rfid_number')
                                     ->label('RFID Number')
                                     ->placeholder('Select an RFID number')
@@ -68,12 +68,12 @@ class UserInformationResource extends Resource
                                     ->options(function () {
                                         // Get all RFID numbers already assigned to a user
                                         $assignedIds = UserInformation::whereNotNull('id_card_id')->pluck('id_card_id');
-                                
+
                                         // Fetch RFID numbers that are not assigned yet
                                         return Nfc::whereNotIn('id', $assignedIds)->pluck('rfid_number', 'id')->toArray();
                                     })
                                     ->disabled(fn($get) => $get('isRestricted')),
-                                
+
 
                                 Select::make('seat_id')
                                     ->relationship('seat', 'computer_id')
@@ -110,6 +110,16 @@ class UserInformationResource extends Resource
                                     ->label('Year')
                                     ->placeholder('Select the year')
                                     ->helperText('Choose the year level of the user.')
+                                    ->disabled(fn($get) => $get('isRestricted')),
+                                Select::make('course_id')
+                                    ->relationship('course', 'course_name')
+                                    ->label('Course')
+                                    ->multiple()
+                                    ->placeholder('Select a course')
+                                    ->helperText('Choose the course for this user.')
+                                    ->searchable()
+                                    ->preload(10)
+                                    ->options(fn() => \App\Models\Course::whereHas('labSchedules')->pluck('course_name', 'id')->toArray())
                                     ->disabled(fn($get) => $get('isRestricted')),
                             ]),
                     ]),
@@ -184,7 +194,7 @@ class UserInformationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->poll('2s')
+            ->poll('2s')
             ->columns([
                 TextColumn::make('user.name')
                     ->label('User')
@@ -234,6 +244,12 @@ class UserInformationResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s year level.')
+                    ->alignLeft(),
+                TextColumn::make('course.course_name')
+                    ->label('Course')
+                    ->sortable()
+                    ->searchable()
+                    ->tooltip('The user\'s course.')
                     ->alignLeft(),
 
                 TextColumn::make('first_name')
