@@ -69,29 +69,45 @@ class UserController extends Controller
 
     public function getUsersByFingerprint($fingerprint_id)
     {
-        // Query to find users with the specific fingerprint_id in the nested JSON array
-        $users = User::whereRaw("JSON_CONTAINS(fingerprint_id, ?, '$')", [json_encode(['fingerprint_id' => $fingerprint_id])])->get();
-    
-        // If no users are found, return a 404 response
-        if ($users->isEmpty()) {
+        // Retrieve all users
+        $users = User::all();
+
+        // Filter users to find those with the specific fingerprint_id
+        $filteredUsers = $users->filter(function ($user) use ($fingerprint_id) {
+            $fingerprints = $user->fingerprint_id;
+
+            // Ensure fingerprints is an array, decode if needed
+            if (!is_array($fingerprints)) {
+                $fingerprints = json_decode($fingerprints, true) ?? [];
+            }
+
+            // Search through each fingerprint object in the array
+            foreach ($fingerprints as $fingerprint) {
+                if (isset($fingerprint['fingerprint_id']) && $fingerprint['fingerprint_id'] === $fingerprint_id) {
+                    return true; // Found matching fingerprint_id
+                }
+            }
+
+            return false; // No match found in this user
+        });
+
+        // If no users are found with the fingerprint_id, return a 404 response
+        if ($filteredUsers->isEmpty()) {
             return response()->json(['message' => 'No users found with this fingerprint ID'], 404);
         }
-    
+
         // Format the response to include relevant user information
-        $usersData = $users->map(function ($user) {
+        $usersData = $filteredUsers->map(function ($user) {
             return [
                 'name' => $user->name,
                 'fingerprint_id' => $user->fingerprint_id,
                 'role_number' => $user->role_number,
             ];
         });
-    
+
         // Return the list of users with a 200 response
-        return response()->json($usersData, 200);
+        return response()->json($usersData->values(), 200);
     }
-    
-
-
 
 
 
