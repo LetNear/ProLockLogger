@@ -235,20 +235,20 @@ class LabScheduleController extends Controller
     {
         // Find the instructor by fingerprint ID, accounting for JSON structure
         $instructor = User::whereJsonContains('fingerprint_id', ['fingerprint_id' => $fingerprint_id])->first();
-    
+
         if (!$instructor) {
             return response()->json(['message' => 'Instructor not found'], 404);
         }
-    
+
         // Get the lab schedules for the instructor, eager loading related data
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
             ->with(['course', 'block'])
             ->get();
-    
+
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this instructor'], 404);
         }
-    
+
         // Format the response with detailed information
         $formattedSchedules = $labSchedules->map(function ($schedule) {
             return [
@@ -262,10 +262,10 @@ class LabScheduleController extends Controller
                 'class_end' => $schedule->class_end,
             ];
         });
-    
+
         return response()->json($formattedSchedules, 200);
     }
-    
+
     public function getStudentScheduleByEmail($email)
     {
         // Find the student by email
@@ -289,7 +289,27 @@ class LabScheduleController extends Controller
         return response()->json($labSchedules, 200);
     }
 
+    public function showSchedule()
+    {
+        // Eager load 'course' relationship to ensure 'course_code' and 'course_name' are available
+        $weekSchedule = LabSchedule::with('course') // Eager loading the 'course' relationship
+            ->get()
+            ->groupBy('day_of_the_week')
+            ->map(function ($schedules) {
+                return $schedules->mapToGroups(function ($schedule) {
+                    return [
+                        $schedule->class_start => [
+                            'course_code' => $schedule->course->course_code ?? 'N/A', // Safely access course_code
+                            'course_name' => $schedule->course->course_name ?? 'N/A', // Safely access course_name
+                            'class_start' => $schedule->class_start,
+                            'class_end' => $schedule->class_end,
+                        ]
+                    ];
+                });
+            });
+
+        // Pass the data to the Blade view
+        return view('schedules.index', compact('weekSchedule'));
+    }
 }
-
-
 

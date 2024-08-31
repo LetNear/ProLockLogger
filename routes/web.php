@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\LabScheduleController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\NfcTagController;
 use App\Http\Controllers\SeatController;
@@ -36,3 +37,5 @@ Route::post('/remove-student', [SeatController::class, 'removeStudent'])->name('
 
 Route::get('prolock://', [NfcTagController::class, 'show'])
     ->name('nfc.details');
+
+Route::get('/schedule', [LabScheduleController::class, 'showSchedule']);

@@ -1,15 +1,13 @@
 <?php
-
 namespace App\Filament\Resources;
 
 use App\Filament\Imports\LabScheduleImporter;
 use App\Filament\Resources\LabScheduleResource\Pages;
 use App\Models\LabSchedule;
+use App\Models\Course;
 use App\Models\User;
-use App\Models\Block;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -17,7 +15,6 @@ use Filament\Tables;
 use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use OwenIt\Auditing\Events\Auditing;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class LabScheduleResource extends Resource
@@ -44,7 +41,18 @@ class LabScheduleResource extends Resource
                                     ->label('Course')
                                     ->relationship('course', 'course_name')
                                     ->required()
-                                    ->placeholder('Select a course'),
+                                    ->placeholder('Select a course')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        // Fetch the course by the selected course_id and set the course_code and course_name
+                                        if ($course = Course::find($state)) {
+                                            $set('course_code', $course->course_code);
+                                            $set('course_name', $course->course_name);
+                                        } else {
+                                            $set('course_code', null);
+                                            $set('course_name', null);
+                                        }
+                                    }),
                                 Select::make('instructor_id')
                                     ->label('Instructor')
                                     ->options(User::where('role_number', 2)->pluck('name', 'id')->toArray())
@@ -104,8 +112,11 @@ class LabScheduleResource extends Resource
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('course.course_name')
+                TextColumn::make('course_name')
                     ->label('Course Name')
+                    ->searchable(),
+                TextColumn::make('course_code') // Display course code
+                    ->label('Course Code')
                     ->searchable(),
                 TextColumn::make('instructor.name')
                     ->label('Instructor')

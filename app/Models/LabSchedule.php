@@ -14,6 +14,8 @@ class LabSchedule extends Model implements Auditable
 
     protected $fillable = [
         'course_id', // Include this in the fillable array
+        'course_code', // Include this in the fillable array
+        'course_name', // Include this in the fillable array
         'block_id',
         'instructor_id',
         'year',
@@ -42,8 +44,14 @@ class LabSchedule extends Model implements Auditable
         return $this->hasMany(Seat::class);
     }
 
+    // Accessor for course code, which will be used in your Blade
     public function getCourseCodeAttribute()
     {
         return $this->course ? $this->course->course_code : 'N/A';
+    }
+
+    public function getCourseNameAttribute()
+    {
+        return $this->course ? $this->course->course_name : 'N/A';
     }
 }

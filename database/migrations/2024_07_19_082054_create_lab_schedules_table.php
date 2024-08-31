@@ -23,6 +23,8 @@ return new class extends Migration
             $table->foreignIdFor(User::class, 'instructor_id')->nullable();
             $table->foreignIdFor(Block::class)->nullable();
             $table->string('year')->nullable();
+            $table->string('course_code')->nullable();
+            $table->string('course_name')->nullable();
             $table->string('day_of_the_week')->nullable();
             $table->string('class_start')->nullable();
             $table->string('class_end')->nullable();

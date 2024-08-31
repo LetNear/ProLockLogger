@@ -2,6 +2,7 @@
 namespace App\Filament\Resources\LabScheduleResource\Pages;
 
 use App\Filament\Resources\LabScheduleResource;
+use App\Models\Course;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use App\Models\LabSchedule;
@@ -14,7 +15,15 @@ class CreateLabSchedule extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        // Validate the schedule to ensure no conflicts and proper time range
         $this->validateSchedule($data);
+
+        // Fetch the course details and assign course_code and course_name before saving
+        if ($course = Course::find($data['course_id'] ?? null)) {
+            $data['course_code'] = $course->course_code;
+            $data['course_name'] = $course->course_name;
+        }
+
         return $data;
     }
 
@@ -26,7 +35,7 @@ class CreateLabSchedule extends CreateRecord
     
         // Check if class end time is before or the same as class start time
         if (strtotime($classEnd) <= strtotime($classStart)) {
-            Notification::make()
+            Notification::make()    
                 ->title('Invalid Time Range')
                 ->danger()
                 ->body('Class end time must be after class start time.')
