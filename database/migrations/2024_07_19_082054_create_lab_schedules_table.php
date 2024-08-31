@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Block;
+use App\Models\Course;
 use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\YearAndProgram;
@@ -18,8 +19,7 @@ return new class extends Migration
         Schema::create('lab_schedules', function (Blueprint $table) {
             $table->id();
   
-            $table->string('subject_code')->nullable();
-            $table->string('subject_name')->nullable();
+            $table->foreignIdFor(Course::class, 'course_id')->nullable();
             $table->foreignIdFor(User::class, 'instructor_id')->nullable();
             $table->foreignIdFor(Block::class)->nullable();
             $table->string('year')->nullable();

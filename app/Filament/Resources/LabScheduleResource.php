@@ -40,14 +40,11 @@ class LabScheduleResource extends Resource
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('subject_code')
-                                    ->label('Subject Code')
+                                Select::make('course_id')
+                                    ->label('Course')
+                                    ->relationship('course', 'course_name')
                                     ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('subject_name')
-                                    ->label('Subject Name')
-                                    ->required()
-                                    ->maxLength(255),
+                                    ->placeholder('Select a course'),
                                 Select::make('instructor_id')
                                     ->label('Instructor')
                                     ->options(User::where('role_number', 2)->pluck('name', 'id')->toArray())
@@ -107,11 +104,8 @@ class LabScheduleResource extends Resource
                     ->label('ID')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('subject_code')
-                    ->label('Subject Code')
-                    ->searchable(),
-                TextColumn::make('subject_name')
-                    ->label('Subject Name')
+                TextColumn::make('course.course_name')
+                    ->label('Course Name')
                     ->searchable(),
                 TextColumn::make('instructor.name')
                     ->label('Instructor')
