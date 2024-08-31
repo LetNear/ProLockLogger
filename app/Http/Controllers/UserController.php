@@ -102,24 +102,24 @@ class UserController extends Controller
         // Validate the incoming request data
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'fingerprint_id' => 'required|string|max:255',  // Validate as a string with max length
+            'fingerprint_id' => 'required|string|max:255',  // Fingerprint ID validation
         ]);
-
-        Log::info('updateFingerprintByEmail endpoint hit', ['request' => $request->all()]);
     
         // Find the user by email
         $user = User::where('email', $request->email)->firstOrFail();
     
-        // Retrieve and decode the existing fingerprint_ids from the database
+        // Retrieve the existing fingerprint_ids from the database
         $existingFingerprints = json_decode($user->fingerprint_id, true);
     
-        // Ensure existingFingerprints is initialized as an array if it's null or not an array
+        // Ensure existingFingerprints is an array
         if (!is_array($existingFingerprints)) {
             $existingFingerprints = [];
         }
     
-        // Check if the fingerprint already exists
+        // Extract current fingerprint IDs to check for duplicates
         $fingerprintIds = array_column($existingFingerprints, 'fingerprint_id');
+    
+        // Check if the new fingerprint_id already exists
         if (in_array($request->fingerprint_id, $fingerprintIds)) {
             return response()->json(['message' => 'Fingerprint already exists.'], 400);
         }
