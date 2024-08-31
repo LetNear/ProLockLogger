@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,5 +42,8 @@ class LabSchedule extends Model implements Auditable
         return $this->hasMany(Seat::class);
     }
 
-    
+    public function getCourseCodeAttribute()
+    {
+        return $this->course ? $this->course->course_code : 'N/A';
+    }
 }

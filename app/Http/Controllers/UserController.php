@@ -68,14 +68,14 @@ class UserController extends Controller
 
     public function getUserByFingerprint($fingerprint_id)
     {
-        // Search for the user by fingerprint_id
-        $user = User::where('fingerprint_id', $fingerprint_id)->first();
-
+        // Search for the user by fingerprint_id using whereJsonContains
+        $user = User::whereJsonContains('fingerprint_id', $fingerprint_id)->first();
+    
         // If the user is not found, return a 404 response
         if ($user === null) {
             return response()->json(['message' => 'User not found'], 404);
         }
-
+    
         // If the user is found, return the user data with a 200 response
         return response()->json([
             'name' => $user->name,
@@ -83,6 +83,7 @@ class UserController extends Controller
             'role_number' => $user->role_number,
         ], 200);
     }
+    
 
     public function getUsersByRole()
     {
