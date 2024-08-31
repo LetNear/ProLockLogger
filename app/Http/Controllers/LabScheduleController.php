@@ -233,22 +233,39 @@ class LabScheduleController extends Controller
 
     public function getLabScheduleDataByFingerprintId($fingerprint_id)
     {
-        // Find the instructor by fingerprint ID
-        $instructor = User::where('fingerprint_id', $fingerprint_id)->first();
-
+        // Find the instructor by fingerprint ID, accounting for JSON structure
+        $instructor = User::whereJsonContains('fingerprint_id', ['fingerprint_id' => $fingerprint_id])->first();
+    
         if (!$instructor) {
             return response()->json(['message' => 'Instructor not found'], 404);
         }
-
-        // Get the lab schedules for the instructor
-        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)->get();
-
+    
+        // Get the lab schedules for the instructor, eager loading related data
+        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
+            ->with(['course', 'block'])
+            ->get();
+    
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this instructor'], 404);
         }
-
-        return response()->json($labSchedules, 200);
+    
+        // Format the response with detailed information
+        $formattedSchedules = $labSchedules->map(function ($schedule) {
+            return [
+                'id' => $schedule->id,
+                'course_code' => $schedule->course->course_code ?? 'N/A',
+                'course_name' => $schedule->course->course_name ?? 'N/A',
+                'block' => $schedule->block->block ?? 'N/A',
+                'year' => $schedule->year ?? 'N/A',
+                'day_of_the_week' => $schedule->day_of_the_week,
+                'class_start' => $schedule->class_start,
+                'class_end' => $schedule->class_end,
+            ];
+        });
+    
+        return response()->json($formattedSchedules, 200);
     }
+    
     public function getStudentScheduleByEmail($email)
     {
         // Find the student by email
