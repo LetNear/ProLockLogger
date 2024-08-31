@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
@@ -18,12 +18,21 @@ class WeeklySchedule extends Page
 
     public function mount(): void
     {
-        // Efficiently load the necessary fields, including related models
-        $this->weekSchedule = LabSchedule::with(['course', 'instructor', 'block'])  // Eager load related models
-            ->get(['day_of_the_week', 'class_start', 'class_end', 'course_id', 'instructor_id', 'block_id'])  // Select only the necessary fields
+        // Load the schedules with related course data
+        $this->weekSchedule = LabSchedule::with(['course', 'instructor', 'block'])
+            ->get()
             ->groupBy('day_of_the_week')
             ->map(function ($daySlots) {
-                return $daySlots->sortBy('class_start')->groupBy('class_start');
+                return $daySlots->sortBy('class_start')->groupBy('class_start')->map(function ($slots) {
+                    return $slots->map(function ($slot) {
+                        return [
+                            'course_code' => $slot->course->course_code ?? 'N/A',
+                            'course_name' => $slot->course->course_name ?? 'N/A',
+                            'class_start' => $slot->class_start,
+                            'class_end' => $slot->class_end,
+                        ];
+                    });
+                });
             })->toArray();
     }
 }
