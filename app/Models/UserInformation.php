@@ -20,7 +20,6 @@ class UserInformation extends Model implements Auditable
         'seat_id',
         'year',
         'user_number',
-        'course_id',
         'block_id',
         'first_name',
         'middle_name',
@@ -32,45 +31,51 @@ class UserInformation extends Model implements Auditable
         'complete_address',
     ];
 
-
+    // Define the relationship with the User model
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    // Define the relationship with the NFC model
     public function idCard()
     {
         return $this->belongsTo(Nfc::class, 'id_card_id');
     }
 
+    // Define the relationship with the Role model
     public function role()
     {
         return $this->belongsTo(Role::class);
     }
 
+    // Define the relationship with the Seat model
     public function seat()
     {
         return $this->belongsTo(Seat::class);
     }
 
-
+    // Define the relationship with the Block model
     public function block()
     {
         return $this->belongsTo(Block::class);
     }
 
+    // Define the relationship with the Seat model (alternative)
     public function seats()
     {
         return $this->hasOne(Seat::class);
     }
 
+    // Define the relationship with the LabSchedule model
     public function labSchedules()
     {
         return $this->hasMany(LabSchedule::class);
     }
 
-    public function course()
+    // Define the many-to-many relationship with Course model
+    public function courses()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsToMany(Course::class, 'course_user_information');
     }
 }

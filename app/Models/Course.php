@@ -18,4 +18,9 @@ class Course extends Model
     {
         return $this->hasMany(LabSchedule::class);
     }
+
+    public function userInformations()
+    {
+        return $this->belongsToMany(UserInformation::class, 'course_user_information');
+    }
 }
