@@ -40,4 +40,6 @@ class LabSchedule extends Model implements Auditable
     {
         return $this->hasMany(Seat::class);
     }
+
+    
 }

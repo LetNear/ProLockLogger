@@ -15,6 +15,7 @@ class Seat extends Model implements Auditable
         'instructor_id',
         'instructor_name',
         'year',
+        'course_name',
         'block_id',
         'student_id',
         'lab_attendance_id',

@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SeatResource\Pages;
 use App\Filament\Resources\SeatResource\RelationManagers;
 use App\Models\Block;
 use App\Models\Computer;
+use App\Models\Course;
 use App\Models\Seat;
 use App\Models\User;
 use App\Models\UserInformation;
@@ -49,105 +49,88 @@ class SeatResource extends Resource
                                     ->required()
                                     ->reactive()
                                     ->disabled(), // Make it read-only if you don't want it to be editable
-
-                                Select::make('block_id')
-                                    ->label('Block')
-                                    ->options(function ($get) {
-                                        $instructorId = $get('instructor_id');
-
-                                        if ($instructorId) {
-                                            // Fetch blocks based on the selected instructor
-                                            return Block::whereIn('id', function ($query) use ($instructorId) {
-                                                $query->select('block_id')
-                                                    ->from('lab_schedules')
-                                                    ->where('instructor_id', $instructorId);
-                                            })->pluck('block', 'id')->toArray();
-                                        }
-
-                                        return [];
+    
+                                Select::make('course_id')
+                                    ->label('Course Name')
+                                    ->options(function () {
+                                        return Course::pluck('course_name', 'id');
                                     })
                                     ->required()
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        $set('year', null); // Reset year when block changes
-                                    }),
-
-                                Select::make('year')
-                                    ->label('Year')
-                                    ->options(function ($get) {
-                                        $instructorId = $get('instructor_id');
-                                        $blockId = $get('block_id');
-
-                                        if ($instructorId && $blockId) {
-                                            // Fetch years based on the selected instructor and block
-                                            return LabSchedule::where('instructor_id', $instructorId)
-                                                ->where('block_id', $blockId)
-                                                ->distinct()
-                                                ->pluck('year', 'year')
-                                                ->mapWithKeys(function ($year) {
-                                                    return [$year => "{$year} Year"];
-                                                })
-                                                ->toArray();
-                                        }
-
-                                        return [];
-                                    })
-                                    ->required(),
-
-
+                                    ->searchable()
+                                    ->placeholder('Select Course'),
+    
                                 Select::make('computer_id')
                                     ->label('Computer')
                                     ->options(function ($get) {
-                                        $year = $get('year');
-                                        $blockId = $get('block_id');
-
-                                        if ($year && $blockId) {
+                                        $courseId = $get('course_id');
+    
+                                        if ($courseId) {
                                             // Filter computers that are not already assigned
-                                            $assignedComputerIds = Seat::where('year', $year)
-                                                ->where('block_id', $blockId)
+                                            $assignedComputerIds = Seat::where('course_id', $courseId)
                                                 ->pluck('computer_id')
                                                 ->toArray();
-
+    
                                             return Computer::whereNotIn('id', $assignedComputerIds) // Exclude already assigned computers
                                                 ->pluck('computer_number', 'id');
                                         }
-
+    
                                         return [];
                                     })
                                     ->searchable()
                                     ->required()
                                     ->placeholder('Select Computer'),
-
+    
                                 Select::make('student_id')
                                     ->label('Student')
                                     ->options(function ($get) {
-                                        $year = $get('year');
-                                        $blockId = $get('block_id');
-
-                                        if ($year && $blockId) {
+                                        $courseId = $get('course_id');
+    
+                                        if ($courseId) {
                                             // Filter students who are not already assigned
-                                            $assignedStudentIds = Seat::where('year', $year)
-                                                ->where('block_id', $blockId)
+                                            $assignedStudentIds = Seat::where('course_id', $courseId)
                                                 ->pluck('student_id')
                                                 ->toArray();
-
-                                            return UserInformation::where('year', $year)
-                                                ->where('block_id', $blockId)
+    
+                                            return UserInformation::whereHas('labSchedule', function ($query) use ($courseId) {
+                                                $query->where('course_id', $courseId);
+                                            })
                                                 ->whereNotIn('user_id', $assignedStudentIds) // Exclude already assigned students
                                                 ->with('user')
                                                 ->get()
                                                 ->pluck('user.name', 'user_id');
                                         }
-
+    
                                         return [];
                                     })
                                     ->searchable()
                                     ->required()
                                     ->placeholder('Select Student'),
+    
+                                Select::make('year')
+                                    ->label('Year')
+                                    ->options(function () {
+                                        // Load all available years
+                                        return LabSchedule::distinct()->pluck('year', 'year');
+                                    })
+                                    ->required()
+                                    ->placeholder('Select Year'),
+    
+                                    Select::make('block_id')
+                                    ->label('Block')
+                                    ->options(function () {
+                                        // Get distinct blocks from the LabSchedule that are assigned
+                                        $assignedBlockIds = LabSchedule::pluck('block_id')->unique();
+                                
+                                        return Block::whereIn('id', $assignedBlockIds)
+                                            ->pluck('block', 'id');
+                                    })
+                                    ->required()
+                                    ->placeholder('Select Block'),
                             ]),
                     ]),
             ]);
     }
+    
 
     public static function table(Table $table): Table
     {
@@ -159,7 +142,7 @@ class SeatResource extends Resource
                     ->searchable()
                     ->tooltip('The unique number assigned to the computer.'),
 
-                Tables\Columns\TextColumn::make('instructor.name') // Show instructor's name
+                Tables\Columns\TextColumn::make('instructor.name')
                     ->label('Instructor')
                     ->sortable()
                     ->searchable()
@@ -171,13 +154,13 @@ class SeatResource extends Resource
                     ->searchable()
                     ->tooltip('The year assigned to the seat plan.'),
 
-                Tables\Columns\TextColumn::make('block.block') // Show block name
+                Tables\Columns\TextColumn::make('block.block')
                     ->label('Block')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The block assigned to the seat plan.'),
 
-                Tables\Columns\TextColumn::make('student.name') // Show student's name
+                Tables\Columns\TextColumn::make('student.name')
                     ->label('Student')
                     ->sortable()
                     ->searchable()
