@@ -99,16 +99,21 @@ class UserController extends Controller
         // Validate the incoming request data
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'fingerprint_id' => 'required|string|max:255',
+            'fingerprint_ids' => 'required|array|min:1|max:2',  // Ensure an array with 1 or 2 items
+            'fingerprint_ids.*' => 'required|string|max:255',   // Each fingerprint ID should be a valid string
         ]);
-
+    
         // Find the user by email
         $user = User::where('email', $request->email)->firstOrFail();
-
+    
         // Update the user's fingerprint_id
-        $user->fingerprint_id = $request->fingerprint_id;
+        $fingerprintData = array_map(function($fingerprintId) {
+            return ['fingerprint_id' => $fingerprintId];
+        }, $request->fingerprint_ids);
+    
+        $user->fingerprint_id = $fingerprintData;
         $user->save();
-
+    
         // Return a JSON response with the updated user and status code 200
         return response()->json($user, 200);
     }
