@@ -98,6 +98,11 @@ class UserController extends Controller
 
         // Format the response to include relevant user information
         $usersData = $filteredUsers->map(function ($user) {
+            // Decode the fingerprint_id from string to JSON array if it's not already an array
+            if (is_string($user->fingerprint_id)) {
+                $fingerprintArray = json_decode($user->fingerprint_id, true);
+                $user->fingerprint_id = $fingerprintArray; // Assign decoded array back to the field
+            }
             return [
                 'name' => $user->name,
                 'fingerprint_id' => $user->fingerprint_id,
@@ -105,9 +110,10 @@ class UserController extends Controller
             ];
         });
 
-        // Return the list of users with a 200 response
+        // Return the list of users with a 200 response, ensuring correct JSON structure
         return response()->json($usersData->values(), 200);
     }
+
 
 
 
