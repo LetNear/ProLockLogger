@@ -71,48 +71,35 @@ class UserController extends Controller
     {
         // Retrieve all users
         $users = User::all();
-
+    
         // Filter users to find those with the specific fingerprint_id
         $filteredUsers = $users->filter(function ($user) use ($fingerprint_id) {
             $fingerprints = $user->fingerprint_id;
-
+    
             // Ensure fingerprints is an array, decode if needed
             if (!is_array($fingerprints)) {
                 $fingerprints = json_decode($fingerprints, true) ?? [];
             }
-
+    
             // Search through each fingerprint object in the array
             foreach ($fingerprints as $fingerprint) {
                 if (isset($fingerprint['fingerprint_id']) && $fingerprint['fingerprint_id'] === $fingerprint_id) {
                     return true; // Found matching fingerprint_id
                 }
             }
-
+    
             return false; // No match found in this user
         });
-
-        // If no users are found with the fingerprint_id, return a 404 response
-        if ($filteredUsers->isEmpty()) {
-            return response()->json(['message' => 'No users found with this fingerprint ID'], 404);
+    
+        // If users are found with the fingerprint_id, prompt an error that the fingerprint_id is already registered
+        if ($filteredUsers->isNotEmpty()) {
+            return response()->json(['message' => 'Fingerprint ID is already registered.'], 400);
         }
-
-        // Format the response to include relevant user information
-        $usersData = $filteredUsers->map(function ($user) {
-            // Decode the fingerprint_id from string to JSON array if it's not already an array
-            if (is_string($user->fingerprint_id)) {
-                $fingerprintArray = json_decode($user->fingerprint_id, true);
-                $user->fingerprint_id = $fingerprintArray; // Assign decoded array back to the field
-            }
-            return [
-                'name' => $user->name,
-                'fingerprint_id' => $user->fingerprint_id,
-                'role_number' => $user->role_number,
-            ];
-        });
-
-        // Return the list of users with a 200 response, ensuring correct JSON structure
-        return response()->json($usersData->values(), 200);
+    
+        // If no users are found with the fingerprint_id, return a success message or other relevant response
+        return response()->json(['message' => 'Fingerprint ID is not registered and is available.'], 200);
     }
+    
 
 
 
