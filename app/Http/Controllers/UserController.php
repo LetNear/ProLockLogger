@@ -102,40 +102,41 @@ class UserController extends Controller
         // Validate the incoming request data
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'fingerprint_id' => 'required|string|max:255',  // Single fingerprint ID
+            'fingerprint_id' => 'required|string|max:255',  // Validate as a string with max length
         ]);
     
         // Find the user by email
         $user = User::where('email', $request->email)->firstOrFail();
     
-        // Retrieve the existing fingerprint_ids from the database
-        $existingFingerprints = $user->fingerprint_id;
+        // Retrieve and decode the existing fingerprint_ids from the database
+        $existingFingerprints = json_decode($user->fingerprint_id, true);
     
-        // Ensure existingFingerprints is an array
+        // Ensure existingFingerprints is initialized as an array if it's null or not an array
         if (!is_array($existingFingerprints)) {
-            $existingFingerprints = json_decode($existingFingerprints, true);
-        }
-    
-        // Initialize as an empty array if null
-        if (is_null($existingFingerprints)) {
             $existingFingerprints = [];
         }
     
-        // Add the new fingerprint_id to the array, ensuring no duplicates
+        // Check if the fingerprint already exists
+        $fingerprintIds = array_column($existingFingerprints, 'fingerprint_id');
+        if (in_array($request->fingerprint_id, $fingerprintIds)) {
+            return response()->json(['message' => 'Fingerprint already exists.'], 400);
+        }
+    
+        // Add the new fingerprint_id to the array if the count is less than 2
         if (count($existingFingerprints) < 2) {
-            // Prevent adding duplicates
             $existingFingerprints[] = ['fingerprint_id' => $request->fingerprint_id];
         } else {
             return response()->json(['message' => 'Cannot add more than 2 fingerprints.'], 400);
         }
     
-        // Update the user's fingerprint_id field
-        $user->fingerprint_id = $existingFingerprints;
+        // Update the user's fingerprint_id field with the new array
+        $user->fingerprint_id = json_encode($existingFingerprints);
         $user->save();
     
         // Return a JSON response with the updated user and status code 200
         return response()->json($user, 200);
     }
+    
 
     public function getUserByEmail($email)
     {
