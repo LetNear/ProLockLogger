@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Filament\Resources;
 
@@ -8,6 +8,7 @@ use App\Models\User;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -54,30 +55,36 @@ class UserResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s email address')
                                     ->helperText('The email address of the user.'),
-                                    // ->rules(function () {
-                                    //     $rules = ['required', 'email'];
-                                    //     if (request()->routeIs('filament.resources.users.create')) {
-                                    //         $rules[] = 'unique:users,email';
-                                    //     } else {
-                                    //         $userId = request()->route('record');
-                                    //         $rules[] = "unique:users,email,$userId";
-                                    //     }
-                                    //     return $rules;
-                                    // }),
+                                // ->rules(function () {
+                                //     $rules = ['required', 'email'];
+                                //     if (request()->routeIs('filament.resources.users.create')) {
+                                //         $rules[] = 'unique:users,email';
+                                //     } else {
+                                //         $userId = request()->route('record');
+                                //         $rules[] = "unique:users,email,$userId";
+                                //     }
+                                //     return $rules;
+                                // }),
 
-                                    // TODO make validations
+                                // TODO make validations
                                 Select::make('role_number')
                                     ->label('Roles')
                                     ->relationship('roles', 'name')
                                     ->preload(3)
                                     ->required(),
-                                TextInput::make('fingerprint_id')
-                                    ->label('Fingerprint ID')
-                                    ->maxLength(255)
-                                    ->placeholder('Enter the user\'s fingerprint ID')
-                                    ->helperText('The fingerprint ID of the user.'),
+                                Repeater::make('fingerprint_id')
+                                    ->label('Fingerprint IDs')
+                                    ->schema([
+                                        TextInput::make('fingerprint_id')
+                                            ->label('Fingerprint ID')
+                                            ->placeholder('Enter a fingerprint ID')
+                                    ])
+                                    ->minItems(2)
+                                    ->maxItems(2)
+                                    ->helperText('Add exactly two fingerprint IDs.')
+
                             ]),
-                            
+
                     ]),
                 Section::make('Verification & Security')
                     ->schema([
@@ -95,9 +102,9 @@ class UserResource extends Resource
                                     ->helperText('The password for the user. Leave blank to keep the current password.'),
                             ]),
                     ]),
-                ]);
+            ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -137,16 +144,42 @@ class UserResource extends Resource
                             2 => 'Faculty',
                             3 => 'Student',
                         ];
-                
+
                         return $roles[$record->role_number] ?? 'Unknown';
                     })
                     ->sortable()
                     ->tooltip('The roles assigned to the user.'),
-                    TextColumn::make('fingerprint_id')
-                    ->label('Fingerprint ID')
+                TextColumn::make('fingerprint_id')
+                    ->label('Fingerprint IDs')
+                    ->getStateUsing(function ($record) {
+                        $fingerprintData = $record->fingerprint_id;
+
+                        // Check if the data is an array of objects
+                        if (is_array($fingerprintData)) {
+                            // Extract the fingerprint_id from each object
+                            $fingerprintIds = array_map(function ($item) {
+                                return $item['fingerprint_id'] ?? null;  // Extract the fingerprint_id value
+                            }, $fingerprintData);
+
+                            // Filter out any null values (in case of missing fingerprint_id keys)
+                            $fingerprintIds = array_filter($fingerprintIds);
+
+                            // If there are no valid fingerprint IDs, return a default message
+                            if (empty($fingerprintIds)) {
+                                return 'No fingerprints';
+                            }
+
+                            // Implode the array into a comma-separated string
+                            return implode(', ', $fingerprintIds);
+                        }
+
+                        // If not an array, handle it as a string (unlikely but safe fallback)
+                        return $fingerprintData ?? 'None';
+                    })
                     ->searchable()
                     ->sortable()
-                    ->tooltip('The fingerprint ID of the user.'),
+                    ->tooltip('The fingerprint IDs of the user.')
+
 
             ])
             ->actions([

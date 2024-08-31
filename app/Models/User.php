@@ -1,13 +1,9 @@
 <?php
-
 namespace App\Models;
-
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Auditable as AuditingAuditable;
@@ -19,7 +15,6 @@ class User extends Authenticatable implements Auditable, FilamentUser
     use HasFactory, Notifiable;
     use AuditingAuditable;
     use HasRoles;
-
 
     /**
      * The attributes that are mass assignable.
@@ -46,17 +41,15 @@ class User extends Authenticatable implements Auditable, FilamentUser
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'fingerprint_id' => 'array',  // Correctly cast fingerprint_id as an array
+    ];
 
     public function userInformation()
     {
@@ -70,12 +63,12 @@ class User extends Authenticatable implements Auditable, FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasAnyRole('Administrator', 'Faculty');
+        return $this->hasAnyRole(['Administrator', 'Faculty']);
     }
 
-    public function getNameAttribute()
-{
-    // Assuming the name attribute exists in the User model
-    return $this->attributes['name'];
-}
+    public function getNameAttribute(): string
+    {
+        // Assuming the name attribute exists in the User model
+        return $this->attributes['name'];
+    }
 }
