@@ -104,6 +104,8 @@ class UserController extends Controller
             'email' => 'required|email|exists:users,email',
             'fingerprint_id' => 'required|string|max:255',  // Validate as a string with max length
         ]);
+
+        Log::info('updateFingerprintByEmail endpoint hit', ['request' => $request->all()]);
     
         // Find the user by email
         $user = User::where('email', $request->email)->firstOrFail();
