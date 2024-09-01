@@ -76,8 +76,8 @@ class UserController extends Controller
         $filteredUsers = $users->filter(function ($user) use ($fingerprint_id) {
             $fingerprints = $user->fingerprint_id;
     
-            // Ensure fingerprints is an array, decode if needed
-            if (!is_array($fingerprints)) {
+            // Ensure fingerprints is an array, decode if it's a JSON string
+            if (is_string($fingerprints)) {
                 $fingerprints = json_decode($fingerprints, true) ?? [];
             }
     
@@ -95,26 +95,30 @@ class UserController extends Controller
         if ($filteredUsers->isNotEmpty()) {
             // Extract the first matching user details
             $user = $filteredUsers->first();
-            $fingerprints = json_decode($user->fingerprint_id, true) ?? [];
+            $fingerprints = $user->fingerprint_id;
+    
+            // Decode fingerprints if it's a JSON string
+            if (is_string($fingerprints)) {
+                $fingerprints = json_decode($fingerprints, true) ?? [];
+            }
             
             // Find the specific fingerprint within the array
             $matchingFingerprint = collect($fingerprints)->firstWhere('fingerprint_id', $fingerprint_id);
     
-            return response()->json([
-                'fingerprint_id' => $matchingFingerprint['fingerprint_id'],
-                'name' => $user->name,
-                'email' => $user->email,
-            ], 400);
+            // If a matching fingerprint is found, return the required details
+            if ($matchingFingerprint) {
+                return response()->json([
+                    'fingerprint_id' => $matchingFingerprint['fingerprint_id'],
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ], 400);
+            }
         }
     
         // If no users are found with the fingerprint_id, return a success message
         return response()->json(['message' => 'Fingerprint ID is not registered and is available.'], 200);
     }
     
-
-
-
-
 
 
     public function getUsersByRole()
