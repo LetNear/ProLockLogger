@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
@@ -70,5 +71,18 @@ class User extends Authenticatable implements Auditable, FilamentUser
     {
         // Assuming the name attribute exists in the User model
         return $this->attributes['name'];
+    }
+
+
+    public function getFingerprintIdAttribute($value)
+    {
+        // Decode if it's a JSON string, otherwise return an empty array
+        return is_string($value) ? json_decode($value, true) : $value;
+    }
+
+    public function setFingerprintIdAttribute($value)
+    {
+        // Encode array to JSON string for storage
+        $this->attributes['fingerprint_id'] = is_array($value) ? json_encode($value) : $value;
     }
 }

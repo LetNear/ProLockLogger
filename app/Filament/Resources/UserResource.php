@@ -114,10 +114,6 @@ class UserResource extends Resource
                     ->importer(UserImporter::class)
                     ->label('Import Instructors')
                     ->visible(fn() => Auth::user()->hasRole('Administrator')), // Only visible to Administrators
-                // ImportAction::make()
-                //     ->importer(UserImporter::class)
-                //     ->label('Import Students')
-                //     ->visible(fn() => Auth::user()->hasRole('Administrator')), // Only visible to Administrators
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -144,55 +140,39 @@ class UserResource extends Resource
                             2 => 'Faculty',
                             3 => 'Student',
                         ];
-
+    
                         return $roles[$record->role_number] ?? 'Unknown';
                     })
                     ->sortable()
                     ->tooltip('The roles assigned to the user.'),
-                    TextColumn::make('fingerprint_id')
+                TextColumn::make('fingerprint_id')
                     ->label('Fingerprint IDs')
                     ->getStateUsing(function ($record) {
                         $fingerprintData = $record->fingerprint_id;
-                
-                        // Ensure fingerprintData is treated as an array
+    
+                        // Handle fingerprintData: decode if it's a string, or ensure it's an array
                         if (is_string($fingerprintData)) {
-                            // Try to decode if it's a JSON string
                             $fingerprintData = json_decode($fingerprintData, true);
                         }
-                
-                        // If it's now an array of objects, we proceed
-                        if (is_array($fingerprintData)) {
-                            // Check if it's an associative array (single fingerprint object) or a list of arrays
-                            if (isset($fingerprintData[0]) && is_array($fingerprintData[0])) {
-                                // Case where we have multiple fingerprint objects
-                                $fingerprintIds = array_map(function($item) {
-                                    return $item['fingerprint_id'] ?? null;
-                                }, $fingerprintData);
-                            } else {
-                                // Case where it's a single fingerprint object
-                                $fingerprintIds = [$fingerprintData['fingerprint_id'] ?? null];
-                            }
-                
-                            // Filter out any null values
-                            $fingerprintIds = array_filter($fingerprintIds);
-                
-                            // If there are no valid fingerprint IDs, return a default message
-                            if (empty($fingerprintIds)) {
-                                return 'No fingerprints';
-                            }
-                
-                            // Implode the array into a comma-separated string
-                            return implode(', ', $fingerprintIds);
+    
+                        // Ensure $fingerprintData is an array
+                        if (!is_array($fingerprintData)) {
+                            $fingerprintData = [];
                         }
-                
-                        // If not an array or valid JSON, handle as a string or return 'None'
-                        return is_string($fingerprintData) ? $fingerprintData : 'None';
+    
+                        // Extract fingerprint IDs from the array
+                        $fingerprintIds = array_map(function($item) {
+                            return $item['fingerprint_id'] ?? null;
+                        }, $fingerprintData);
+    
+                        // Filter out null values and return as a comma-separated string
+                        $fingerprintIds = array_filter($fingerprintIds);
+    
+                        return empty($fingerprintIds) ? 'No fingerprints' : implode(', ', $fingerprintIds);
                     })
                     ->searchable()
                     ->sortable()
                     ->tooltip('The fingerprint IDs of the user.'),
-
-
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -208,6 +188,7 @@ class UserResource extends Resource
                     ->tooltip('Delete selected users'),
             ]);
     }
+    
 
     public static function getRelations(): array
     {
