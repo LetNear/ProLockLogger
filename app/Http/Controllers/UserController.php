@@ -71,46 +71,46 @@ class UserController extends Controller
     {
         // Retrieve all users
         $users = User::all();
-
+    
         // Filter users to find those with the specific fingerprint_id
         $filteredUsers = $users->filter(function ($user) use ($fingerprint_id) {
             $fingerprints = $user->fingerprint_id;
-
+    
             // Ensure fingerprints is an array, decode if needed
             if (!is_array($fingerprints)) {
                 $fingerprints = json_decode($fingerprints, true) ?? [];
             }
-
+    
             // Search through each fingerprint object in the array
             foreach ($fingerprints as $fingerprint) {
                 if (isset($fingerprint['fingerprint_id']) && $fingerprint['fingerprint_id'] === $fingerprint_id) {
                     return true; // Found matching fingerprint_id
                 }
             }
-
+    
             return false; // No match found in this user
         });
-
+    
         // If users are found with the fingerprint_id, return their details
         if ($filteredUsers->isNotEmpty()) {
-            // Transform the collection to include only the fingerprint_id, name, and email
-            $userDetails = $filteredUsers->map(function ($user) {
-                return [
-                    'fingerprint_id' => $user->fingerprint_id, // Adjust this if fingerprint_id is within an array
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ];
-            });
-
+            // Extract the first matching user details
+            $user = $filteredUsers->first();
+            $fingerprints = json_decode($user->fingerprint_id, true) ?? [];
+            
+            // Find the specific fingerprint within the array
+            $matchingFingerprint = collect($fingerprints)->firstWhere('fingerprint_id', $fingerprint_id);
+    
             return response()->json([
-                'message' => 'Fingerprint ID is already registered.',
-                'users' => $userDetails
+                'fingerprint_id' => $matchingFingerprint['fingerprint_id'],
+                'name' => $user->name,
+                'email' => $user->email,
             ], 400);
         }
-
+    
         // If no users are found with the fingerprint_id, return a success message
         return response()->json(['message' => 'Fingerprint ID is not registered and is available.'], 200);
     }
+    
 
 
 
