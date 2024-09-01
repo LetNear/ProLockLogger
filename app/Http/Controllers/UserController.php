@@ -81,6 +81,11 @@ class UserController extends Controller
                 $fingerprints = json_decode($fingerprints, true) ?? [];
             }
     
+            // Ensure $fingerprints is an array before looping
+            if (!is_array($fingerprints)) {
+                $fingerprints = [];
+            }
+    
             // Search through each fingerprint object in the array
             foreach ($fingerprints as $fingerprint) {
                 if (isset($fingerprint['fingerprint_id']) && $fingerprint['fingerprint_id'] === $fingerprint_id) {
@@ -101,7 +106,12 @@ class UserController extends Controller
             if (is_string($fingerprints)) {
                 $fingerprints = json_decode($fingerprints, true) ?? [];
             }
-            
+    
+            // Ensure $fingerprints is an array
+            if (!is_array($fingerprints)) {
+                $fingerprints = [];
+            }
+    
             // Find the specific fingerprint within the array
             $matchingFingerprint = collect($fingerprints)->firstWhere('fingerprint_id', $fingerprint_id);
     
@@ -118,6 +128,7 @@ class UserController extends Controller
         // If no users are found with the fingerprint_id, return a success message
         return response()->json(['message' => 'Fingerprint ID is not registered and is available.'], 200);
     }
+    
     
 
 
