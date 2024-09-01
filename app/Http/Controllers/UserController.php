@@ -220,7 +220,7 @@ class UserController extends Controller
     public function getCurrentDateTime()
     {
         // Get the current date and time
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Manila');
 
         // Extract detailed components of the current date and time
         $dayOfWeek = $now->format('l');            // Day of the week (e.g., 'Monday')
