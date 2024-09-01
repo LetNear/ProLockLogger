@@ -222,12 +222,20 @@ class UserController extends Controller
         // Get the current date and time
         $now = Carbon::now();
 
-        // Format the date and time as 'Y-m-d H:i:s' (e.g., '2024-09-01 14:30:00')
-        $currentDateTime = $now->format('Y-m-d H:i:s');
+        // Extract detailed components of the current date and time
+        $dayOfWeek = $now->format('l');            // Day of the week (e.g., 'Monday')
+        $date = $now->format('d');                // Day of the month (e.g., '01')
+        $year = $now->format('Y');                // Year (e.g., '2024')
+        $month = $now->format('F');               // Month (e.g., 'September')
+        $currentTime = $now->format('H:i');     // Current time (e.g., '14:30:00')
 
-        // Return the current date and time in JSON response
+        // Return the detailed date and time components in JSON response
         return response()->json([
-            'current_date_time' => $currentDateTime,
+            'day_of_week' => $dayOfWeek,
+            'date' => $date,
+            'year' => $year,
+            'month' => $month,
+            'current_time' => $currentTime,
         ], 200);
     }
 }
