@@ -121,7 +121,7 @@ class UserController extends Controller
                     'fingerprint_id' => $matchingFingerprint['fingerprint_id'],
                     'name' => $user->name,
                     'email' => $user->email,
-                ], 400);
+                ], 200);
             }
         }
     
