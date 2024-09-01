@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserInformationResource\Pages;
 use App\Filament\Resources\UserInformationResource\RelationManagers;
+use App\Models\Course;
+use App\Models\LabSchedule;
 use App\Models\Nfc;
 use App\Models\Role;
 use App\Models\Seat;
@@ -111,16 +113,46 @@ class UserInformationResource extends Resource
                                     ->placeholder('Select the year')
                                     ->helperText('Choose the year level of the user.')
                                     ->disabled(fn($get) => $get('isRestricted')),
-                                Select::make('courses')
-                                    ->relationship('courses', 'course_name') // Uses the many-to-many relationship
+                                    Select::make('courses')
                                     ->label('Courses')
+                                    ->relationship('courses', 'course_name') // Relates to the many-to-many relationship in the model
                                     ->placeholder('Select courses')
                                     ->helperText('Choose one or more courses for this user.')
                                     ->searchable()
                                     ->multiple() // Allows multiple selections
                                     ->preload(10)
-                                    ->options(fn() => \App\Models\Course::whereHas('labSchedules')->pluck('course_name', 'id')->toArray())
-                                    ->disabled(fn($get) => $get('isRestricted')),
+                                    ->options(function () {
+                                        // Fetch courses with their lab schedules
+                                        $courses = Course::whereHas('labSchedules')
+                                            ->with('labSchedules') // Ensure schedules are loaded
+                                            ->get();
+                                
+                                        // Map the courses and schedules to create separate entries
+                                        $options = [];
+                                        foreach ($courses as $course) {
+                                            foreach ($course->labSchedules as $schedule) {
+                                                // Create a unique identifier combining course and schedule
+                                                $options[$schedule->id] = $course->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')';
+                                            }
+                                        }
+                                
+                                        return $options;
+                                    })
+                                    ->saveRelationshipsUsing(function ($state, $record) {
+                                        // Reset the current relationships to ensure all are saved
+                                        $record->courses()->detach();
+                                
+                                        // Handle saving of multiple courses with their schedules
+                                        foreach ($state as $scheduleId) {
+                                            // Find the schedule and get the corresponding course ID
+                                            $schedule = LabSchedule::find($scheduleId);
+                                            if ($schedule) {
+                                                // Attach the course with the specific schedule ID
+                                                $record->courses()->attach($schedule->course_id, ['schedule_id' => $scheduleId]);
+                                            }
+                                        }
+                                    })
+                                    ->disabled(fn($get) => $get('isRestricted'))
                             ]),
                     ]),
                 Section::make('Personal Information')
@@ -202,14 +234,14 @@ class UserInformationResource extends Resource
                     ->searchable()
                     ->tooltip('The user\'s name.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('user.role.name')
                     ->label('Role')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s role.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('idCard.rfid_number')
                     ->label('RFID Number')
                     ->sortable()
@@ -217,35 +249,35 @@ class UserInformationResource extends Resource
                     ->tooltip('The user\'s RFID number.')
                     ->alignLeft()
                     ->getStateUsing(fn($record) => $record->id_card_id ? $record->idCard->rfid_number : 'None'),
-    
+
                 TextColumn::make('user_number')
                     ->label('User ID Card Number')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s ID card number.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('seat.computer_number')
                     ->label('Computer Number')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s assigned computer number.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('block.block')
                     ->label('Block')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s block.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('year')
                     ->label('Year')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s year level.')
                     ->alignLeft(),
-    
+
                 // Add this column to display courses
                 TextColumn::make('courses')
                     ->label('Courses')
@@ -253,36 +285,39 @@ class UserInformationResource extends Resource
                     ->searchable()
                     ->tooltip('The courses assigned to the user.')
                     ->alignLeft()
-                    ->getStateUsing(fn($record) => $record->courses->pluck('course_name')->join(', ')), // Joins course names into a string
-    
+                    ->getStateUsing(function ($record) {
+                        // Joins course names into a string
+                        return $record->courses->pluck('course_name')->join(', ');
+                    }),
+
                 TextColumn::make('first_name')
                     ->label('First Name')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s first name.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('middle_name')
                     ->label('Middle Name')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s middle name.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('last_name')
                     ->label('Last Name')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s last name.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('suffix')
                     ->label('Suffix')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s suffix.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('date_of_birth')
                     ->label('Date of Birth')
                     ->dateTime('M d, Y')
@@ -290,34 +325,34 @@ class UserInformationResource extends Resource
                     ->searchable()
                     ->tooltip('The user\'s date of birth.')
                     ->alignCenter(),
-    
+
                 TextColumn::make('gender')
                     ->label('Gender')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s gender.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('contact_number')
                     ->label('Contact Number')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s contact number.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('complete_address')
                     ->label('Complete Address')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s complete address.')
                     ->alignLeft(),
-    
+
                 TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime('M d, Y h:i A')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-    
+
                 TextColumn::make('updated_at')
                     ->label('Updated At')
                     ->dateTime('M d, Y h:i A')
@@ -333,7 +368,7 @@ class UserInformationResource extends Resource
                         '3' => '3rd Year',
                         '4' => '4th Year',
                     ]),
-    
+
                 Tables\Filters\SelectFilter::make('gender')
                     ->label('Gender')
                     ->options([
@@ -341,11 +376,11 @@ class UserInformationResource extends Resource
                         'Female' => 'Female',
                         'Other' => 'Other',
                     ]),
-    
+
                 Tables\Filters\SelectFilter::make('block_id')
                     ->label('Block')
                     ->relationship('block', 'block'),
-    
+
                 // Tables\Filters\TrashedFilter::make('trashed'),
             ])
             ->actions([

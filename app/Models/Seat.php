@@ -19,6 +19,7 @@ class Seat extends Model implements Auditable
         'block_id',
         'student_id',
         'lab_attendance_id',
+        'course_id',
     ];
 
     public function userInformation()
@@ -29,6 +30,11 @@ class Seat extends Model implements Auditable
     public function computer()
     {
         return $this->belongsTo(Computer::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 
     public function userInformations()
@@ -43,7 +49,7 @@ class Seat extends Model implements Auditable
 
     public function student()
     {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(UserInformation::class, 'student_id');
     }
     public function instructor()
     {

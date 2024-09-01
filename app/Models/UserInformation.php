@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use OwenIt\Auditing\Auditable as AuditingAuditable;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -74,8 +75,10 @@ class UserInformation extends Model implements Auditable
     }
 
     // Define the many-to-many relationship with Course model
-    public function courses()
+    public function courses(): BelongsToMany
     {
-        return $this->belongsToMany(Course::class, 'course_user_information');
+        return $this->belongsToMany(Course::class, 'course_user_information', 'user_information_id', 'course_id')
+            ->withPivot('schedule_id') // Include schedule_id in the relationship
+            ->withTimestamps();
     }
 }
