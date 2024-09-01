@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -213,6 +214,20 @@ class UserController extends Controller
             'email' => $user->email,
             'fingerprint_id' => $user->fingerprint_id,
             'role_number' => $user->role_number,
+        ], 200);
+    }
+
+    public function getCurrentDateTime()
+    {
+        // Get the current date and time
+        $now = Carbon::now();
+
+        // Format the date and time as 'Y-m-d H:i:s' (e.g., '2024-09-01 14:30:00')
+        $currentDateTime = $now->format('Y-m-d H:i:s');
+
+        // Return the current date and time in JSON response
+        return response()->json([
+            'current_date_time' => $currentDateTime,
         ], 200);
     }
 }
