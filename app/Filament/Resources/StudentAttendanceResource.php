@@ -131,8 +131,7 @@ class StudentAttendanceResource extends Resource
     {
         return [
             'index' => Pages\ListStudentAttendances::route('/'),
-            'create' => Pages\CreateStudentAttendance::route('/create'),
-            'edit' => Pages\EditStudentAttendance::route('/{record}/edit'),
+            
         ];
     }
 }
