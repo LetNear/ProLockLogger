@@ -81,4 +81,6 @@ class UserInformation extends Model implements Auditable
             ->withPivot('schedule_id') // Include schedule_id in the relationship
             ->withTimestamps();
     }
+
+   
 }

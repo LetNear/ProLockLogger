@@ -75,6 +75,9 @@ class RecentLogsController extends Controller
                 return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
             }
     
+            // Retrieve the course information from the pivot table
+            $course = $userInformation->courses()->first()->name ?? 'Unknown';
+    
             // Create a new log entry
             $log = RecentLogs::create([
                 'user_number' => $userInformation->user_number,
@@ -89,7 +92,7 @@ class RecentLogsController extends Controller
             // Save the data to StudentAttendance table
             StudentAttendance::create([
                 'name' => $userInformation->user->name,
-                'course' => $userInformation->course,
+                'course' => $course, // Ensure the course is saved correctly
                 'year' => $validated['year'],
                 'block' => $userInformation->block->block ?? 'Unknown',
                 'student_number' => $userInformation->user_number,
@@ -103,6 +106,7 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
     
 
     /**
