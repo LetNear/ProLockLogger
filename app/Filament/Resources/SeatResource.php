@@ -3,14 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SeatResource\Pages;
-use App\Filament\Resources\SeatResource\RelationManagers;
 use App\Models\Block;
 use App\Models\Computer;
 use App\Models\Course;
 use App\Models\Seat;
 use App\Models\User;
 use App\Models\UserInformation;
-use App\Models\LabSchedule; // Import LabSchedule model
+use App\Models\LabSchedule;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -46,136 +46,130 @@ class SeatResource extends Resource
                                     ->options(function () {
                                         return User::where('role_number', 2)->pluck('name', 'id');
                                     })
-                                    ->default(Auth::id())
+                                    ->default(Auth::id()) // Set the default to the current user's ID
                                     ->required()
-                                    ->reactive()
-                                    ->disabled(),
-    
+                                    ->reactive(), // Remove the disabled() method
+
+
                                 Select::make('course_id')
-                                    ->label('Course Name')
+                                    ->label('Course')
                                     ->options(function () {
-                                        return Course::pluck('course_name', 'id');
+                                        $instructorId = Auth::id();
+                                        return LabSchedule::with('course')
+                                            ->where('instructor_id', $instructorId)
+                                            ->get()
+                                            ->mapWithKeys(function ($schedule) {
+                                                $classStart = Carbon::parse($schedule->class_start)->format('H:i');
+                                                $classEnd = Carbon::parse($schedule->class_end)->format('H:i');
+                                                $displayText = "{$schedule->course->course_name} - {$schedule->day_of_the_week}, {$classStart} - {$classEnd}";
+                                                return [$schedule->id => $displayText];
+                                            });
                                     })
                                     ->required()
                                     ->searchable()
                                     ->placeholder('Select Course')
-                                    ->reactive(), // Reactive to update dependent fields
-    
-                                Select::make('year')
-                                    ->label('Year')
-                                    ->options(function () {
-                                        return LabSchedule::distinct()->pluck('year', 'year');
-                                    })
-                                    ->required()
-                                    ->placeholder('Select Year'),
-    
-                                Select::make('block_id')
-                                    ->label('Block')
-                                    ->options(function () {
-                                        $assignedBlockIds = LabSchedule::pluck('block_id')->unique();
-                                        return Block::whereIn('id', $assignedBlockIds)->pluck('block', 'id');
-                                    })
-                                    ->required()
-                                    ->placeholder('Select Block'),
-    
-                                    Select::make('student_id')
+                                    ->reactive(),
+
+                                Select::make('student_id')
                                     ->label('Student')
                                     ->options(function ($get) {
-                                        $courseId = $get('course_id'); // Retrieve the selected course ID
-                                
-                                        if ($courseId) {
-                                            // Fetch students enrolled in the selected course using the pivot table 'course_user_information'
-                                            return UserInformation::whereHas('courses', function ($query) use ($courseId) {
-                                                    $query->where('course_id', $courseId); // Filter by selected course ID
-                                                })
-                                                ->with('user') // Eager load the related user model to get user names
+                                        $scheduleId = $get('course_id'); // The course_id here corresponds to the schedule_id
+
+                                        if ($scheduleId) {
+                                            // Exclude students who are already assigned to a seat
+                                            $assignedStudentIds = Seat::pluck('student_id')->toArray();
+
+                                            return UserInformation::whereHas('courses', function ($query) use ($scheduleId) {
+                                                $query->where('course_user_information.schedule_id', $scheduleId);
+                                            })
+                                                ->whereNotIn('id', $assignedStudentIds) // Exclude assigned students
+                                                ->with('user')
                                                 ->get()
-                                                ->pluck('user.name', 'user_id'); // Pluck user names and their IDs
+                                                ->pluck('user.name', 'id');
                                         }
-                                
+
                                         return [];
                                     })
-                                    ->relationship('student', 'name') // Use the correct relationship for the select
                                     ->searchable()
                                     ->required()
                                     ->placeholder('Select Student'),
-                                
-    
-                                    // Select::make('computer_id')
-                                    // ->label('Computer')
-                                    // ->options(function ($get) {
-                                    //     $courseId = $get('course_id');
-    
-                                    //     if ($courseId) {
-                                    //         $assignedComputerIds = Seat::where('course_id', $courseId)
-                                    //             ->pluck('computer_id')
-                                    //             ->toArray();
-    
-                                    //         return Computer::whereNotIn('id', $assignedComputerIds)
-                                    //             ->pluck('computer_number', 'id');
-                                    //     }
-    
-                                    //     return [];
-                                    // })
-                                    // ->searchable()
-                                    // ->required()
-                                    // ->placeholder('Select Computer'),
+
+                                Select::make('computer_id')
+                                    ->label('Computer')
+                                    ->options(function ($get) {
+                                        $courseId = $get('course_id');
+
+                                        if ($courseId) {
+                                            $assignedComputerIds = Seat::where('course_id', $courseId)
+                                                ->pluck('computer_id')
+                                                ->toArray();
+
+                                            return Computer::whereNotIn('id', $assignedComputerIds)
+                                                ->pluck('computer_number', 'id');
+                                        }
+
+                                        return [];
+                                    })
+                                    ->searchable()
+                                    ->required()
+                                    ->placeholder('Select Computer'),
                             ]),
                     ]),
             ]);
     }
-    
 
     public static function table(Table $table): Table
-{
-    return $table
-        ->columns([
-            TextColumn::make('computer.computer_number')
-                ->label('Computer Number')
-                ->sortable()
-                ->searchable(),
+    {
+        return $table
+            ->columns([
+                // Display the computer number
+                TextColumn::make('computer.computer_number')
+                    ->label('Computer Number')
+                    ->sortable()
+                    ->searchable(),
 
-            TextColumn::make('instructor.name')
-                ->label('Instructor')
-                ->sortable()
-                ->searchable(),
+                // Display the instructor's name
+                TextColumn::make('instructor.name')
+                    ->label('Instructor Name')
+                    ->sortable()
+                    ->searchable(),
 
-            TextColumn::make('course.course_name')
-                ->label('Course')
-                ->sortable()
-                ->searchable(),
+                // Display the student's name
+                TextColumn::make('student.user.name')
+                    ->label('Student Name')
+                    ->sortable()
+                    ->searchable(),
 
-            TextColumn::make('block.block')
-                ->label('Block')
-                ->sortable()
-                ->searchable(),
+                // Display the course name
+                TextColumn::make('course.course_name')
+                    ->label('Course Name')
+                    ->sortable()
+                    ->searchable(),
 
-            TextColumn::make('student.name')
-                ->label('Student')
-                ->sortable()
-                ->searchable(),
 
-            TextColumn::make('created_at')
-                ->dateTime()
-                ->sortable()
-                ->label('Created At'),
 
-            TextColumn::make('updated_at')
-                ->dateTime()
-                ->sortable()
-                ->label('Updated At'),
-        ])
-        ->actions([
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
-        ])
-        ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
-        ])
-        ->searchable()
-        ->defaultSort('created_at', 'desc');
-}
+                // Display the creation timestamp
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->label('Created At'),
 
+                // Display the update timestamp
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->label('Updated At'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ])
+            ->searchable()
+            ->defaultSort('created_at', 'desc');
+    }
 
     public static function getRelations(): array
     {
