@@ -1,7 +1,6 @@
 <?php
 namespace App\Filament\Pages;
 
-use App\Models\Block;
 use App\Models\LabSchedule;
 use App\Models\Seat;
 use App\Models\UserInformation;
@@ -14,8 +13,8 @@ class SeatPlanPage extends Page
     public $students;
     public $selectedStudent;
     public $selectedSeat;
-    public $selectedBlockYear;
-    public $instructorBlocksAndYears = [];
+    public $selectedCourse; // Replaces selectedBlockYear
+    public $courses = []; // To store the courses available for the instructor
 
     protected static string $view = 'filament.pages.seat-plan-page';
 
@@ -24,7 +23,7 @@ class SeatPlanPage extends Page
         // Initialize properties
         $this->seats = collect();
         $this->students = collect();
-        $this->selectedBlockYear = null;
+        $this->selectedCourse = null;
         $this->selectedStudent = null;
         $this->selectedSeat = null;
 
@@ -33,79 +32,36 @@ class SeatPlanPage extends Page
             $query->where('role_number', 3);
         })->whereNull('seat_id')->get();
 
-        // Fetch instructor's blocks and years
+        // Fetch courses associated with the instructor's schedules
         if (auth()->check() && auth()->user()->role_number == 2) {
-            $this->instructorBlocksAndYears = LabSchedule::where('instructor_id', auth()->user()->id)
-                ->join('blocks', 'lab_schedules.block_id', '=', 'blocks.id')
-                ->select('blocks.block as block_name', 'lab_schedules.year')
-                ->distinct()
+            $this->courses = LabSchedule::where('instructor_id', auth()->user()->id)
+                ->with('course')
                 ->get()
-                ->mapWithKeys(function ($item) {
-                    return [$item->block_name . '-' . $item->year => $item->block_name . ' - ' . $item->year];
+                ->mapWithKeys(function ($schedule) {
+                    $courseName = $schedule->course->course_name ?? 'Unknown Course';
+                    $displayText = "{$courseName} - {$schedule->day_of_the_week}, {$schedule->class_start} - {$schedule->class_end}";
+                    return [$schedule->id => $displayText]; // Map schedule ID to display text
                 });
         }
     }
 
-    public function updatedSelectedBlockYear($value)
+    public function updatedSelectedCourse($value)
     {
-        // Load seat plan details when the selectedBlockYear changes
+        // Load seat plan details when the selectedCourse changes
         $this->loadSeatPlanDetails();
     }
 
     public function loadSeatPlanDetails()
     {
-        if (!empty($this->selectedBlockYear)) {
-            // Debug output to verify initial selectedBlockYear value
-          
-    
-            // Ensure there's a dash separating block and year
-            if (strpos($this->selectedBlockYear, '-') !== false) {
-                // Split the string by the dash
-                $parts = explode('-', $this->selectedBlockYear);
-    
-                // Ensure we have exactly two parts
-                if (count($parts) == 2) {
-                    $blockName = trim($parts[0]);
-                    $year = trim($parts[1]);
-                } else {
-                    $blockName = $this->selectedBlockYear;
-                    $year = null;
-                }
-            } else {
-                $blockName = $this->selectedBlockYear;
-                $year = null;
-            }
-    
-            // Debug output to verify extracted blockName and year
-           
-    
-            // Fetch the block ID based on the block name
-            $block = Block::where('block', $blockName)->first();
-            $blockId = $block ? $block->id : null;
-    
-            // Debug output to verify blockId
-         
-    
-            if ($blockId) {
-                // Fetch seats based on block ID and year
-                $this->seats = Seat::where('block_id', $blockId)
-                                   ->where(function($query) use ($year) {
-                                       if ($year) {
-                                           $query->where('year', $year);
-                                       }
-                                   })
-                                   ->get();
-            } else {
-                $this->seats = collect(); // or handle as needed
-            }
-    
-            // Debug output to verify seats
-         
+        if (!empty($this->selectedCourse)) {
+            // Fetch seats based on the selected course (use course_id instead of schedule_id)
+            $this->seats = Seat::where('course_id', $this->selectedCourse) // Change to course_id
+                ->with('computer', 'student.user') // Load related computer and student data
+                ->get();
         } else {
-            $this->seats = collect(); // or handle as needed
+            $this->seats = collect(); // Clear seats if no course is selected
         }
     }
-    
 
     public function selectSeat($seatId)
     {

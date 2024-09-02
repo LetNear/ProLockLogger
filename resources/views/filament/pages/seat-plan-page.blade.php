@@ -1,12 +1,12 @@
 <div>
-    <!-- Dropdown for selecting instructor's block and year -->
-    @if (!empty($instructorBlocksAndYears))
-        <div class="block-year-dropdown">
-            <h3>Select Block and Year:</h3>
-            <select wire:model="selectedBlockYear" wire:change="loadSeatPlanDetails">
-                <option value="">Select Block and Year</option>
-                @foreach ($instructorBlocksAndYears as $key => $value)
-                    <option value="{{ $key }}">{{ $value }}</option>
+    <!-- Dropdown for selecting courses -->
+    @if (!empty($courses))
+        <div class="course-dropdown">
+            <h3>Select Course:</h3>
+            <select wire:model="selectedCourse" wire:change="loadSeatPlanDetails">
+                <option value="">Select Course</option>
+                @foreach ($courses as $id => $course)
+                    <option value="{{ $id }}">{{ $course }}</option>
                 @endforeach
             </select>
         </div>
@@ -21,15 +21,15 @@
             style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
             @foreach (range(1, 14) as $index)
                 @php
-                    $seat = $seats ? $seats->firstWhere('computer.computer_number', $index) : null;
+                    $seat = $seats->firstWhere('computer.computer_number', $index);
                 @endphp
 
                 <div class="seat-item {{ $seat && $seat->student ? 'occupied' : 'available' }}"
                     style="min-height: 100px; border: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: {{ $seat && $seat->student ? '#f8d7da' : '#d4edda' }};"
                     wire:click="{{ $seat && $seat->student ? 'removeStudentFromSeat(' . ($seat->id ?? 'null') . ')' : 'selectSeat(' . ($seat ? $seat->id : 'null') . ')' }}">
-                    <p>Seat {{ $seat ? $seat->computer->computer_number : 'N/A' }}</p>
+                    <p>Seat {{ $seat ? $seat->computer->computer_number : $index }}</p>
                     @if ($seat && $seat->student)
-                        <p>{{ $seat->student->name }}</p>
+                        <p>{{ $seat->student->user->name }}</p>
                         <button class="remove-button" wire:click.stop="removeStudentFromSeat({{ $seat->id }})"
                             style="margin-top: 10px;">Remove</button>
                     @else
@@ -44,15 +44,15 @@
             style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px;">
             @foreach (range(15, 28) as $index)
                 @php
-                    $seat = $seats ? $seats->firstWhere('computer.computer_number', $index) : null;
+                    $seat = $seats->firstWhere('computer.computer_number', $index);
                 @endphp
 
                 <div class="seat-item {{ $seat && $seat->student ? 'occupied' : 'available' }}"
                     style="min-height: 100px; border: 1px solid #ccc; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: {{ $seat && $seat->student ? '#f8d7da' : '#d4edda' }};"
                     wire:click="{{ $seat && $seat->student ? 'removeStudentFromSeat(' . ($seat->id ?? 'null') . ')' : 'selectSeat(' . ($seat ? $seat->id : 'null') . ')' }}">
-                    <p>Seat {{ $seat ? $seat->computer->computer_number : 'N/A' }}</p>
+                    <p>Seat {{ $seat ? $seat->computer->computer_number : $index }}</p>
                     @if ($seat && $seat->student)
-                        <p>{{ $seat->student->name }}</p>
+                        <p>{{ $seat->student->user->name }}</p>
                         <button class="remove-button" wire:click.stop="removeStudentFromSeat({{ $seat->id }})"
                             style="margin-top: 10px;">Remove</button>
                     @else
@@ -69,7 +69,7 @@
             <select wire:model="selectedStudent" style="margin-top: 10px; padding: 5px;">
                 <option value="">Select a Student</option>
                 @foreach ($students as $student)
-                    <option value="{{ $student->id }}">{{ $student->name }}</option>
+                    <option value="{{ $student->id }}">{{ $student->user->name }}</option>
                 @endforeach
             </select>
             <button wire:click="assignStudentToSeat" style="margin-top: 10px; padding: 5px 10px;">Assign</button>
