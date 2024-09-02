@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SeatResource\Pages;
@@ -68,14 +69,14 @@ class SeatResource extends Resource
                                     ->placeholder('Select Course')
                                     ->reactive(),
 
-                                    Select::make('student_id')
+                                Select::make('student_id')
                                     ->label('Student')
                                     ->options(function ($get) {
                                         $scheduleId = $get('course_id');
-                                
+
                                         if ($scheduleId) {
                                             $assignedStudentIds = Seat::pluck('student_id')->toArray();
-                                
+
                                             return UserInformation::whereHas('courses', function ($query) use ($scheduleId) {
                                                 $query->where('course_user_information.schedule_id', $scheduleId);
                                             })
@@ -84,14 +85,20 @@ class SeatResource extends Resource
                                                 ->get()
                                                 ->pluck('user.name', 'id');
                                         }
-                                
+
                                         return [];
                                     })
-                                    ->default(fn ($record) => $record ? $record->student_id : null)
+                                    ->default(fn($record) => $record ? $record->student_id : null)
                                     ->searchable()
                                     ->required()
-                                    ->placeholder('Select Student'),
-
+                                    ->placeholder('Select Student')
+                                    ->formatStateUsing(function ($state) {
+                                        if ($state) {
+                                            $student = UserInformation::with('user')->find($state);
+                                            return $student ? $student->user->name : $state; // Show the student's name if available
+                                        }
+                                        return null;
+                                    }),
                                 Select::make('computer_id')
                                     ->label('Computer')
                                     ->options(function ($get) {
@@ -124,42 +131,42 @@ class SeatResource extends Resource
                     ->label('Computer Number')
                     ->sortable()
                     ->searchable(),
-    
+
                 TextColumn::make('instructor.name')
                     ->label('Instructor Name')
                     ->sortable()
                     ->searchable(),
-    
+
                 TextColumn::make('student.user.name')
                     ->label('Student Name')
                     ->sortable()
                     ->searchable(),
-    
+
                 TextColumn::make('course.course_name')
                     ->label('Course Name')
                     ->sortable()
                     ->searchable(),
-    
+
                 TextColumn::make('schedule.day_of_the_week')
                     ->label('Day of the Week')
                     ->sortable()
                     ->searchable(),
-    
+
                 TextColumn::make('schedule.class_start')
                     ->label('Class Start Time')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('H:i')),
-    
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('H:i')),
+
                 TextColumn::make('schedule.class_end')
                     ->label('Class End Time')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('H:i')),
-    
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('H:i')),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->label('Created At'),
-    
+
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
