@@ -108,25 +108,7 @@ class StudentAttendanceResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('name')
-                    ->label('Name')
-                    ->placeholder('Search by name'),
 
-                SelectFilter::make('course')
-                    ->label('Course')
-                    ->placeholder('Search by course'),
-
-                SelectFilter::make('year')
-                    ->label('Year Level')
-                    ->placeholder('Search by year level'),
-
-                SelectFilter::make('block')
-                    ->label('Block')
-                    ->placeholder('Search by block'),
-
-                SelectFilter::make('student_number')
-                    ->label('Student Number')
-                    ->placeholder('Search by student number'),
 
                
             ])
