@@ -190,7 +190,7 @@ class RecentLogsController extends Controller
         // Validate the input data
         $validated = $request->validate([
             'fingerprint_id' => 'required|string',
-            'time_in' => 'required|date_format:H:i',
+            'time_in' => 'required|string',
             'role_id' => 'required|integer',
             'user_name' => 'required|string',
         ]);
@@ -245,7 +245,7 @@ class RecentLogsController extends Controller
         // Validate the input data
         $validated = $request->validate([
             'fingerprint_id' => 'required|string',
-            'time_out' => 'required|date_format:H:i',
+            'time_out' => 'required|string',
         ]);
 
         try {
