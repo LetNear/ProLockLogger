@@ -21,28 +21,40 @@ class RecentLogsController extends Controller
      */
     public function index(): JsonResponse
     {
-        // Eager load the block, nfc, and userInformation relationships
-        $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user'])
-            ->where('role_id', 3) // Filter by role_id directly in the RecentLogs model
-            ->get()
-            ->map(function ($log) {
-                return [
-                    'user_name' => $log->user_name, // Use user_name from the table or fallback to the relationship
-                    'block_name' => $log->block->block ?? 'Unknown',
-                    'year' => $log->year,
-                    'time_in' => $log->time_in,
-                    'time_out' => $log->time_out,
-                    'UID' => $log->nfc->rfid_number ?? 'Unknown',
-                    'user_number' => $log->user_number,
-                    'block_id' => $log->block_id,
-                    'id_card_id' => $log->id_card_id,
-                    'role_name' => $log->role->name ?? 'Unknown', // Added role name for clarity
-                ];
-            });
+        try {
+            // Eager load the related models to avoid N+1 query problem
+            $recentLogs = RecentLogs::with([
+                'block',
+                'nfc',
+                'userInformation.user',
+                'role',
+                'seat.computer', // Ensure 'seat' and 'computer' relationships are correctly defined
+            ])
+                ->where('role_id', 3) // Filter logs with role_id of 3
+                ->get()
+                ->map(function ($log) {
+                    return [
+                        'user_name' => $log->user_name ?? ($log->userInformation->user->name ?? 'Unknown'),
+                        'block_name' => $log->block->block ?? 'Unknown',
+                        'year' => $log->year ?? 'Unknown',
+                        'time_in' => $log->time_in ?? 'N/A',
+                        'time_out' => $log->time_out ?? 'N/A',
+                        'UID' => $log->nfc->rfid_number ?? 'Unknown',
+                        'user_number' => $log->user_number ?? 'Unknown',
+                        'block_id' => $log->block_id ?? 'Unknown',
+                        'id_card_id' => $log->id_card_id ?? 'Unknown',
+                        'role_name' => $log->role->name ?? 'Unknown',
+                        'seat_number' => $log->seat->seat_number ?? 'Unassigned', // Assuming seat_number is a column in Seat
+                        'computer_number' => $log->seat->computer->computer_number ?? 'Unassigned', // Assuming seat has a computer
+                    ];
+                });
 
-        return response()->json($recentLogs);
+            return response()->json($recentLogs, 200);
+        } catch (\Exception $e) {
+            \Log::error('An error occurred while fetching recent logs.', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
-
     /**
      * Record time-in using the NFC UID.
      *
@@ -59,30 +71,30 @@ class RecentLogsController extends Controller
             'role_id' => 'required|integer',
             'user_name' => 'required|string',
         ]);
-    
+
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-    
+
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-    
+
             // Find associated user information
             $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
-    
+
             if (!$userInformation) {
                 return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
             }
-    
+
             // Retrieve the correct course and schedule based on time and user information
             $course = $userInformation->courses()
                 ->whereHas('labSchedules', function ($query) use ($validated) {
                     $query->where('class_start', '<=', $validated['time_in'])
-                          ->where('class_end', '>=', $validated['time_in']);
+                        ->where('class_end', '>=', $validated['time_in']);
                 })
                 ->first();
-    
+
             if ($course) {
                 $courseName = $course->course_name; // Adjust based on actual column name
                 $schedule = $course->labSchedules()
@@ -93,11 +105,11 @@ class RecentLogsController extends Controller
                 $courseName = 'Unknown';
                 $schedule = null;
             }
-    
+
             if (!$schedule) {
                 return response()->json(['message' => 'No valid schedule found for the provided time.'], 404);
             }
-    
+
             // Create a new log entry
             $log = RecentLogs::create([
                 'user_number' => $userInformation->user_number,
@@ -108,7 +120,7 @@ class RecentLogsController extends Controller
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
             ]);
-    
+
             // Save the data to StudentAttendance table
             StudentAttendance::create([
                 'name' => $userInformation->user->name,
@@ -120,14 +132,14 @@ class RecentLogsController extends Controller
                 'time_out' => null, // Initially null, will be updated later
                 'status' => 'In Progress', // Assuming initial status
             ]);
-    
+
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
         } catch (\Exception $e) {
             \Log::error('An error occurred while creating the log entry.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-    
+
 
 
 
@@ -195,15 +207,15 @@ class RecentLogsController extends Controller
         $validated = $request->validate([
             'rfid_number' => 'required|string',
         ]);
-    
+
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-    
+
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-    
+
             // Fetch recent logs associated with this NFC UID
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user.course.instructor'])
                 ->where('id_card_id', $nfc->id)
@@ -213,7 +225,7 @@ class RecentLogsController extends Controller
                     $user = $log->userInformation->user ?? null;
                     $course = $user ? $user->course : null;
                     $instructor = $course ? $course->instructor : null;
-    
+
                     return [
                         'date' => $log->created_at->toDateString(),
                         'name' => $log->user_name ?? ($user ? $user->name : 'Unknown'),
@@ -226,7 +238,7 @@ class RecentLogsController extends Controller
                         'time_out' => $log->time_out,
                     ];
                 });
-    
+
             // Save each log entry to the StudentAttendance table if time_out is not null
             foreach ($recentLogs as $log) {
                 if (!is_null($log['time_out'])) {
@@ -243,14 +255,14 @@ class RecentLogsController extends Controller
                     ]);
                 }
             }
-    
+
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
             \Log::error('An error occurred while fetching recent logs by UID.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-    
+
 
 
     /**

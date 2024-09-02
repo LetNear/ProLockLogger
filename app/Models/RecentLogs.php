@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,15 +39,25 @@ class RecentLogs extends Model implements Auditable
         return $this->belongsTo(UserInformation::class, 'user_number');
     }
 
-    
+
     // If necessary, define these in the User model, not here.
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
-    
+
     // public function userInformation()
     // {
     //     return $this->belongsTo(UserInformation::class, 'user_id');
     // }
+
+    public function seat()
+    {
+        return $this->belongsTo(Seat::class, 'seat_id'); // Assuming seat_id links to Seat
+    }
+
+    public function computer()
+    {
+        return $this->belongsTo(Computer::class, 'computer_id'); // Assuming computer_id links to Computer
+    }
 }
