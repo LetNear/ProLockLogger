@@ -61,6 +61,11 @@ class Seat extends Model implements Auditable
         return $this->belongsTo(LabSchedule::class);
     }
 
+    public function schedule()
+    {
+        return $this->belongsTo(LabSchedule::class, 'course_id'); // assuming course_id is being used for schedule_id
+    }
+
     public static function boot()
     {
         parent::boot();

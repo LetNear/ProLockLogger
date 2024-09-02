@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SeatResource\Pages;
@@ -48,8 +47,7 @@ class SeatResource extends Resource
                                     })
                                     ->default(Auth::id()) // Set the default to the current user's ID
                                     ->required()
-                                    ->reactive(), // Remove the disabled() method
-
+                                    ->reactive(),
 
                                 Select::make('course_id')
                                     ->label('Course')
@@ -62,7 +60,7 @@ class SeatResource extends Resource
                                                 $classStart = Carbon::parse($schedule->class_start)->format('H:i');
                                                 $classEnd = Carbon::parse($schedule->class_end)->format('H:i');
                                                 $displayText = "{$schedule->course->course_name} - {$schedule->day_of_the_week}, {$classStart} - {$classEnd}";
-                                                return [$schedule->id => $displayText];
+                                                return [$schedule->id => $displayText]; // Save schedule_id
                                             });
                                     })
                                     ->required()
@@ -70,15 +68,14 @@ class SeatResource extends Resource
                                     ->placeholder('Select Course')
                                     ->reactive(),
 
-                                Select::make('student_id')
+                                    Select::make('student_id')
                                     ->label('Student')
                                     ->options(function ($get) {
-                                        $scheduleId = $get('course_id'); // The course_id here corresponds to the schedule_id
-
+                                        $scheduleId = $get('course_id');
+                                
                                         if ($scheduleId) {
-                                            // Exclude students who are already assigned to a seat
                                             $assignedStudentIds = Seat::pluck('student_id')->toArray();
-
+                                
                                             return UserInformation::whereHas('courses', function ($query) use ($scheduleId) {
                                                 $query->where('course_user_information.schedule_id', $scheduleId);
                                             })
@@ -87,9 +84,10 @@ class SeatResource extends Resource
                                                 ->get()
                                                 ->pluck('user.name', 'id');
                                         }
-
+                                
                                         return [];
                                     })
+                                    ->default(fn ($record) => $record ? $record->student_id : null)
                                     ->searchable()
                                     ->required()
                                     ->placeholder('Select Student'),
@@ -122,39 +120,46 @@ class SeatResource extends Resource
     {
         return $table
             ->columns([
-                // Display the computer number
                 TextColumn::make('computer.computer_number')
                     ->label('Computer Number')
                     ->sortable()
                     ->searchable(),
-
-                // Display the instructor's name
+    
                 TextColumn::make('instructor.name')
                     ->label('Instructor Name')
                     ->sortable()
                     ->searchable(),
-
-                // Display the student's name
+    
                 TextColumn::make('student.user.name')
                     ->label('Student Name')
                     ->sortable()
                     ->searchable(),
-
-                // Display the course name
+    
                 TextColumn::make('course.course_name')
                     ->label('Course Name')
                     ->sortable()
                     ->searchable(),
-
-
-
-                // Display the creation timestamp
+    
+                TextColumn::make('schedule.day_of_the_week')
+                    ->label('Day of the Week')
+                    ->sortable()
+                    ->searchable(),
+    
+                TextColumn::make('schedule.class_start')
+                    ->label('Class Start Time')
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('H:i')),
+    
+                TextColumn::make('schedule.class_end')
+                    ->label('Class End Time')
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('H:i')),
+    
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->label('Created At'),
-
-                // Display the update timestamp
+    
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
