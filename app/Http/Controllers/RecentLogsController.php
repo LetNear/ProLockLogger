@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LabAttendance;
 use App\Models\RecentLogs;
 use App\Models\Nfc;
 use App\Models\User;

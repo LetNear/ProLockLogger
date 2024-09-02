@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LabAttendanceResource\Pages;
-use App\Filament\Resources\LabAttendanceResource\RelationManagers;
 use App\Models\LabAttendance;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class LabAttendanceResource extends Resource
@@ -34,36 +31,45 @@ class LabAttendanceResource extends Resource
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('user_id')
-                                    ->numeric()
-                                    ->default(null),
+                                Forms\Components\Select::make('user_id')
+                                    ->relationship('user', 'name')
+                                    ->required()
+                                    ->label('User'),
                                 Forms\Components\TextInput::make('seat_id')
                                     ->numeric()
-                                    ->default(null),
+                                    ->nullable()
+                                    ->label('Seat ID'),
                                 Forms\Components\TextInput::make('lab_schedule_id')
                                     ->numeric()
-                                    ->default(null),
+                                    ->nullable()
+                                    ->label('Lab Schedule ID'),
                             ]),
                     ]),
                 Forms\Components\Section::make('Attendance Details')
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('time_in')
+                                Forms\Components\TimePicker::make('time_in')
                                     ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('time_out')
+                                    ->label('Time In'),
+                                Forms\Components\TimePicker::make('time_out')
                                     ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('status')
+                                    ->label('Time Out'),
+                                Forms\Components\Select::make('status')
+                                    ->options([
+                                        'present' => 'Present',
+                                        'absent' => 'Absent',
+                                        'late' => 'Late',
+                                    ])
                                     ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('logdate')
+                                    ->label('Status'),
+                                Forms\Components\DatePicker::make('logdate')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->label('Log Date'),
                                 Forms\Components\TextInput::make('instructor')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->label('Instructor'),
                             ]),
                     ]),
             ]);
@@ -73,24 +79,37 @@ class LabAttendanceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('User')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('seat_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Seat ID')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('lab_schedule_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Lab Schedule ID')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('time_in')
+                    ->label('Time In')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('time_out')
+                    ->label('Time Out')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('logdate')
+                    ->label('Log Date')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('instructor')
+                    ->label('Instructor')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('recentLog.user_number')
                     ->label('Recent Log User Number')
@@ -102,10 +121,12 @@ class LabAttendanceResource extends Resource
                     ->label('Recent Log Role')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created At')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Updated At')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -117,12 +138,9 @@ class LabAttendanceResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
-    
 
     public static function getRelations(): array
     {
