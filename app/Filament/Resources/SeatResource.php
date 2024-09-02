@@ -120,15 +120,7 @@ class SeatResource extends Resource
                                     ->placeholder('Select Computer'),
                             ]),
                     ]),
-            ])
-            ->afterSave(function ($record, $data) {
-                // Update UserInformation with the seat_id
-                $userInformation = UserInformation::find($data['student_id']);
-                if ($userInformation) {
-                    $userInformation->seat_id = $record->id;
-                    $userInformation->save();
-                }
-            });
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -205,5 +197,15 @@ class SeatResource extends Resource
             'create' => Pages\CreateSeat::route('/create'),
             'edit' => Pages\EditSeat::route('/{record}/edit'),
         ];
+    }
+
+    protected static function afterSave($record, $data)
+    {
+        // Update UserInformation with the seat_id
+        $userInformation = UserInformation::find($data['student_id']);
+        if ($userInformation) {
+            $userInformation->seat_id = $record->id;
+            $userInformation->save();
+        }
     }
 }
