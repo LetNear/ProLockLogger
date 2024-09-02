@@ -128,37 +128,11 @@ class LabAttendanceResource extends Resource
                         'in_progress' => 'In Progress',
                     ]),
 
-                SelectFilter::make('instructor')
-                    ->label('Instructor')
-                    ->placeholder('Search by instructor'),
 
-                SelectFilter::make('logdate')
-                    ->label('Log Date')
-                    ->placeholder('Select a log date'),
 
-                SelectFilter::make('time_in')
-                    ->form([
-                        Forms\Components\TimePicker::make('time_in')
-                            ->label('Time In')
-                            ->nullable(),
-                    ])
-                    ->query(function ($query, $data) {
-                        if ($data['time_in']) {
-                            $query->where('time_in', '>=', $data['time_in']);
-                        }
-                    }),
 
-                SelectFilter::make('time_out')
-                    ->form([
-                        Forms\Components\TimePicker::make('time_out')
-                            ->label('Time Out')
-                            ->nullable(),
-                    ])
-                    ->query(function ($query, $data) {
-                        if ($data['time_out']) {
-                            $query->where('time_out', '<=', $data['time_out']);
-                        }
-                    }),
+
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
