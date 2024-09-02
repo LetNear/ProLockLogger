@@ -70,7 +70,7 @@ class StudentAttendanceResource extends Resource
             ->poll('2s')
             ->headerActions([
                 ExportAction::make()
-                ->exporter(StudentAttendanceExporter::class)
+                    ->exporter(StudentAttendanceExporter::class), // Use the correct exporter class
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -114,14 +114,8 @@ class StudentAttendanceResource extends Resource
                     ->dateTime()
                     ->sortable(),
             ])
-            ->filters([
-
-
-               
-            ])
-            ->actions([
-                
-            ])
+            ->filters([])
+            ->actions([])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
@@ -138,7 +132,7 @@ class StudentAttendanceResource extends Resource
     {
         return [
             'index' => Pages\ListStudentAttendances::route('/'),
-            
+
         ];
     }
 }
