@@ -286,7 +286,6 @@ class RecentLogsController extends Controller
         }
     }
 
-
     public function getRecentLogsByFingerprintId(Request $request): JsonResponse
     {
         // Validate the input data
@@ -307,11 +306,11 @@ class RecentLogsController extends Controller
             }
 
             // Convert the result to a model instance if necessary
-            $userInformation = User::find($userInformation->id); // Convert to User model if needed
+            $user = User::find($userInformation->id);
 
             // Fetch recent logs associated with this user's id_card_id
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user', 'role'])
-                ->where('id_card_id', $userInformation->id_card_id)
+                ->where('id_card_id', $user->id_card_id)
                 ->get()
                 ->map(function ($log) {
                     return [
@@ -324,16 +323,31 @@ class RecentLogsController extends Controller
                         'user_number' => $log->user_number,
                         'block_id' => $log->block_id,
                         'id_card_id' => $log->id_card_id,
-                        'role_name' => $log->role->name ?? 'Unknown', // Assuming you have a role relationship
+                        'role_name' => $log->role->name ?? 'Unknown',
                     ];
                 });
 
+            // Save each recent log entry to the LabAttendance table
+            foreach ($recentLogs as $log) {
+                LabAttendance::create([
+                    'user_id' => $user->id,
+                    'seat_id' => null, // Set this according to your application's logic
+                    'lab_schedule_id' => null, // Set this according to your application's logic
+                    'time_in' => $log['time_in'],
+                    'time_out' => $log['time_out'],
+                    'status' => 'Completed', // Or another status relevant to your logic
+                    'logdate' => now()->format('Y-m-d'), // Assuming today's date, adjust as necessary
+                    'instructor' => $user->name, // Assuming the user's name is the instructor, adjust as necessary
+                ]);
+            }
+
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
-            \Log::error('An error occurred while fetching recent logs.', ['error' => $e->getMessage()]);
+            \Log::error('An error occurred while fetching and saving recent logs.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
 
 
     /**
