@@ -6,6 +6,7 @@ use App\Models\LabSchedule;
 use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class LabScheduleController extends Controller
@@ -311,5 +312,39 @@ class LabScheduleController extends Controller
         // Pass the data to the Blade view
         return view('schedules.index', compact('weekSchedule'));
     }
-}
 
+    public function getLabScheduleOfStudentByRFID($rfid_number)
+    {
+        // Step 1: Find the student using the RFID number
+        $student = UserInformation::whereHas('idCard', function ($query) use ($rfid_number) {
+            $query->where('rfid_number', $rfid_number);
+        })->first();
+
+        // Check if the student exists
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        // Step 2: Retrieve schedules for the student using the join table 'course_user_information'
+        $schedules = DB::table('course_user_information')
+            ->join('lab_schedules', 'course_user_information.schedule_id', '=', 'lab_schedules.id')
+            ->join('courses', 'course_user_information.course_id', '=', 'courses.id')
+            ->where('course_user_information.user_information_id', $student->id)
+            ->select(
+                'courses.course_name',
+                'courses.course_code',
+                'lab_schedules.class_start',
+                'lab_schedules.class_end',
+                'lab_schedules.day_of_the_week'
+            )
+            ->get();
+
+        // Check if there are any schedules
+        if ($schedules->isEmpty()) {
+            return response()->json(['message' => 'No schedules found for this student'], 404);
+        }
+
+        // Return all schedules as a JSON response
+        return response()->json($schedules, 200);
+    }
+}
