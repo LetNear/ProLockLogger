@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SeatResource\Pages;
@@ -120,7 +121,18 @@ class SeatResource extends Resource
                                     ->placeholder('Select Computer'),
                             ]),
                     ]),
-            ]);
+            ])
+            ->saved(function ($form, $record) {
+                // This callback runs after the form has been saved
+                $studentId = $record->student_id;
+                if ($studentId) {
+                    $userInformation = UserInformation::find($studentId);
+                    if ($userInformation) {
+                        $userInformation->seat_id = $record->id;
+                        $userInformation->save();
+                    }
+                }
+            });
     }
 
     public static function table(Table $table): Table
@@ -197,15 +209,5 @@ class SeatResource extends Resource
             'create' => Pages\CreateSeat::route('/create'),
             'edit' => Pages\EditSeat::route('/{record}/edit'),
         ];
-    }
-
-    protected static function afterSave($record, $data)
-    {
-        // Update UserInformation with the seat_id
-        $userInformation = UserInformation::find($data['student_id']);
-        if ($userInformation) {
-            $userInformation->seat_id = $record->id;
-            $userInformation->save();
-        }
     }
 }
