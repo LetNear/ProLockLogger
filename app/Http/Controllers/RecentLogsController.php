@@ -154,29 +154,30 @@ class RecentLogsController extends Controller
             }
 
             // Fetch recent logs associated with this NFC UID
-            $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user'])
+            $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user.course.instructor'])
                 ->where('id_card_id', $nfc->id)
                 ->get()
                 ->map(function ($log) {
                     return [
-                        'user_name' => $log->user_name ?? $log->userInformation->user->name ?? 'Unknown',
-                        'block_name' => $log->block->block ?? 'Unknown',
-                        'year' => $log->year,
+                        'date' => $log->created_at->toDateString(), // Assuming 'created_at' reflects the relevant date
+                        'name' => $log->user_name ?? $log->userInformation->user->name ?? 'Unknown',
+                        'pc_number' => $log->nfc->pc_number ?? 'Unknown', // Assuming 'pc_number' is a field in the NFC model
+                        'student_number' => $log->user_number,
+                        'year' => $log->year ?? 'Unknown',
+                        'block' => $log->block->block ?? 'Unknown',
+                        'instructor' => $log->userInformation->user->course->instructor->name ?? 'Unknown', // Fetching instructor's name from the course relation
                         'time_in' => $log->time_in,
                         'time_out' => $log->time_out,
-                        'UID' => $log->nfc->rfid_number ?? 'Unknown',
-                        'user_number' => $log->user_number,
-                        'block_id' => $log->block_id,
-                        'id_card_id' => $log->id_card_id,
-                        'role_name' => $log->role->name ?? 'Unknown', // Assuming you have a role relationship
                     ];
                 });
 
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
+            \Log::error('An error occurred while fetching recent logs by UID.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
 
     /**
      * Record time-in using the fingerprint ID.
