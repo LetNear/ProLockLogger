@@ -113,7 +113,7 @@ class StudentAttendanceResource extends Resource
                
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
