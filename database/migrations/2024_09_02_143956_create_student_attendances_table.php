@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('course')->nullable(); // Student's course
             $table->string('year')->nullable(); // Student's year level
             $table->string('block')->nullable(); // Student's block
-            $table->string('student_number')->unique(); // Student's unique number
+            $table->string('student_number')->nullable(); // Student's unique number
             $table->time('time_in')->nullable(); // Time in
             $table->time('time_out')->nullable(); // Time out
             $table->string('status')->nullable(); // Attendance status (present, absent, late)
