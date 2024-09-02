@@ -9,7 +9,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TextFilter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\DateFilter;
+use Filament\Tables\Filters\Filter;
 
 class StudentAttendanceResource extends Resource
 {
@@ -61,7 +64,7 @@ class StudentAttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->poll('2s')
+            ->poll('2s')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Name')
@@ -105,7 +108,27 @@ class StudentAttendanceResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                // You can add filters here if needed
+                SelectFilter::make('name')
+                    ->label('Name')
+                    ->placeholder('Search by name'),
+
+                SelectFilter::make('course')
+                    ->label('Course')
+                    ->placeholder('Search by course'),
+
+                SelectFilter::make('year')
+                    ->label('Year Level')
+                    ->placeholder('Search by year level'),
+
+                SelectFilter::make('block')
+                    ->label('Block')
+                    ->placeholder('Search by block'),
+
+                SelectFilter::make('student_number')
+                    ->label('Student Number')
+                    ->placeholder('Search by student number'),
+
+               
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
