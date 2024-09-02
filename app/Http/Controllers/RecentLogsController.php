@@ -76,7 +76,7 @@ class RecentLogsController extends Controller
             }
     
             // Retrieve the course information from the pivot table
-            $course = $userInformation->courses()->first()->name ?? 'Unknown';
+            $course = $userInformation->courses()->first()->course_id ?? 'Unknown';
     
             // Create a new log entry
             $log = RecentLogs::create([
