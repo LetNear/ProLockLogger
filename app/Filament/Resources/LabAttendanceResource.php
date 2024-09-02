@@ -9,6 +9,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\DateFilter;
+use Filament\Tables\Filters\TextFilter;
+use Filament\Tables\Filters\Filter;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class LabAttendanceResource extends Resource
@@ -78,7 +82,7 @@ class LabAttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->poll('2s')
+            ->poll('2s')
             ->columns([
                 Tables\Columns\TextColumn::make('instructor')
                     ->label('Instructor')
@@ -100,10 +104,6 @@ class LabAttendanceResource extends Resource
                     ->label('Log Date')
                     ->sortable()
                     ->searchable(),
-                
-               
-              
-                
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
@@ -116,7 +116,50 @@ class LabAttendanceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Define any filters here if needed
+                SelectFilter::make('user_id')
+                    ->label('User')
+                    ->relationship('user', 'name')
+                    ->searchable(),
+
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'present' => 'Present',
+                        'absent' => 'Absent',
+                        'late' => 'Late',
+                    ]),
+
+                SelectFilter::make('instructor')
+                    ->label('Instructor')
+                    ->placeholder('Search by instructor'),
+
+                SelectFilter::make('logdate')
+                    ->label('Log Date')
+                    ->placeholder('Select a log date'),
+
+                Filter::make('time_in')
+                    ->form([
+                        Forms\Components\TimePicker::make('time_in')
+                            ->label('Time In')
+                            ->nullable(),
+                    ])
+                    ->query(function ($query, $data) {
+                        if ($data['time_in']) {
+                            $query->where('time_in', '>=', $data['time_in']);
+                        }
+                    }),
+
+                Filter::make('time_out')
+                    ->form([
+                        Forms\Components\TimePicker::make('time_out')
+                            ->label('Time Out')
+                            ->nullable(),
+                    ])
+                    ->query(function ($query, $data) {
+                        if ($data['time_out']) {
+                            $query->where('time_out', '<=', $data['time_out']);
+                        }
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
