@@ -20,6 +20,8 @@ class SeatPlanPage extends Page
 
     public function mount()
     {
+        $this->authorizeAccess();
+
         // Initialize properties
         $this->seats = collect();
         $this->students = collect();
@@ -42,6 +44,13 @@ class SeatPlanPage extends Page
                     $displayText = "{$courseName} - {$schedule->day_of_the_week}, {$schedule->class_start} - {$schedule->class_end}";
                     return [$schedule->id => $displayText]; // Map schedule ID to display text
                 });
+        }
+    }
+
+    protected function authorizeAccess()
+    {
+        if (auth()->user()->role_number !== 2) {
+            abort(403, 'Unauthorized');
         }
     }
 
