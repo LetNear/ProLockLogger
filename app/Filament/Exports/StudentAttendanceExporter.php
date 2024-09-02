@@ -6,12 +6,9 @@ use App\Models\StudentAttendance;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use Filament\Actions\Exports\Concerns\WithColumns; // Import WithColumns trait
 
 class StudentAttendanceExporter extends Exporter
 {
-    use WithColumns; // Use the trait to handle columns
-
     protected static ?string $model = StudentAttendance::class;
 
     /**
@@ -23,44 +20,34 @@ class StudentAttendanceExporter extends Exporter
     {
         return [
             ExportColumn::make('student_number')
-                ->label('Student Number')
-                ->description('Unique identifier for the student'),
+                ->label('Student Number'),
 
             ExportColumn::make('name')
-                ->label('Name')
-                ->description('Full name of the student'),
+                ->label('Name'),
 
             ExportColumn::make('course')
-                ->label('Course')
-                ->description('Course the student is enrolled in'),
+                ->label('Course'),
 
             ExportColumn::make('year')
-                ->label('Year Level')
-                ->description('Year level of the student'),
+                ->label('Year Level'),
 
             ExportColumn::make('block')
-                ->label('Block')
-                ->description('Block of the student'),
+                ->label('Block'),
 
             ExportColumn::make('time_in')
-                ->label('Time In')
-                ->description('Time the student checked in'),
+                ->label('Time In'),
 
             ExportColumn::make('time_out')
-                ->label('Time Out')
-                ->description('Time the student checked out'),
+                ->label('Time Out'),
 
             ExportColumn::make('status')
-                ->label('Status')
-                ->description('Attendance status (Present, Absent, Late)'),
+                ->label('Status'),
 
             ExportColumn::make('created_at')
-                ->label('Created At')
-                ->description('Record creation timestamp'),
+                ->label('Created At'),
 
             ExportColumn::make('updated_at')
-                ->label('Updated At')
-                ->description('Last updated timestamp'),
+                ->label('Updated At'),
         ];
     }
 
