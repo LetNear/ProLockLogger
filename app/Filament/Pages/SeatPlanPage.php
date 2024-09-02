@@ -20,7 +20,7 @@ class SeatPlanPage extends Page
 
     public function mount()
     {
-        $this->authorizeAccess();
+        
 
         // Initialize properties
         $this->seats = collect();
