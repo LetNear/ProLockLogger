@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RecentLogsResource\Pages;
@@ -10,6 +11,9 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TextFilter;
+use Filament\Tables\Filters\DateFilter;
 
 class RecentLogsResource extends Resource
 {
@@ -32,7 +36,7 @@ class RecentLogsResource extends Resource
                                     ->relationship('user', 'name')
                                     ->label('User')
                                     ->required()
-                                    ->disabled(), // Disable all form inputs
+                                    ->disabled(),
 
                                 Forms\Components\Select::make('role_id')
                                     ->relationship('role', 'name')
@@ -123,7 +127,24 @@ class RecentLogsResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Add any filters if needed
+                SelectFilter::make('user_id')
+                    ->label('User')
+                    ->relationship('user', 'name')
+                    ->searchable(),
+
+                SelectFilter::make('role_id')
+                    ->label('Role')
+                    ->relationship('role', 'name')
+                    ->searchable(),
+
+                SelectFilter::make('block_id')
+                    ->label('Block')
+                    ->relationship('block', 'block')
+                    ->searchable(),
+
+                SelectFilter::make('year')
+                    ->label('Year'),
+
             ])
             ->actions([
                 // Remove EditAction to make it view-only
