@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LabAttendance;
 use App\Models\RecentLogs;
 use App\Models\Nfc;
+use App\Models\StudentAttendance;
 use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Http\JsonResponse;
@@ -58,25 +59,25 @@ class RecentLogsController extends Controller
             'role_id' => 'required|integer',
             'user_name' => 'required|string',
         ]);
-
+    
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-
+    
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-
+    
             // Find associated user information
             $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
-
+    
             if (!$userInformation) {
                 return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
             }
-
+    
             // Create a new log entry
             $log = RecentLogs::create([
-                'user_number' => $userInformation->user_number, // Changed to user_number
+                'user_number' => $userInformation->user_number,
                 'block_id' => $userInformation->block_id,
                 'year' => $validated['year'],
                 'time_in' => $validated['time_in'],
@@ -84,12 +85,25 @@ class RecentLogsController extends Controller
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
             ]);
-
+    
+            // Save the data to StudentAttendance table
+            StudentAttendance::create([
+                'name' => $userInformation->user->name,
+                'course' => $userInformation->course,
+                'year' => $validated['year'],
+                'block' => $userInformation->block->block ?? 'Unknown',
+                'student_number' => $userInformation->user_number,
+                'time_in' => $validated['time_in'],
+                'time_out' => null, // Initially null, will be updated later
+                'status' => 'In Progress', // Assuming initial status
+            ]);
+    
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
     /**
      * Record time-out using the NFC UID.
@@ -103,35 +117,44 @@ class RecentLogsController extends Controller
             'rfid_number' => 'required|string',
             'time_out' => 'required|date_format:H:i',
         ]);
-
+    
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-
+    
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-
+    
             // Find the existing log entry and update time-out
             $log = RecentLogs::where('id_card_id', $nfc->id)
                 ->whereNotNull('time_in') // Ensure the log has a time_in
                 ->whereNull('time_out') // Ensure the log doesn't have a time_out already
                 ->first();
-
+    
             if (!$log) {
                 return response()->json(['message' => 'No matching time-in record found.'], 404);
             }
-
+    
             $log->update([
                 'time_out' => $validated['time_out'],
                 'updated_at' => now(),
             ]);
-
+    
+            // Update the corresponding StudentAttendance record
+            StudentAttendance::where('student_number', $log->user_number)
+                ->whereNull('time_out')
+                ->update([
+                    'time_out' => $validated['time_out'],
+                    'status' => 'Completed', // Assuming status update on time-out
+                ]);
+    
             return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
     /**
      * Get recent logs by NFC UID (rfid_number).
@@ -145,40 +168,56 @@ class RecentLogsController extends Controller
         $validated = $request->validate([
             'rfid_number' => 'required|string',
         ]);
-
+    
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-
+    
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-
+    
             // Fetch recent logs associated with this NFC UID
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user.course.instructor'])
                 ->where('id_card_id', $nfc->id)
                 ->get()
                 ->map(function ($log) {
                     return [
-                        'date' => $log->created_at->toDateString(), // Assuming 'created_at' reflects the relevant date
+                        'date' => $log->created_at->toDateString(),
                         'name' => $log->user_name ?? $log->user->user->name ?? 'Unknown',
-                        'pc_number' => $log->nfc->pc_number ?? 'Unknown', // Assuming 'pc_number' is a field in the NFC model
+                        'pc_number' => $log->nfc->pc_number ?? 'Unknown',
                         'student_number' => $log->user_number,
                         'year' => $log->year ?? 'Unknown',
                         'block' => $log->block->block ?? 'Unknown',
-                        'instructor' => $log->userInformation->user->course->instructor->name ?? 'Unknown', // Fetching instructor's name from the course relation
+                        'instructor' => $log->userInformation->user->course->instructor->name ?? 'Unknown',
                         'time_in' => $log->time_in,
                         'time_out' => $log->time_out,
                     ];
                 });
-
+    
+            // Save each log entry to the StudentAttendance table if time_out is not null
+            foreach ($recentLogs as $log) {
+                if (!is_null($log['time_out'])) {
+                    StudentAttendance::create([
+                        'name' => $log['name'],
+                        'course' => $log['course'],
+                        'year' => $log['year'],
+                        'block' => $log['block'],
+                        'student_number' => $log['student_number'],
+                        'time_in' => $log['time_in'],
+                        'time_out' => $log['time_out'],
+                        'status' => 'Completed',
+                    ]);
+                }
+            }
+    
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
             \Log::error('An error occurred while fetching recent logs by UID.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-
+    
 
     /**
      * Record time-in using the fingerprint ID.
