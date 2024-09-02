@@ -3,22 +3,34 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SeatResource\Pages;
+use App\Models\Block;
 use App\Models\Computer;
+use App\Models\Course;
 use App\Models\Seat;
+use App\Models\User;
 use App\Models\UserInformation;
+use App\Models\LabSchedule;
 use Carbon\Carbon;
+use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
 class SeatResource extends Resource
 {
     protected static ?string $model = Seat::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-archive-box';
+
+    protected static ?string $title = 'Seat';
+
+    protected static ?string $label = 'Seat';
+
     protected static ?string $navigationGroup = 'Laboratory Management';
 
     public static function form(Form $form): Form
@@ -109,7 +121,7 @@ class SeatResource extends Resource
                                     ->placeholder('Select Computer'),
                             ]),
                     ]),
-            ]);
+                ]);
     }
 
     public static function table(Table $table): Table
