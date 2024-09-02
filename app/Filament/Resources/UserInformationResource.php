@@ -77,15 +77,7 @@ class UserInformationResource extends Resource
                                     ->disabled(fn($get) => $get('isRestricted')),
 
 
-                                Select::make('seat_id')
-                                    ->relationship('seat', 'computer_id')
-                                    ->label('Computer Number')
-                                    ->placeholder('Select a computer number')
-                                    ->helperText('Choose the computer number assigned to this user.')
-                                    ->searchable()
-                                    ->preload(10)
-                                    ->options(fn() => Seat::whereNotIn('id', $existingSeatIds)->pluck('computer_id', 'id')->toArray())
-                                    ->disabled(fn($get) => $get('isRestricted')),
+                       
 
                                 TextInput::make('user_number')
                                     ->label('User ID Card Number')
@@ -257,12 +249,7 @@ class UserInformationResource extends Resource
                     ->tooltip('The user\'s ID card number.')
                     ->alignLeft(),
 
-                TextColumn::make('seat.computer_number')
-                    ->label('Computer Number')
-                    ->sortable()
-                    ->searchable()
-                    ->tooltip('The user\'s assigned computer number.')
-                    ->alignLeft(),
+               
 
                 TextColumn::make('block.block')
                     ->label('Block')
