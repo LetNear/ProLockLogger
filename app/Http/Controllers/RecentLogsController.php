@@ -195,39 +195,45 @@ class RecentLogsController extends Controller
         $validated = $request->validate([
             'rfid_number' => 'required|string',
         ]);
-
+    
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-
+    
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-
+    
             // Fetch recent logs associated with this NFC UID
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user.course.instructor'])
                 ->where('id_card_id', $nfc->id)
                 ->get()
                 ->map(function ($log) {
+                    // Safely access nested relationships using null coalescing or optional chaining
+                    $user = $log->userInformation->user ?? null;
+                    $course = $user ? $user->course : null;
+                    $instructor = $course ? $course->instructor : null;
+    
                     return [
                         'date' => $log->created_at->toDateString(),
-                        'name' => $log->user_name ?? $log->user->user->name ?? 'Unknown',
+                        'name' => $log->user_name ?? ($user ? $user->name : 'Unknown'),
                         'pc_number' => $log->nfc->pc_number ?? 'Unknown',
-                        'student_number' => $log->user_number,
+                        'student_number' => $log->user_number ?? 'Unknown',
                         'year' => $log->year ?? 'Unknown',
                         'block' => $log->block->block ?? 'Unknown',
-                        'instructor' => $log->userInformation->user->course->instructor->name ?? 'Unknown',
+                        'instructor' => $instructor ? $instructor->name : 'Unknown',
                         'time_in' => $log->time_in,
                         'time_out' => $log->time_out,
                     ];
                 });
-
+    
             // Save each log entry to the StudentAttendance table if time_out is not null
             foreach ($recentLogs as $log) {
                 if (!is_null($log['time_out'])) {
+                    // Add a null coalescing operator for 'course' and other potentially missing keys
                     StudentAttendance::create([
                         'name' => $log['name'],
-                        'course' => $log['course'],
+                        'course' => $log['course'] ?? 'Unknown', // Handle undefined 'course'
                         'year' => $log['year'],
                         'block' => $log['block'],
                         'student_number' => $log['student_number'],
@@ -237,13 +243,14 @@ class RecentLogsController extends Controller
                     ]);
                 }
             }
-
+    
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
             \Log::error('An error occurred while fetching recent logs by UID.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
 
     /**
