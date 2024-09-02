@@ -3,35 +3,54 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CourseResource\Pages;
-use App\Filament\Resources\CourseResource\RelationManagers;
 use App\Models\Course;
 use Filament\Forms;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Courses';
+    protected static ?string $pluralLabel = 'Courses';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('course_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('course_code')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('course_description')
-                    ->required()
-                    ->maxLength(255),
+                Section::make('Course Information') // Add section for better organization
+                    ->description('Please provide the details for the course below.')
+                    ->schema([
+                        Forms\Components\TextInput::make('course_name')
+                            ->label('Course Name')
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true) // Ensure course_name is unique
+                            ->helperText('Enter the unique name of the course.'),
+
+                        Forms\Components\TextInput::make('course_code')
+                            ->label('Course Code')
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true) // Ensure course_code is unique
+                            ->helperText('Enter the unique code for the course.'),
+
+                        RichEditor::make('course_description')
+                            ->label('Course Description')
+                            ->required()
+
+                            ->helperText('Provide a brief description of the course.'),
+                    ])
             ]);
     }
 
@@ -39,30 +58,55 @@ class CourseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('course_name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('course_code')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('course_description')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                TextColumn::make('course_name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('course_code')
+                    ->label('Code')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('course_description')
+                    ->label('Description')
+                    ->searchable()
+                    ->wrap() // Wrap text for long descriptions
+                    ->limit(50), // Limit displayed text for better readability
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('M d, Y h:i A')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+
+                TextColumn::make('updated_at')
+                    ->label('Updated')
+                    ->dateTime('M d, Y h:i A')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // Add filters to improve user searchability if needed
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make()
+                    ->icon('heroicon-o-pencil-alt') // Add icons for actions
+                    ->tooltip('Edit Course'), // Tooltip for clarity
+
+                DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->tooltip('Delete Course')
+                    ->requiresConfirmation() // Confirmation dialog for deletes
+                    ->color('danger'), // Highlight delete actions with color
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->requiresConfirmation()
+                        ->icon('heroicon-o-trash')
+                        ->label('Delete Selected') // Label for clarity
+                        ->color('danger'),
                 ]),
             ]);
     }
@@ -70,7 +114,7 @@ class CourseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            // Define any related models or managers here if needed
         ];
     }
 
