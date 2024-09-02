@@ -27,4 +27,19 @@ class LabAttendance extends Model implements Auditable
     {
         return $this->belongsTo(RecentLogs::class, 'user_id', 'user_number');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function seat()
+    {
+        return $this->belongsTo(Seat::class);
+    }
+
+    public function labSchedule()
+    {
+        return $this->belongsTo(LabSchedule::class);
+    }
 }
