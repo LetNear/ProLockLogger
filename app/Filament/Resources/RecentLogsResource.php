@@ -127,10 +127,6 @@ class RecentLogsResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('user_id')
-                    ->label('User')
-                    ->relationship('user', 'name')
-                    ->searchable(),
 
                 SelectFilter::make('role_id')
                     ->label('Role')

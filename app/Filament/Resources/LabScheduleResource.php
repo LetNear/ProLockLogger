@@ -14,9 +14,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\DateFilter;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 
@@ -25,8 +22,11 @@ class LabScheduleResource extends Resource
     protected static ?string $model = LabSchedule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+
     protected static ?string $title = 'Laboratory Schedule';
+
     protected static ?string $label = 'Laboratory Schedule';
+
     protected static ?string $navigationGroup = 'Laboratory Management';
 
     public static function form(Form $form): Form
@@ -44,6 +44,7 @@ class LabScheduleResource extends Resource
                                     ->placeholder('Select a course')
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
+                                        // Fetch the course by the selected course_id and set the course_code and course_name
                                         if ($course = Course::find($state)) {
                                             $set('course_code', $course->course_code);
                                             $set('course_name', $course->course_name);
@@ -114,7 +115,7 @@ class LabScheduleResource extends Resource
                 TextColumn::make('course_name')
                     ->label('Course Name')
                     ->searchable(),
-                TextColumn::make('course_code')
+                TextColumn::make('course_code') // Display course code
                     ->label('Course Code')
                     ->searchable(),
                 TextColumn::make('instructor.name')
@@ -151,75 +152,15 @@ class LabScheduleResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('course_id')
-                    ->label('Course')
-                    ->relationship('course', 'course_name')
-                    ->searchable()
-                    ->placeholder('All Courses'),
-
-                SelectFilter::make('instructor_id')
-                    ->label('Instructor')
-                    ->relationship('instructor', 'name')
-                    ->searchable()
-                    ->placeholder('All Instructors'),
-
-                SelectFilter::make('block_id')
-                    ->label('Block')
-                    ->relationship('block', 'block')
-                    ->searchable()
-                    ->placeholder('All Blocks'),
-
-                SelectFilter::make('year')
-                    ->label('Year')
-                    ->options([
-                        '1' => '1st Year',
-                        '2' => '2nd Year',
-                        '3' => '3rd Year',
-                        '4' => '4th Year',
-                    ])
-                    ->placeholder('All Years'),
-
-                SelectFilter::make('day_of_the_week')
-                    ->label('Day of the Week')
-                    ->options([
-                        'Monday' => 'Monday',
-                        'Tuesday' => 'Tuesday',
-                        'Wednesday' => 'Wednesday',
-                        'Thursday' => 'Thursday',
-                        'Friday' => 'Friday',
-                        'Saturday' => 'Saturday',
-                        'Sunday' => 'Sunday',
-                    ])
-                    ->placeholder('All Days'),
-
-                // You can also add custom filters for Class Start and End Times if needed
-                Filter::make('class_start')
-                    ->label('Class Start Time')
-                    ->form([
-                        Forms\Components\TimePicker::make('start')
-                            ->label('Start Time')
-                            ->withoutSeconds(),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query->when($data['start'], fn($q, $time) => $q->where('class_start', '>=', $time));
-                    }),
-
-                Filter::make('class_end')
-                    ->label('Class End Time')
-                    ->form([
-                        Forms\Components\TimePicker::make('end')
-                            ->label('End Time')
-                            ->withoutSeconds(),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query->when($data['end'], fn($q, $time) => $q->where('class_end', '<=', $time));
-                    }),
+                // Define any filters here if needed
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
