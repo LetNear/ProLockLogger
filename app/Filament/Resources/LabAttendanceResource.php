@@ -116,12 +116,12 @@ class LabAttendanceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('user_id')
+                Filter::make('user_id')
                     ->label('User')
                     ->relationship('user', 'name')
                     ->searchable(),
 
-                SelectFilter::make('status')
+                Filter::make('status')
                     ->label('Status')
                     ->options([
                         'present' => 'Present',
@@ -129,11 +129,11 @@ class LabAttendanceResource extends Resource
                         'late' => 'Late',
                     ]),
 
-                SelectFilter::make('instructor')
+                Filter::make('instructor')
                     ->label('Instructor')
                     ->placeholder('Search by instructor'),
 
-                SelectFilter::make('logdate')
+                Filter::make('logdate')
                     ->label('Log Date')
                     ->placeholder('Select a log date'),
 
