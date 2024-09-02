@@ -246,45 +246,45 @@ class RecentLogsController extends Controller
             'fingerprint_id' => 'required|string',
             'time_out' => 'required|date_format:H:i',
         ]);
-    
+
         try {
             // Use raw SQL to find the user by nested JSON structure
             $fingerprintId = $validated['fingerprint_id'];
             $userInformation = DB::table('users')
                 ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
                 ->first();
-    
+
             // Convert the result to a model instance if necessary
             if (!$userInformation) {
                 \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
-    
+
             $userInformation = User::find($userInformation->id); // Convert to User model if needed
-    
+
             // Find the existing log entry and update time-out
             $log = RecentLogs::where('id_card_id', $userInformation->id_card_id)
                 ->whereNotNull('time_in')  // Ensure the log has a time_in
                 ->whereNull('time_out')    // Ensure the log doesn't have a time_out already
                 ->first();
-    
+
             if (!$log) {
                 return response()->json(['message' => 'No matching time-in record found.'], 404);
             }
-    
+
             // Update the time-out
             $log->update([
                 'time_out' => $validated['time_out'],
                 'updated_at' => now(),
             ]);
-    
+
             return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
         } catch (\Exception $e) {
             \Log::error('An error occurred while updating the time-out.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-    
+
 
     public function getRecentLogsByFingerprintId(Request $request): JsonResponse
     {
@@ -294,15 +294,22 @@ class RecentLogsController extends Controller
         ]);
 
         try {
-            // Find the user information by fingerprint_id
-            $userInformation = User::where('fingerprint_id', $validated['fingerprint_id'])->first();
+            // Use raw SQL to find the user by nested JSON structure
+            $fingerprintId = $validated['fingerprint_id'];
+            $userInformation = DB::table('users')
+                ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
+                ->first();
 
             if (!$userInformation) {
+                \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
 
-            // Fetch recent logs associated with this fingerprint ID
-            $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user'])
+            // Convert the result to a model instance if necessary
+            $userInformation = User::find($userInformation->id); // Convert to User model if needed
+
+            // Fetch recent logs associated with this user's id_card_id
+            $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user', 'role'])
                 ->where('id_card_id', $userInformation->id_card_id)
                 ->get()
                 ->map(function ($log) {
@@ -322,9 +329,11 @@ class RecentLogsController extends Controller
 
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
+            \Log::error('An error occurred while fetching recent logs.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
 
     /**
      * Get the total count of logs for a student by email.
