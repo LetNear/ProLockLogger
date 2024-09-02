@@ -78,17 +78,10 @@ class LabAttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->poll('2s')
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('User')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('seat_id')
-                    ->label('Seat ID')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('lab_schedule_id')
-                    ->label('Lab Schedule ID')
+                Tables\Columns\TextColumn::make('instructor')
+                    ->label('Instructor')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('time_in')
@@ -107,19 +100,10 @@ class LabAttendanceResource extends Resource
                     ->label('Log Date')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('instructor')
-                    ->label('Instructor')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('recentLog.user_number')
-                    ->label('Recent Log User Number')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('recentLog.block.block')
-                    ->label('Recent Log Block')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('recentLog.role.name')
-                    ->label('Recent Log Role')
-                    ->sortable(),
+                
+               
+              
+                
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
