@@ -19,11 +19,11 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->nullable();
             $table->foreignIdFor(Seat::class)->nullable();
             $table->foreignIdFor(LabSchedule::class)->nullable();
-            $table->string('time_in');
-            $table->string('time_out');
-            $table->string('status');
-            $table->string('logdate');
-            $table->string('instructor');
+            $table->string('time_in')->nullable();
+            $table->string('time_out')->nullable();
+            $table->string('status')->nullable();
+            $table->string('logdate')->nullable();
+            $table->string('instructor')->nullable();
             $table->timestamps();
         });
     }

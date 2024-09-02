@@ -293,22 +293,22 @@ class RecentLogsController extends Controller
         $validated = $request->validate([
             'fingerprint_id' => 'required|string',
         ]);
-
+    
         try {
             // Use raw SQL to find the user by nested JSON structure
             $fingerprintId = $validated['fingerprint_id'];
             $userInformation = DB::table('users')
                 ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
                 ->first();
-
+    
             if (!$userInformation) {
                 \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
-
+    
             // Convert the result to a model instance if necessary
             $user = User::find($userInformation->id);
-
+    
             // Fetch recent logs associated with this user's id_card_id
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user', 'role'])
                 ->where('id_card_id', $user->id_card_id)
@@ -327,27 +327,30 @@ class RecentLogsController extends Controller
                         'role_name' => $log->role->name ?? 'Unknown',
                     ];
                 });
-
-            // Save each recent log entry to the LabAttendance table
+    
+            // Save each recent log entry to the LabAttendance table, only if time_out is not null
             foreach ($recentLogs as $log) {
-                LabAttendance::create([
-                    'user_id' => $user->id,
-                    'seat_id' => null, // Set this according to your application's logic
-                    'lab_schedule_id' => null, // Set this according to your application's logic
-                    'time_in' => $log['time_in'],
-                    'time_out' => $log['time_out'],
-                    'status' => 'Completed', // Or another status relevant to your logic
-                    'logdate' => now()->format('Y-m-d'), // Assuming today's date, adjust as necessary
-                    'instructor' => $user->name, // Assuming the user's name is the instructor, adjust as necessary
-                ]);
+                if (!is_null($log['time_out'])) {
+                    LabAttendance::create([
+                        'user_id' => $user->id,
+                        'seat_id' => null, // Set this according to your application's logic
+                        'lab_schedule_id' => null, // Set this according to your application's logic
+                        'time_in' => $log['time_in'],
+                        'time_out' => $log['time_out'],
+                        'status' => 'Completed', // Or another status relevant to your logic
+                        'logdate' => now()->format('Y-m-d'), // Assuming today's date, adjust as necessary
+                        'instructor' => $user->name, // Assuming the user's name is the instructor, adjust as necessary
+                    ]);
+                }
             }
-
+    
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
             \Log::error('An error occurred while fetching and saving recent logs.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
 
 
