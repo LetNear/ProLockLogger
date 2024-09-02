@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\TextFilter;
 use Filament\Tables\Filters\SelectFilter;
@@ -69,7 +70,7 @@ class StudentAttendanceResource extends Resource
         return $table
             ->poll('2s')
             ->headerActions([
-                ExportAction::make()
+                ExportBulkAction::make()
                     ->exporter(StudentAttendanceExporter::class), // Use the correct exporter class
             ])
             ->columns([
