@@ -160,7 +160,7 @@ class RecentLogsController extends Controller
                 ->map(function ($log) {
                     return [
                         'date' => $log->created_at->toDateString(), // Assuming 'created_at' reflects the relevant date
-                        'name' => $log->user_name ?? $log->user->name ?? 'Unknown',
+                        'name' => $log->user_name ?? $log->user->user->name ?? 'Unknown',
                         'pc_number' => $log->nfc->pc_number ?? 'Unknown', // Assuming 'pc_number' is a field in the NFC model
                         'student_number' => $log->user_number,
                         'year' => $log->year ?? 'Unknown',
