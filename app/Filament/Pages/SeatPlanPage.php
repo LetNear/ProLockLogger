@@ -47,11 +47,9 @@ class SeatPlanPage extends Page
         }
     }
 
-    protected function authorizeAccess()
+    public static function shouldRegisterNavigation(): bool
     {
-        if (auth()->user()->role_number !== 2) {
-            abort(403, 'Unauthorized');
-        }
+        return auth()->check() && auth()->user()->role_number === 2;
     }
 
     public function updatedSelectedCourse($value)
