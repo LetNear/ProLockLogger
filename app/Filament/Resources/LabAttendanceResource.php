@@ -135,7 +135,7 @@ class LabAttendanceResource extends Resource
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -153,8 +153,7 @@ class LabAttendanceResource extends Resource
     {
         return [
             'index' => Pages\ListLabAttendances::route('/'),
-            'create' => Pages\CreateLabAttendance::route('/create'),
-            'edit' => Pages\EditLabAttendance::route('/{record}/edit'),
+           
         ];
     }
 }
