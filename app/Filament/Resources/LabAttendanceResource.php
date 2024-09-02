@@ -121,13 +121,11 @@ class LabAttendanceResource extends Resource
                     ->label('User')
                     ->relationship('user', 'name')
                     ->searchable(),
-
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options([
-                        'present' => 'Present',
-                        'absent' => 'Absent',
-                        'late' => 'Late',
+                        'completed' => 'Completed',
+                        'in_progress' => 'In Progress',
                     ]),
 
                 SelectFilter::make('instructor')
