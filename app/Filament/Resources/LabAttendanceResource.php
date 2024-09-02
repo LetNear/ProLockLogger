@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LabAttendanceResource\Pages;
 use App\Models\LabAttendance;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -116,12 +117,12 @@ class LabAttendanceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filter::make('user_id')
+                SelectFilter::make('user_id')
                     ->label('User')
                     ->relationship('user', 'name')
                     ->searchable(),
 
-                Filter::make('status')
+                SelectFilter::make('status')
                     ->label('Status')
                     ->options([
                         'present' => 'Present',
@@ -129,15 +130,15 @@ class LabAttendanceResource extends Resource
                         'late' => 'Late',
                     ]),
 
-                Filter::make('instructor')
+                SelectFilter::make('instructor')
                     ->label('Instructor')
                     ->placeholder('Search by instructor'),
 
-                Filter::make('logdate')
+                SelectFilter::make('logdate')
                     ->label('Log Date')
                     ->placeholder('Select a log date'),
 
-                Filter::make('time_in')
+                SelectFilter::make('time_in')
                     ->form([
                         Forms\Components\TimePicker::make('time_in')
                             ->label('Time In')
@@ -149,7 +150,7 @@ class LabAttendanceResource extends Resource
                         }
                     }),
 
-                Filter::make('time_out')
+                SelectFilter::make('time_out')
                     ->form([
                         Forms\Components\TimePicker::make('time_out')
                             ->label('Time Out')
