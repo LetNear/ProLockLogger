@@ -78,7 +78,7 @@ class UserInformation extends Model implements Auditable
     public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_user_information', 'user_information_id', 'course_id')
-            ->withPivot('schedule_id') // Include schedule_id in the relationship
+            ->withPivot('schedule_id')
             ->withTimestamps();
     }
 

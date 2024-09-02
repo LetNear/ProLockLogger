@@ -23,7 +23,7 @@ class Course extends Model
     public function userInformations(): BelongsToMany
     {
         return $this->belongsToMany(UserInformation::class, 'course_user_information', 'course_id', 'user_information_id')
-            ->withPivot('schedule_id') // Include schedule_id
+            ->withPivot('schedule_id')
             ->withTimestamps();
     }
 
