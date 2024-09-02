@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RecentLogsController extends Controller
 {
@@ -194,12 +195,23 @@ class RecentLogsController extends Controller
         ]);
 
         try {
-            // Find the user information by fingerprint_id using whereJsonContains
-            $userInformation = User::whereJsonContains('fingerprint_id', $validated['fingerprint_id'])->first();
+            // Debug: Log the validated data
+            \Log::info('Validated Input:', $validated);
 
+            // Use raw SQL to find the user by nested JSON structure
+            $fingerprintId = $validated['fingerprint_id'];
+            $userInformation = DB::table('users')
+                ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
+                ->first();
+
+            // Debug: Log the user information query result
             if (!$userInformation) {
+                \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
+
+            // Convert the result to a model instance if necessary
+            $userInformation = User::find($userInformation->id);
 
             // Create a new log entry
             $log = RecentLogs::create([
@@ -214,9 +226,12 @@ class RecentLogsController extends Controller
 
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
         } catch (\Exception $e) {
+            \Log::error('An error occurred while creating the log entry.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
+
 
     /**
      * Record time-out using the fingerprint ID.
