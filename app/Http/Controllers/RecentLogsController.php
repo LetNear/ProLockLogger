@@ -59,45 +59,45 @@ class RecentLogsController extends Controller
             'role_id' => 'required|integer',
             'user_name' => 'required|string',
         ]);
-
+    
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-
+    
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-
+    
             // Find associated user information
             $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
-
+    
             if (!$userInformation) {
                 return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
             }
-
+    
             // Retrieve the correct course and schedule based on time and user information
             $course = $userInformation->courses()
                 ->whereHas('labSchedules', function ($query) use ($validated) {
-                    $query->where('start_time', '<=', $validated['time_in'])
-                        ->where('end_time', '>=', $validated['time_in']);
+                    $query->where('class_start', '<=', $validated['time_in'])
+                          ->where('class_end', '>=', $validated['time_in']);
                 })
                 ->first();
-
+    
             if ($course) {
                 $courseName = $course->course_name; // Adjust based on actual column name
                 $schedule = $course->labSchedules()
-                    ->where('start_time', '<=', $validated['time_in'])
-                    ->where('end_time', '>=', $validated['time_in'])
+                    ->where('class_start', '<=', $validated['time_in'])
+                    ->where('class_end', '>=', $validated['time_in'])
                     ->first();
             } else {
                 $courseName = 'Unknown';
                 $schedule = null;
             }
-
+    
             if (!$schedule) {
                 return response()->json(['message' => 'No valid schedule found for the provided time.'], 404);
             }
-
+    
             // Create a new log entry
             $log = RecentLogs::create([
                 'user_number' => $userInformation->user_number,
@@ -108,7 +108,7 @@ class RecentLogsController extends Controller
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
             ]);
-
+    
             // Save the data to StudentAttendance table
             StudentAttendance::create([
                 'name' => $userInformation->user->name,
@@ -120,13 +120,14 @@ class RecentLogsController extends Controller
                 'time_out' => null, // Initially null, will be updated later
                 'status' => 'In Progress', // Assuming initial status
             ]);
-
+    
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
         } catch (\Exception $e) {
             \Log::error('An error occurred while creating the log entry.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
 
 
