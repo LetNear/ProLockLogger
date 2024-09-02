@@ -53,7 +53,7 @@ class UserInformation extends Model implements Auditable
     // Define the relationship with the Seat model
     public function seat()
     {
-        return $this->belongsTo(Seat::class);
+        return $this->belongsTo(Seat::class, 'seat_id');
     }
 
     // Define the relationship with the Block model

@@ -24,7 +24,7 @@ class Seat extends Model implements Auditable
 
     public function userInformation()
     {
-        return $this->hasOne(UserInformation::class);
+        return $this->hasOne(UserInformation::class, 'seat_id');
     }
 
     public function computer()
