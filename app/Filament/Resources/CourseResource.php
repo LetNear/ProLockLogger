@@ -91,7 +91,7 @@ class CourseResource extends Resource
             ])
             ->actions([
                 EditAction::make()
-                    ->icon('heroicon-o-pencil-alt') // Add icons for actions
+                    
                     ->tooltip('Edit Course'), // Tooltip for clarity
 
                 DeleteAction::make()
