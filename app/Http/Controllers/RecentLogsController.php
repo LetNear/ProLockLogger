@@ -194,8 +194,8 @@ class RecentLogsController extends Controller
         ]);
 
         try {
-            // Find the user information by fingerprint_id
-            $userInformation = User::where('fingerprint_id', $validated['fingerprint_id'])->first();
+            // Find the user information by fingerprint_id using whereJsonContains
+            $userInformation = User::whereJsonContains('fingerprint_id', $validated['fingerprint_id'])->first();
 
             if (!$userInformation) {
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
@@ -301,7 +301,7 @@ class RecentLogsController extends Controller
         }
     }
 
-     /**
+    /**
      * Get the total count of logs for a student by email.
      *
      * @param Request $request
