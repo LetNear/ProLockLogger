@@ -195,43 +195,53 @@ class RecentLogsController extends Controller
             'role_id' => 'required|integer',
             'user_name' => 'required|string',
         ]);
-
+    
         try {
-            // Debug: Log the validated data
             \Log::info('Validated Input:', $validated);
-
-            // Use raw SQL to find the user by nested JSON structure
+    
+            // Find the user by nested JSON structure
             $fingerprintId = $validated['fingerprint_id'];
             $userInformation = DB::table('users')
                 ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
                 ->first();
-
-            // Debug: Log the user information query result
+    
             if (!$userInformation) {
                 \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
-
-            // Convert the result to a model instance if necessary
-            $userInformation = User::find($userInformation->id);
-
+    
+            $user = User::find($userInformation->id);
+    
             // Create a new log entry
             $log = RecentLogs::create([
-                'user_number' => $userInformation->user_number,
-                'block_id' => $userInformation->block_id,
-                'year' => null, // Set the year to null
+                'user_number' => $user->user_number,
+                'block_id' => $user->block_id,
+                'year' => null,
                 'time_in' => $validated['time_in'],
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
                 'fingerprint_id' => $validated['fingerprint_id'],
             ]);
-
+    
+            // Save the data to LabAttendance table
+            LabAttendance::create([
+                'user_id' => $user->id,
+                'seat_id' => null,
+                'lab_schedule_id' => null,
+                'time_in' => $validated['time_in'],
+                'time_out' => null, // Initially null, will be updated later
+                'status' => 'In Progress', // Assuming initial status
+                'logdate' => now()->format('Y-m-d'),
+                'instructor' => $user->name,
+            ]);
+    
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
         } catch (\Exception $e) {
             \Log::error('An error occurred while creating the log entry.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
 
 
@@ -248,54 +258,58 @@ class RecentLogsController extends Controller
             'fingerprint_id' => 'required|string',
             'time_out' => 'required|string',
         ]);
-
+    
         try {
-            // Use raw SQL to find the user by nested JSON structure
             $fingerprintId = $validated['fingerprint_id'];
             $userInformation = DB::table('users')
                 ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
                 ->first();
-
-            // Convert the result to a model instance if necessary
+    
             if (!$userInformation) {
                 \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
-
-            $userInformation = User::find($userInformation->id); // Convert to User model if needed
-
+    
+            $user = User::find($userInformation->id);
+    
             // Find the existing log entry and update time-out
-            $log = RecentLogs::where('id_card_id', $userInformation->id_card_id)
-                ->whereNotNull('time_in')  // Ensure the log has a time_in
-                ->whereNull('time_out')    // Ensure the log doesn't have a time_out already
+            $log = RecentLogs::where('id_card_id', $user->id_card_id)
+                ->whereNotNull('time_in')
+                ->whereNull('time_out')
                 ->first();
-
+    
             if (!$log) {
                 return response()->json(['message' => 'No matching time-in record found.'], 404);
             }
-
-            // Update the time-out
+    
             $log->update([
                 'time_out' => $validated['time_out'],
                 'updated_at' => now(),
             ]);
-
+    
+            // Update the corresponding LabAttendance record
+            LabAttendance::where('user_id', $user->id)
+                ->whereNull('time_out')
+                ->update([
+                    'time_out' => $validated['time_out'],
+                    'status' => 'Completed', // Assuming status update on time-out
+                ]);
+    
             return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
         } catch (\Exception $e) {
             \Log::error('An error occurred while updating the time-out.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
     public function getRecentLogsByFingerprintId(Request $request): JsonResponse
     {
-        // Validate the input data
         $validated = $request->validate([
             'fingerprint_id' => 'required|string',
         ]);
     
         try {
-            // Use raw SQL to find the user by nested JSON structure
             $fingerprintId = $validated['fingerprint_id'];
             $userInformation = DB::table('users')
                 ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
@@ -306,10 +320,8 @@ class RecentLogsController extends Controller
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
     
-            // Convert the result to a model instance if necessary
             $user = User::find($userInformation->id);
     
-            // Fetch recent logs associated with this user's id_card_id
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user', 'role'])
                 ->where('id_card_id', $user->id_card_id)
                 ->get()
@@ -328,18 +340,17 @@ class RecentLogsController extends Controller
                     ];
                 });
     
-            // Save each recent log entry to the LabAttendance table, only if time_out is not null
             foreach ($recentLogs as $log) {
                 if (!is_null($log['time_out'])) {
                     LabAttendance::create([
                         'user_id' => $user->id,
-                        'seat_id' => null, // Set this according to your application's logic
-                        'lab_schedule_id' => null, // Set this according to your application's logic
+                        'seat_id' => null,
+                        'lab_schedule_id' => null,
                         'time_in' => $log['time_in'],
                         'time_out' => $log['time_out'],
-                        'status' => 'Completed', // Or another status relevant to your logic
-                        'logdate' => now()->format('Y-m-d'), // Assuming today's date, adjust as necessary
-                        'instructor' => $user->name, // Assuming the user's name is the instructor, adjust as necessary
+                        'status' => 'Completed',
+                        'logdate' => now()->format('Y-m-d'),
+                        'instructor' => $user->name,
                     ]);
                 }
             }
@@ -350,6 +361,7 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
     
 
 
