@@ -22,6 +22,7 @@ class LabSchedule extends Model implements Auditable
         'day_of_the_week',
         'class_start',
         'class_end',
+        'password',
     ];
 
     public function course()
