@@ -52,7 +52,6 @@ class CreateLabSchedule extends CreateRecord
         }
 
         $conflictingSchedule = LabSchedule::where('day_of_the_week', $data['day_of_the_week'])
-            ->where('instructor_id', $data['instructor_id'])
             ->where(function ($query) use ($classStart, $classEnd) {
                 $query->where(function ($subQuery) use ($classStart, $classEnd) {
                     $subQuery->whereTime('class_start', '<', $classEnd)
