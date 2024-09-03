@@ -3,6 +3,7 @@
 use App\Http\Controllers\FingerprintController;
 use App\Http\Controllers\LabScheduleController;
 use App\Http\Controllers\NfcTagController;
+use App\Http\Controllers\OpenAndCloseLogController;
 use App\Http\Controllers\RecentLogsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserInformationController;
@@ -65,7 +66,8 @@ Route::get('/student/lab-schedule/rfid/{rfid_number}', [LabScheduleController::c
 Route::get('/lab-schedules', [LabScheduleController::class, 'getAllLabSchedules']);
 Route::post('/enroll-student', [LabScheduleController::class, 'enrollStudentToCourse']);
 Route::get('/enrolled-courses/{email}', [LabScheduleController::class, 'getEnrolledCoursesByEmail']);
-
+Route::post('/door/open', [OpenAndCloseLogController::class, 'openDoor']);
+Route::post('/door/close', [OpenAndCloseLogController::class, 'closeDoor']);
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 // Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
 // Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);
