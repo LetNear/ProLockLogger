@@ -274,20 +274,23 @@ class LabScheduleController extends Controller
         $student = UserInformation::whereHas('user', function ($query) use ($email) {
             $query->where('email', $email);
         })->first();
-
+    
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
         }
-
-        // Get the lab schedules based on block_id and year
-        $labSchedules = LabSchedule::where('block_id', $student->block_id)
-            ->where('year', $student->year)
-            ->get();
-
+    
+        // Fetch lab schedules based on course_name, class_start, and class_end
+        $labSchedules = LabSchedule::where(function ($query) {
+                // Update the query conditions according to your requirements
+                $query->whereNotNull('course_name') // Ensure the course_name exists
+                      ->whereNotNull('class_start') // Ensure the class_start exists
+                      ->whereNotNull('class_end');  // Ensure the class_end exists
+            })->get();
+    
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this student'], 404);
         }
-
+    
         return response()->json($labSchedules, 200);
     }
 
