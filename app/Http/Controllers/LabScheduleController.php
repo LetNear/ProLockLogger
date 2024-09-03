@@ -373,15 +373,14 @@ class LabScheduleController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Retrieve the student by email and ensure the user has the role of a student (role_number = 3)
+        // Retrieve the student by email
         $student = UserInformation::whereHas('user', function ($query) use ($request) {
-            $query->where('email', $request->email)
-                ->where('role_number', 3); // Check that the user is a student
+            $query->where('email', $request->email);
         })->first();
 
         // Ensure that the student exists
         if (!$student) {
-            return response()->json(['message' => 'Only students (role_number = 3) can be enrolled'], 403);
+            return response()->json(['message' => 'User not found'], 404);
         }
 
         // Retrieve the course
@@ -389,12 +388,12 @@ class LabScheduleController extends Controller
 
         // Check if the student is already enrolled in the course
         if ($student->courses()->where('course_id', $course->id)->exists()) {
-            return response()->json(['message' => 'Student is already enrolled in this course'], 409);
+            return response()->json(['message' => 'User is already enrolled in this course'], 409);
         }
 
         // Enroll the student in the course
         $student->courses()->attach($course->id);
 
-        return response()->json(['message' => 'Student enrolled successfully'], 201);
+        return response()->json(['message' => 'User enrolled successfully'], 201);
     }
 }
