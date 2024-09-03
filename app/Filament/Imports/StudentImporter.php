@@ -5,6 +5,7 @@ namespace App\Filament\Imports;
 use App\Models\Block;
 use App\Models\User;
 use App\Models\UserInformation;
+use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -14,9 +15,6 @@ use Illuminate\Support\Facades\Session;
 class StudentImporter extends Importer
 {
     protected static ?string $model = User::class;
-    protected array $duplicateEmails = [];
-    protected array $duplicateUserNumbers = [];
-    protected array $invalidEmails = [];
 
     public static function getColumns(): array
     {
@@ -57,14 +55,12 @@ class StudentImporter extends Importer
 
         // Check if the email already exists
         if (User::where('email', $this->data['email'])->exists()) {
-            $this->duplicateEmails[] = $this->data['email'];
-            return null; // Skip processing for this user
+            return new RowImportFailedException('Email already exists');
         }
 
         // Check if the user number already exists
         if (UserInformation::where('user_number', ['user_number'])->exists()) {
-            $this->duplicateUserNumbers[] = ['user_number'];
-            return null; // Skip processing for this user
+            return new RowImportFailedException('User number already exists');
         }
 
         // Create the user
@@ -102,9 +98,6 @@ class StudentImporter extends Importer
         return $user;
     }
 
-
-
-
     protected function getRoleNameByNumber(int $roleNumber): ?string
     {
         $roles = [
@@ -114,21 +107,6 @@ class StudentImporter extends Importer
         ];
 
         return $roles[$roleNumber] ?? null;
-    }
-
-    public function afterImport()
-    {
-        if (!empty($this->duplicateEmails)) {
-            Session::flash('duplicateEmails', $this->duplicateEmails);
-        }
-
-        if (!empty($this->duplicateUserNumbers)) {
-            Session::flash('duplicateUserNumbers', $this->duplicateUserNumbers);
-        }
-
-        if (!empty($this->invalidEmails)) {
-            Session::flash('invalidEmails', $this->invalidEmails);
-        }
     }
 
     public static function getCompletedNotificationBody(Import $import): string
