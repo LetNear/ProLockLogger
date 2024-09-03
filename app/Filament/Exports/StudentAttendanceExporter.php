@@ -3,9 +3,10 @@
 namespace App\Filament\Exports;
 
 use App\Models\StudentAttendance;
-use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
+use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Database\Eloquent\Builder;
 
 class StudentAttendanceExporter extends Exporter
 {
@@ -16,11 +17,11 @@ class StudentAttendanceExporter extends Exporter
         return [
             ExportColumn::make('id')
                 ->label('ID'),
-            ExportColumn::make('name'),
-            ExportColumn::make('course'),
-            ExportColumn::make('year'),
-            ExportColumn::make('block'),
-            ExportColumn::make('student_number'),
+            ExportColumn::make('userInformation.user.name')->label('Name'),
+            ExportColumn::make('userInformation.courses.course_name')->label('Course'), 
+            ExportColumn::make('userInformation.year')->label('Year'),
+            ExportColumn::make('userInformation.block.block')->label('Block'),
+            ExportColumn::make('userInformation.user_number')->label('Student Number'),
             ExportColumn::make('time_in'),
             ExportColumn::make('time_out'),
             ExportColumn::make('status'),
@@ -28,6 +29,16 @@ class StudentAttendanceExporter extends Exporter
             ExportColumn::make('updated_at'),
         ];
     }
+
+    // public static function modifyQuery(Builder $query): Builder
+    // {
+    //     $user = auth()->user();
+    //     if($user->role_number === 1){
+    //         return $query;
+    //     }
+
+    //     return $query;
+    // }
 
     public static function getCompletedNotificationBody(Export $export): string
     {

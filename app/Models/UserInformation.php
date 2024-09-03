@@ -82,5 +82,9 @@ class UserInformation extends Model implements Auditable
             ->withTimestamps();
     }
 
-   
+    public function studentAttendances()
+    {
+        return $this->hasMany(StudentAttendance::class);
+    }
+
 }

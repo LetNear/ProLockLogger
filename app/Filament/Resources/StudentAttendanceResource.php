@@ -5,8 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\StudentAttendanceExporter;
 use App\Filament\Resources\StudentAttendanceResource\Pages;
 use App\Models\StudentAttendance;
+use App\Models\UserInformation;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
@@ -30,22 +32,12 @@ class StudentAttendanceResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Student Information')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        Forms\Components\Select::make('user_information_id')
+                            ->relationship('userInformation', 'id')
                             ->required()
-                            ->label('Name'),
-                        Forms\Components\TextInput::make('course')
-                            ->required()
-                            ->label('Course'),
-                        Forms\Components\TextInput::make('year')
-                            ->required()
-                            ->label('Year Level'),
-                        Forms\Components\TextInput::make('block')
-                            ->required()
-                            ->label('Block'),
-                        Forms\Components\TextInput::make('student_number')
-                            ->required()
-                            ->unique(StudentAttendance::class, 'student_number')
-                            ->label('Student Number'),
+                            ->preload()
+                            ->label('Student')
+                            ->searchable(),
                     ]),
                 Forms\Components\Section::make('Attendance Details')
                     ->schema([
@@ -74,23 +66,23 @@ class StudentAttendanceResource extends Resource
                     ->exporter(StudentAttendanceExporter::class), // Use the correct exporter class
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('userInformation.user.name')
                     ->label('Name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('course')
+                Tables\Columns\TextColumn::make('userInformation.courses.course_name')
                     ->label('Course')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('year')
+                Tables\Columns\TextColumn::make('userInformation.year')
                     ->label('Year Level')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('block')
+                Tables\Columns\TextColumn::make('userInformation.block.block')
                     ->label('Block')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('student_number')
+                Tables\Columns\TextColumn::make('userInformation.user_number')
                     ->label('Student Number')
                     ->sortable()
                     ->searchable(),

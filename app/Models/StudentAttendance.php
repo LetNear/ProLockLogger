@@ -10,13 +10,14 @@ class StudentAttendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'course',
-        'year',
-        'block',
-        'student_number',
+        'user_information_id',
         'time_in',
         'time_out',
         'status',
     ];
+
+    public function userInformation()
+    {
+        return $this->belongsTo(UserInformation::class);
+    }
 }
