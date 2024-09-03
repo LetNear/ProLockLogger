@@ -374,7 +374,7 @@ class LabScheduleController extends Controller
         }
 
         // Retrieve the student and course
-        $student = UserInformation::find($request->student_id);
+        $student = UserInformation::find($request->user_id);
         $course = Course::find($request->course_id);
 
         // Check if the student is already enrolled in the course
