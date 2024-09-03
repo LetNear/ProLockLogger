@@ -2,6 +2,7 @@
 
 namespace App\Filament\Exports;
 
+use App\Models\LabSchedule;
 use App\Models\StudentAttendance;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\ExportColumn;
@@ -18,7 +19,7 @@ class StudentAttendanceExporter extends Exporter
             ExportColumn::make('id')
                 ->label('ID'),
             ExportColumn::make('userInformation.user.name')->label('Name'),
-            ExportColumn::make('userInformation.courses.course_name')->label('Course'), 
+            ExportColumn::make('userInformation.courses.course_name')->label('Course'),
             ExportColumn::make('userInformation.year')->label('Year'),
             ExportColumn::make('userInformation.block.block')->label('Block'),
             ExportColumn::make('userInformation.user_number')->label('Student Number'),
@@ -30,15 +31,22 @@ class StudentAttendanceExporter extends Exporter
         ];
     }
 
-    // public static function modifyQuery(Builder $query): Builder
-    // {
-    //     $user = auth()->user();
-    //     if($user->role_number === 1){
-    //         return $query;
-    //     }
+    public static function modifyQuery(Builder $query): Builder
+    {
+        $user = auth()->user();
+        
+        if ($user->role_number === 2) {
+            return StudentAttendance::whereHas('userInformation', function ($query) use ($user) {
+                $query->whereHas('courses', function ($query) use ($user) {
+                    $query->whereHas('labSchedules', function ($query) use ($user) {
+                        $query->where('instructor_id', $user->id);
+                    });
+                });
+            })->getQuery();
+        }
 
-    //     return $query;
-    // }
+        return $query;
+    }
 
     public static function getCompletedNotificationBody(Export $export): string
     {
