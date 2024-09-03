@@ -44,10 +44,8 @@ Route::get('/schedule', [LabScheduleController::class, 'showSchedule']);
 
 Route::get('/export_latest_attendance', function () {
     $directories = Storage::directories('public/filament_exports');
-
     $lastDirectory = collect($directories)->map(function ($directory) {
         return (int)basename($directory);
     })->max();
-
     return Storage::download("public/filament_exports/{$lastDirectory}/export-{$lastDirectory}-student-attendances.xlsx");
 });

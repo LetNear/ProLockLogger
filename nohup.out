@@ -103,3 +103,768 @@
   2024-08-26 14:43:18 Filament\Notifications\DatabaseNotification  9.87ms DONE
   2024-08-26 14:43:18 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
   2024-08-26 14:43:18 Filament\Notifications\Events\DatabaseNotificationsSent  5.64ms DONE
+  2024-08-26 21:10:31 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-26 21:10:31 Filament\Actions\Imports\Jobs\ImportCsv .. 191.27ms DONE
+  2024-08-26 21:10:31 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-26 21:10:31 Filament\Notifications\DatabaseNotification  10.43ms DONE
+  2024-08-26 21:10:31 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-26 21:10:31 Filament\Notifications\Events\DatabaseNotificationsSent  6.56ms DONE
+  2024-08-26 21:10:53 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-26 21:10:53 Filament\Actions\Imports\Jobs\ImportCsv .. 156.43ms DONE
+  2024-08-26 21:10:53 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-26 21:10:53 Filament\Notifications\DatabaseNotification  7.56ms DONE
+  2024-08-26 21:10:53 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-26 21:10:53 Filament\Notifications\Events\DatabaseNotificationsSent  5.02ms DONE
+  2024-08-27 16:31:40 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 16:31:40 Filament\Actions\Imports\Jobs\ImportCsv .. 164.74ms DONE
+  2024-08-27 16:31:40 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 16:31:40 Filament\Notifications\DatabaseNotification  9.03ms DONE
+  2024-08-27 16:31:40 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 16:31:40 Filament\Notifications\Events\DatabaseNotificationsSent  6.08ms DONE
+  2024-08-27 16:31:58 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 16:31:59 Filament\Actions\Imports\Jobs\ImportCsv .. 203.39ms DONE
+  2024-08-27 16:31:59 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 16:31:59 Filament\Notifications\DatabaseNotification  10.14ms DONE
+  2024-08-27 16:31:59 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 16:31:59 Filament\Notifications\Events\DatabaseNotificationsSent  5.62ms DONE
+  2024-08-27 17:13:49 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:13:49 Filament\Actions\Imports\Jobs\ImportCsv .. 187.58ms DONE
+  2024-08-27 17:13:49 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:13:49 Filament\Notifications\DatabaseNotification  9.22ms DONE
+  2024-08-27 17:13:49 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:13:49 Filament\Notifications\Events\DatabaseNotificationsSent  6.42ms DONE
+  2024-08-27 17:14:07 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:14:08 Filament\Actions\Imports\Jobs\ImportCsv .. 385.43ms DONE
+  2024-08-27 17:14:08 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:14:08 Filament\Notifications\DatabaseNotification  20.47ms DONE
+  2024-08-27 17:14:08 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:14:08 Filament\Notifications\Events\DatabaseNotificationsSent  13.75ms DONE
+  2024-08-27 17:25:23 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:25:23 Filament\Actions\Imports\Jobs\ImportCsv .. 251.79ms DONE
+  2024-08-27 17:25:23 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:25:24 Filament\Notifications\DatabaseNotification  10.41ms DONE
+  2024-08-27 17:25:24 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:25:24 Filament\Notifications\Events\DatabaseNotificationsSent  7.56ms DONE
+  2024-08-27 17:25:45 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:25:45 Filament\Actions\Imports\Jobs\ImportCsv .. 167.77ms DONE
+  2024-08-27 17:25:45 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:25:45 Filament\Notifications\DatabaseNotification  11.14ms DONE
+  2024-08-27 17:25:45 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:25:45 Filament\Notifications\Events\DatabaseNotificationsSent  7.30ms DONE
+  2024-08-27 17:39:28 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:39:28 Filament\Actions\Imports\Jobs\ImportCsv .. 141.55ms DONE
+  2024-08-27 17:39:28 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:39:28 Filament\Notifications\DatabaseNotification  7.42ms DONE
+  2024-08-27 17:39:28 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:39:28 Filament\Notifications\Events\DatabaseNotificationsSent  5.99ms DONE
+  2024-08-27 17:39:43 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:39:43 Filament\Actions\Imports\Jobs\ImportCsv .. 158.47ms DONE
+  2024-08-27 17:39:43 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:39:43 Filament\Notifications\DatabaseNotification  9.28ms DONE
+  2024-08-27 17:39:43 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:39:43 Filament\Notifications\Events\DatabaseNotificationsSent  6.77ms DONE
+  2024-08-27 17:57:32 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:57:32 Filament\Actions\Imports\Jobs\ImportCsv .. 282.36ms DONE
+  2024-08-27 17:57:32 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:57:32 Filament\Notifications\DatabaseNotification  15.71ms DONE
+  2024-08-27 17:57:32 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:57:32 Filament\Notifications\Events\DatabaseNotificationsSent  8.98ms DONE
+  2024-08-27 17:57:50 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 17:57:50 Filament\Actions\Imports\Jobs\ImportCsv .. 188.56ms DONE
+  2024-08-27 17:57:50 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 17:57:50 Filament\Notifications\DatabaseNotification  11.99ms DONE
+  2024-08-27 17:57:50 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 17:57:50 Filament\Notifications\Events\DatabaseNotificationsSent  7.91ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-08-27 18:17:14 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 18:17:14 Filament\Actions\Imports\Jobs\ImportCsv .. 232.04ms DONE
+  2024-08-27 18:17:14 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 18:17:14 Filament\Actions\Imports\Jobs\ImportCsv .. 165.86ms DONE
+  2024-08-27 18:17:14 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 18:17:15 Filament\Actions\Imports\Jobs\ImportCsv .. 105.19ms DONE
+  2024-08-27 18:17:15 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 18:17:15 Filament\Notifications\DatabaseNotification  19.77ms DONE
+  2024-08-27 18:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 18:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  9.65ms DONE
+  2024-08-27 18:17:15 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 18:17:15 Filament\Notifications\DatabaseNotification  8.78ms DONE
+  2024-08-27 18:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 18:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  6.41ms DONE
+  2024-08-27 18:17:15 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 18:17:15 Filament\Notifications\DatabaseNotification  7.16ms DONE
+  2024-08-27 18:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 18:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  5.64ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-08-27 19:17:07 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 19:17:07 Filament\Actions\Imports\Jobs\ImportCsv .. 220.55ms DONE
+  2024-08-27 19:17:07 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-27 19:17:08 Filament\Actions\Imports\Jobs\ImportCsv .. 153.87ms DONE
+  2024-08-27 19:17:08 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 19:17:08 Filament\Notifications\DatabaseNotification  11.42ms DONE
+  2024-08-27 19:17:08 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 19:17:08 Filament\Notifications\Events\DatabaseNotificationsSent  15.40ms DONE
+  2024-08-27 19:17:08 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-27 19:17:08 Filament\Notifications\DatabaseNotification  13.31ms DONE
+  2024-08-27 19:17:08 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-27 19:17:08 Filament\Notifications\Events\DatabaseNotificationsSent  8.19ms DONE
+  2024-08-28 06:40:17 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-28 06:40:17 Filament\Actions\Imports\Jobs\ImportCsv .. 235.85ms DONE
+  2024-08-28 06:40:17 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-28 06:40:17 Filament\Notifications\DatabaseNotification  15.39ms DONE
+  2024-08-28 06:40:17 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-28 06:40:17 Filament\Notifications\Events\DatabaseNotificationsSent  8.56ms DONE
+  2024-08-28 06:40:56 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-28 06:40:56 Filament\Actions\Imports\Jobs\ImportCsv .. 299.80ms DONE
+  2024-08-28 06:40:56 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-28 06:40:56 Filament\Notifications\DatabaseNotification  17.52ms DONE
+  2024-08-28 06:40:56 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-28 06:40:56 Filament\Notifications\Events\DatabaseNotificationsSent  13.56ms DONE
+  2024-08-30 02:44:53 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-30 02:44:53 Filament\Actions\Imports\Jobs\ImportCsv .. 193.77ms DONE
+  2024-08-30 02:44:53 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-30 02:44:53 Filament\Notifications\DatabaseNotification  14.10ms DONE
+  2024-08-30 02:44:53 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-30 02:44:53 Filament\Notifications\Events\DatabaseNotificationsSent  7.10ms DONE
+  2024-08-30 02:45:15 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-30 02:45:15 Filament\Actions\Imports\Jobs\ImportCsv .. 462.23ms DONE
+  2024-08-30 02:45:15 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-30 02:45:15 Filament\Notifications\DatabaseNotification  14.28ms DONE
+  2024-08-30 02:45:15 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-30 02:45:15 Filament\Notifications\Events\DatabaseNotificationsSent  8.56ms DONE
+  2024-08-30 04:13:40 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-30 04:13:41 Filament\Actions\Imports\Jobs\ImportCsv .. 111.28ms DONE
+  2024-08-30 04:13:41 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-30 04:13:41 Filament\Notifications\DatabaseNotification  11.78ms DONE
+  2024-08-30 04:13:41 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-30 04:13:41 Filament\Notifications\Events\DatabaseNotificationsSent  6.41ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-08-31 14:58:22 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 14:58:22 Filament\Actions\Imports\Jobs\ImportCsv .. 301.41ms DONE
+  2024-08-31 14:58:22 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 14:58:22 Filament\Notifications\DatabaseNotification  16.23ms DONE
+  2024-08-31 14:58:22 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 14:58:22 Filament\Notifications\Events\DatabaseNotificationsSent  8.52ms DONE
+  2024-08-31 14:58:34 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 14:58:34 Filament\Actions\Imports\Jobs\ImportCsv .. 186.60ms DONE
+  2024-08-31 14:58:34 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 14:58:34 Filament\Notifications\DatabaseNotification  8.57ms DONE
+  2024-08-31 14:58:34 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 14:58:34 Filament\Notifications\Events\DatabaseNotificationsSent  7.51ms DONE
+  2024-08-31 15:08:52 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 15:08:53 Filament\Actions\Imports\Jobs\ImportCsv .. 185.18ms DONE
+  2024-08-31 15:08:53 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 15:08:53 Filament\Notifications\DatabaseNotification  17.08ms DONE
+  2024-08-31 15:08:53 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 15:08:53 Filament\Notifications\Events\DatabaseNotificationsSent  9.20ms DONE
+  2024-08-31 15:09:08 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 15:09:08 Filament\Actions\Imports\Jobs\ImportCsv .. 170.06ms DONE
+  2024-08-31 15:09:08 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 15:09:08 Filament\Notifications\DatabaseNotification  9.06ms DONE
+  2024-08-31 15:09:08 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 15:09:08 Filament\Notifications\Events\DatabaseNotificationsSent  7.41ms DONE
+  2024-08-31 15:24:30 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 15:24:30 Filament\Actions\Imports\Jobs\ImportCsv .. 187.65ms DONE
+  2024-08-31 15:24:30 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 15:24:30 Filament\Notifications\DatabaseNotification  10.30ms DONE
+  2024-08-31 15:24:30 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 15:24:30 Filament\Notifications\Events\DatabaseNotificationsSent  8.73ms DONE
+  2024-08-31 15:24:39 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 15:24:39 Filament\Actions\Imports\Jobs\ImportCsv .. 165.52ms DONE
+  2024-08-31 15:24:39 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 15:24:39 Filament\Notifications\DatabaseNotification  9.91ms DONE
+  2024-08-31 15:24:39 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 15:24:39 Filament\Notifications\Events\DatabaseNotificationsSent  6.34ms DONE
+  2024-08-31 16:33:21 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 16:33:21 Filament\Actions\Imports\Jobs\ImportCsv .. 168.03ms DONE
+  2024-08-31 16:33:21 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 16:33:21 Filament\Notifications\DatabaseNotification  10.49ms DONE
+  2024-08-31 16:33:21 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 16:33:21 Filament\Notifications\Events\DatabaseNotificationsSent  7.49ms DONE
+  2024-08-31 16:33:31 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 16:33:31 Filament\Actions\Imports\Jobs\ImportCsv .. 164.06ms DONE
+  2024-08-31 16:33:31 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 16:33:31 Filament\Notifications\DatabaseNotification  9.84ms DONE
+  2024-08-31 16:33:31 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 16:33:31 Filament\Notifications\Events\DatabaseNotificationsSent  6.95ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-08-31 17:59:13 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 17:59:13 Filament\Actions\Imports\Jobs\ImportCsv .. 180.87ms DONE
+  2024-08-31 17:59:13 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 17:59:13 Filament\Notifications\DatabaseNotification  8.98ms DONE
+  2024-08-31 17:59:13 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 17:59:13 Filament\Notifications\Events\DatabaseNotificationsSent  6.20ms DONE
+  2024-08-31 17:59:28 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 17:59:28 Filament\Actions\Imports\Jobs\ImportCsv .. 252.72ms DONE
+  2024-08-31 17:59:28 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 17:59:28 Filament\Notifications\DatabaseNotification  11.17ms DONE
+  2024-08-31 17:59:28 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 17:59:28 Filament\Notifications\Events\DatabaseNotificationsSent  9.08ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-08-31 19:38:33 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 19:38:33 Filament\Actions\Imports\Jobs\ImportCsv .. 160.47ms DONE
+  2024-08-31 19:38:33 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 19:38:33 Filament\Notifications\DatabaseNotification  8.27ms DONE
+  2024-08-31 19:38:33 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 19:38:33 Filament\Notifications\Events\DatabaseNotificationsSent  5.52ms DONE
+  2024-08-31 19:38:43 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-08-31 19:38:43 Filament\Actions\Imports\Jobs\ImportCsv .. 199.99ms DONE
+  2024-08-31 19:38:43 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-08-31 19:38:43 Filament\Notifications\DatabaseNotification  14.26ms DONE
+  2024-08-31 19:38:43 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-08-31 19:38:43 Filament\Notifications\Events\DatabaseNotificationsSent  8.28ms DONE
+  2024-09-01 11:32:14 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-01 11:32:14 Filament\Actions\Imports\Jobs\ImportCsv .. 187.66ms DONE
+  2024-09-01 11:32:14 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-01 11:32:14 Filament\Notifications\DatabaseNotification  7.88ms DONE
+  2024-09-01 11:32:14 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-01 11:32:14 Filament\Notifications\Events\DatabaseNotificationsSent  4.67ms DONE
+  2024-09-01 11:32:43 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-01 11:32:43 Filament\Actions\Imports\Jobs\ImportCsv .. 226.42ms DONE
+  2024-09-01 11:32:43 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-01 11:32:43 Filament\Notifications\DatabaseNotification  8.64ms DONE
+  2024-09-01 11:32:43 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-01 11:32:43 Filament\Notifications\Events\DatabaseNotificationsSent  12.50ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-09-01 15:02:42 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-01 15:02:42 Filament\Actions\Imports\Jobs\ImportCsv .. 276.91ms DONE
+  2024-09-01 15:02:42 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-01 15:02:42 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-01 15:02:42 Filament\Notifications\Events\DatabaseNotificationsSent  15.44ms DONE
+  2024-09-01 15:02:42 Filament\Notifications\DatabaseNotification  48.24ms DONE
+  2024-09-01 15:02:51 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-01 15:02:51 Filament\Actions\Imports\Jobs\ImportCsv .. 187.10ms DONE
+  2024-09-01 15:02:51 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-01 15:02:51 Filament\Notifications\DatabaseNotification  14.94ms DONE
+  2024-09-01 15:02:51 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-01 15:02:51 Filament\Notifications\Events\DatabaseNotificationsSent  6.83ms DONE
+  2024-09-02 10:51:39 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 10:51:40 Filament\Actions\Imports\Jobs\ImportCsv .. 273.67ms DONE
+  2024-09-02 10:51:40 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 10:51:40 Filament\Notifications\DatabaseNotification  13.27ms DONE
+  2024-09-02 10:51:40 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 10:51:40 Filament\Notifications\Events\DatabaseNotificationsSent  14.58ms DONE
+  2024-09-02 10:51:49 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 10:51:49 Filament\Actions\Imports\Jobs\ImportCsv .. 223.55ms DONE
+  2024-09-02 10:51:49 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 10:51:49 Filament\Notifications\DatabaseNotification  9.24ms DONE
+  2024-09-02 10:51:49 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 10:51:49 Filament\Notifications\Events\DatabaseNotificationsSent  5.46ms DONE
+  2024-09-02 14:06:03 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 14:06:03 Filament\Actions\Imports\Jobs\ImportCsv .. 193.94ms DONE
+  2024-09-02 14:06:03 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 14:06:03 Filament\Notifications\DatabaseNotification  9.46ms DONE
+  2024-09-02 14:06:03 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 14:06:03 Filament\Notifications\Events\DatabaseNotificationsSent  5.52ms DONE
+  2024-09-02 14:06:13 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 14:06:13 Filament\Actions\Imports\Jobs\ImportCsv .. 157.41ms DONE
+  2024-09-02 14:06:13 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 14:06:13 Filament\Notifications\DatabaseNotification  8.69ms DONE
+  2024-09-02 14:06:13 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 14:06:13 Filament\Notifications\Events\DatabaseNotificationsSent  7.75ms DONE
+  2024-09-02 14:16:28 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 14:16:28 Filament\Actions\Imports\Jobs\ImportCsv .. 145.80ms DONE
+  2024-09-02 14:16:28 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 14:16:28 Filament\Notifications\DatabaseNotification  6.08ms DONE
+  2024-09-02 14:16:28 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 14:16:28 Filament\Notifications\Events\DatabaseNotificationsSent  4.56ms DONE
+  2024-09-02 14:16:38 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 14:16:38 Filament\Actions\Imports\Jobs\ImportCsv .. 237.34ms DONE
+  2024-09-02 14:16:38 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 14:16:38 Filament\Notifications\DatabaseNotification  19.83ms DONE
+  2024-09-02 14:16:38 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 14:16:38 Filament\Notifications\Events\DatabaseNotificationsSent  7.78ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-09-02 14:53:38 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 14:53:38 Filament\Actions\Imports\Jobs\ImportCsv .. 317.68ms DONE
+  2024-09-02 14:53:38 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 14:53:38 Filament\Notifications\DatabaseNotification  16.03ms DONE
+  2024-09-02 14:53:38 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 14:53:38 Filament\Notifications\Events\DatabaseNotificationsSent  14.00ms DONE
+  2024-09-02 14:53:58 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 14:53:58 Filament\Actions\Imports\Jobs\ImportCsv .. 236.43ms DONE
+  2024-09-02 14:53:58 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 14:53:58 Filament\Notifications\DatabaseNotification  15.60ms DONE
+  2024-09-02 14:53:58 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 14:53:58 Filament\Notifications\Events\DatabaseNotificationsSent  9.31ms DONE
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S02]: Base table or view not found: 1146 Table 'prolocklogger.cache' doesn't exist (Connection: mysql, SQL: select * from `cache` where `key` in (illuminate:queue:restart))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+      [2m+31 vendor frames [22m
+
+  32  artisan:13
+      Illuminate\Foundation\Application::handleCommand()
+
+  2024-09-02 15:26:00 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 15:26:00 Filament\Actions\Imports\Jobs\ImportCsv .. 322.36ms DONE
+  2024-09-02 15:26:00 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 15:26:00 Filament\Notifications\DatabaseNotification  19.08ms DONE
+  2024-09-02 15:26:00 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 15:26:00 Filament\Notifications\Events\DatabaseNotificationsSent  13.44ms DONE
+  2024-09-02 15:26:12 Filament\Actions\Imports\Jobs\ImportCsv ........ RUNNING
+  2024-09-02 15:26:12 Filament\Actions\Imports\Jobs\ImportCsv .. 194.51ms DONE
+  2024-09-02 15:26:12 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 15:26:12 Filament\Notifications\DatabaseNotification  10.68ms DONE
+  2024-09-02 15:26:12 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 15:26:12 Filament\Notifications\Events\DatabaseNotificationsSent  6.17ms DONE
+  2024-09-02 20:49:42 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 20:49:42 Illuminate\Bus\ChainedBatch ............... 52.49ms DONE
+  2024-09-02 20:49:42 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 20:49:42 Filament\Actions\Exports\Jobs\PrepareCsvExport  87.29ms DONE
+  2024-09-02 20:49:42 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:42 Filament\Actions\Exports\Jobs\ExportCsv ... 85.47ms DONE
+  2024-09-02 20:49:42 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:42 Filament\Actions\Exports\Jobs\ExportCsv ... 87.10ms DONE
+  2024-09-02 20:49:42 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 93.50ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 44.22ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 21.09ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv .. 156.32ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 66.15ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 39.62ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv .. 143.43ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 38.57ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 34.70ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 41.98ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 36.14ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv .. 166.61ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 21.98ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 28.08ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv .. 132.57ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 25.79ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 17.32ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 84.41ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCsv ... 99.29ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\ExportCompletion  37.74ms DONE
+  2024-09-02 20:49:43 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 20:49:43 Filament\Notifications\DatabaseNotification  13.31ms DONE
+  2024-09-02 20:49:43 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 20:49:43 Filament\Notifications\Events\DatabaseNotificationsSent  7.64ms DONE
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 20:49:43 Filament\Actions\Exports\Jobs\CreateXlsxFile  124.31ms DONE
+  2024-09-02 20:53:16 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 20:53:16 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 20:53:16 Illuminate\Bus\ChainedBatch ............... 46.64ms DONE
+  2024-09-02 20:53:16 Filament\Actions\Exports\Jobs\PrepareCsvExport  55.86ms DONE
+  2024-09-02 20:53:16 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:16 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:16 Filament\Actions\Exports\Jobs\ExportCsv .. 101.41ms DONE
+  2024-09-02 20:53:16 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:16 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 53.02ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 98.17ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 40.71ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 49.61ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 37.38ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 32.19ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 42.26ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv .. 269.07ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 29.95ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 26.92ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 21.97ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 20.70ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 19.74ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 20.67ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 21.32ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 19.65ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 17.51ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 19.11ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 25.52ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 25.56ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 21.78ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv .. 265.15ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 33.59ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 37.74ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 39.94ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 35.87ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 33.84ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 35.32ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv .. 188.34ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 42.09ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+ ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 35.31ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 42.08ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 37.38ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+ ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 29.63ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv .. 164.09ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 36.06ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 43.57ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 42.76ms  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 41.25ms DONE
+ DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 33.50ms DONE
+ ... 35.72ms  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv .. 166.59ms DONE
+ DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 23.39ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 91.17ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ... 39.98ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv .. 113.73ms DONE
+  2024-09-02 20:53:17 Filament\Actions\Exports\Jobs\ExportCsv .. 103.73ms DONE
+  2024-09-02 20:53:18 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 20:53:18 Filament\Actions\Exports\Jobs\ExportCompletion  24.09ms DONE
+  2024-09-02 20:53:18 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 20:53:18 Filament\Notifications\DatabaseNotification  8.96ms DONE
+  2024-09-02 20:53:18 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 20:53:18 Filament\Notifications\Events\DatabaseNotificationsSent  5.11ms DONE
+  2024-09-02 20:53:18 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 20:53:18 Filament\Actions\Exports\Jobs\CreateXlsxFile  169.14ms DONE
+  2024-09-02 21:03:32 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 21:03:32 Illuminate\Bus\ChainedBatch ............... 22.16ms DONE
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\PrepareCsvExport  22.43ms DONE
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\ExportCsv ... 62.66ms DONE
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\ExportCompletion  38.99ms DONE
+  2024-09-02 21:03:32 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 21:03:32 Filament\Notifications\DatabaseNotification  13.82ms DONE
+  2024-09-02 21:03:32 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 21:03:32 Filament\Notifications\Events\DatabaseNotificationsSent  9.57ms DONE
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 21:03:32 Filament\Actions\Exports\Jobs\CreateXlsxFile  34.72ms DONE
+  2024-09-02 21:05:44 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 21:05:44 Illuminate\Bus\ChainedBatch ............... 56.27ms DONE
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\PrepareCsvExport  29.27ms DONE
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\ExportCsv ... 52.09ms DONE
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\ExportCompletion  37.75ms DONE
+  2024-09-02 21:05:44 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 21:05:44 Filament\Notifications\DatabaseNotification  10.77ms DONE
+  2024-09-02 21:05:44 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 21:05:44 Filament\Notifications\Events\DatabaseNotificationsSent  12.65ms DONE
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 21:05:44 Filament\Actions\Exports\Jobs\CreateXlsxFile  21.70ms DONE
+  2024-09-02 21:06:50 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 21:06:50 Illuminate\Bus\ChainedBatch ............... 19.50ms DONE
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\PrepareCsvExport  23.60ms DONE
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\ExportCsv ... 41.14ms DONE
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\ExportCompletion  34.49ms DONE
+  2024-09-02 21:06:50 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 21:06:50 Filament\Notifications\DatabaseNotification  14.08ms DONE
+  2024-09-02 21:06:50 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 21:06:50 Filament\Notifications\Events\DatabaseNotificationsSent  7.05ms DONE
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 21:06:50 Filament\Actions\Exports\Jobs\CreateXlsxFile  20.02ms DONE
+  2024-09-02 21:09:48 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 21:09:48 Illuminate\Bus\ChainedBatch ............... 26.77ms DONE
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\PrepareCsvExport  20.98ms DONE
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\ExportCsv ... 36.45ms DONE
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\ExportCompletion  23.81ms DONE
+  2024-09-02 21:09:48 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 21:09:48 Filament\Notifications\DatabaseNotification  7.47ms DONE
+  2024-09-02 21:09:48 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 21:09:48 Filament\Notifications\Events\DatabaseNotificationsSent  4.30ms DONE
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 21:09:48 Filament\Actions\Exports\Jobs\CreateXlsxFile  9.45ms DONE
+  2024-09-02 21:13:52 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 21:13:52 Illuminate\Bus\ChainedBatch ............... 42.04ms DONE
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\PrepareCsvExport  18.36ms DONE
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\ExportCsv ... 31.60ms DONE
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\ExportCompletion  29.80ms DONE
+  2024-09-02 21:13:52 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 21:13:52 Filament\Notifications\DatabaseNotification  10.45ms DONE
+  2024-09-02 21:13:52 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 21:13:52 Filament\Notifications\Events\DatabaseNotificationsSent  21.03ms DONE
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 21:13:52 Filament\Actions\Exports\Jobs\CreateXlsxFile  38.43ms DONE
+  2024-09-02 21:17:15 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 21:17:15 Illuminate\Bus\ChainedBatch ............... 19.07ms DONE
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\PrepareCsvExport  21.92ms DONE
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\ExportCsv ... 58.88ms DONE
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\ExportCompletion  29.92ms DONE
+  2024-09-02 21:17:15 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 21:17:15 Filament\Notifications\DatabaseNotification  12.36ms DONE
+  2024-09-02 21:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 21:17:15 Filament\Notifications\Events\DatabaseNotificationsSent  7.43ms DONE
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 21:17:15 Filament\Actions\Exports\Jobs\CreateXlsxFile  14.96ms DONE
+  2024-09-02 21:17:51 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-02 21:17:51 Illuminate\Bus\ChainedBatch ............... 26.04ms DONE
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\PrepareCsvExport  21.88ms DONE
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\ExportCsv ... 35.04ms DONE
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\ExportCompletion  24.10ms DONE
+  2024-09-02 21:17:51 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-02 21:17:51 Filament\Notifications\DatabaseNotification  8.72ms DONE
+  2024-09-02 21:17:51 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-02 21:17:51 Filament\Notifications\Events\DatabaseNotificationsSent  5.71ms DONE
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-02 21:17:51 Filament\Actions\Exports\Jobs\CreateXlsxFile  11.12ms DONE
+  2024-09-03 03:32:25 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-03 03:32:25 Illuminate\Bus\ChainedBatch ............... 29.92ms DONE
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\PrepareCsvExport  24.01ms DONE
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\ExportCsv ... 39.39ms DONE
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\ExportCompletion  27.44ms DONE
+  2024-09-03 03:32:25 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-03 03:32:25 Filament\Notifications\DatabaseNotification  10.14ms DONE
+  2024-09-03 03:32:25 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-03 03:32:25 Filament\Notifications\Events\DatabaseNotificationsSent  6.04ms DONE
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-03 03:32:25 Filament\Actions\Exports\Jobs\CreateXlsxFile  13.16ms DONE
+  2024-09-03 03:35:56 Illuminate\Bus\ChainedBatch .................... RUNNING
+  2024-09-03 03:35:56 Illuminate\Bus\ChainedBatch ............... 20.78ms DONE
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\PrepareCsvExport . RUNNING
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\PrepareCsvExport  24.90ms DONE
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\ExportCsv ........ RUNNING
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\ExportCsv ... 37.27ms DONE
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\ExportCompletion . RUNNING
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\ExportCompletion  22.45ms DONE
+  2024-09-03 03:35:56 Filament\Notifications\DatabaseNotification .... RUNNING
+  2024-09-03 03:35:56 Filament\Notifications\DatabaseNotification  8.54ms DONE
+  2024-09-03 03:35:56 Filament\Notifications\Events\DatabaseNotificationsSent  RUNNING
+  2024-09-03 03:35:56 Filament\Notifications\Events\DatabaseNotificationsSent  5.38ms DONE
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\CreateXlsxFile ... RUNNING
+  2024-09-03 03:35:56 Filament\Actions\Exports\Jobs\CreateXlsxFile  11.01ms DONE
