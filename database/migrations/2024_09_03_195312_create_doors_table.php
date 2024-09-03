@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('open_and_close_logs', function (Blueprint $table) {
+        Schema::create('doors', function (Blueprint $table) {
             $table->id();
             $table->string('instructor_name')->nullable();
             $table->string('instructor_email')->nullable();
@@ -28,6 +28,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('open_and_close_logs');
+        Schema::dropIfExists('doors');
     }
 };
+

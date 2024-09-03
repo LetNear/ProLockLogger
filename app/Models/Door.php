@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Door extends Model
+
+
 {
 
     protected $fillable = [
@@ -16,6 +18,5 @@ class Door extends Model
         'status',
         'log_date',
     ];
-    
     use HasFactory;
 }
