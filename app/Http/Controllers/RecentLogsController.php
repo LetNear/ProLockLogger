@@ -177,7 +177,9 @@ class RecentLogsController extends Controller
             ]);
 
             // Update the corresponding StudentAttendance record
-            StudentAttendance::where('user_information.user_number', $log->user_number)
+            StudentAttendance::whereHas('userInformation', function ($query) use ($log) {
+                $query->where('user_number', $log->user_number);
+            })
                 ->whereNull('time_out')
                 ->update([
                     'time_out' => $validated['time_out'],
