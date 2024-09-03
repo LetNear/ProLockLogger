@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
+use App\Models\RecentLogs;
 
 class LogChart extends ChartWidget
 {
@@ -10,20 +11,26 @@ class LogChart extends ChartWidget
 
     protected function getData(): array
     {
+        // Fetch the recent logs grouped by role and count the occurrences
+        $logs = RecentLogs::selectRaw('roles.name as role_name, COUNT(*) as count')
+            ->join('roles', 'recent_logs.role_id', '=', 'roles.id')
+            ->groupBy('roles.name')
+            ->pluck('count', 'role_name')
+            ->all();
+
         return [
             'datasets' => [
                 [
-                    'label' => 'Blog posts created',
-                    'data' => [0, 10, 5, 2, 21, 32, 45, 74, 65, 45, 77, 89],
+                    'label' => 'Number of Logs by Role',
+                    'data' => array_values($logs),
                 ],
             ],
-            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            'labels' => array_keys($logs),
         ];
-
     }
 
     protected function getType(): string
     {
-        return 'line';
+        return 'bar'; // Changed to 'bar' for a better representation of roles
     }
 }
