@@ -209,6 +209,7 @@ class RecentLogsController extends Controller
         try {
             // Find the NFC record by rfid_number
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
+            $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
 
             if (!$nfc) {
                 return response()->json(['message' => 'NFC UID not found.'], 404);
@@ -242,7 +243,7 @@ class RecentLogsController extends Controller
                 if (!is_null($log['time_out'])) {
                     // Add a null coalescing operator for 'course' and other potentially missing keys
                     StudentAttendance::create([
-                        'user_information_id' => RecentLogs::where('id_card_id', $nfc->id)->first()->userInformation->id,
+                        'user_information_id' => $userInformation->id,
                         'time_in' => $log['time_in'],
                         'time_out' => $log['time_out'],
                         'status' => 'Completed',
