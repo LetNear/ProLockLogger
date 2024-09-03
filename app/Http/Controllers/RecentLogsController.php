@@ -242,7 +242,7 @@ class RecentLogsController extends Controller
                 if (!is_null($log['time_out'])) {
                     // Add a null coalescing operator for 'course' and other potentially missing keys
                     StudentAttendance::create([
-                        'user_information_id' => $log['user_number'],
+                        'user_information_id' => $log['student_number'],
                         'time_in' => $log['time_in'],
                         'time_out' => $log['time_out'],
                         'status' => 'Completed',
