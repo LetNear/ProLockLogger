@@ -10,6 +10,7 @@ use Filament\Forms\Components\DatePicker;
 class LogChart extends ChartWidget
 {
     protected static ?string $heading = 'User Activity';
+    protected static ?int $sort = 2;
     
     // Default start and end dates
     public ?string $startDate = null;

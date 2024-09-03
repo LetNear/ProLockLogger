@@ -39,7 +39,7 @@ class StatsOverview extends BaseWidget
             Stat::make('Total Users', $totalUsers),
             Stat::make('Unique Views', $uniqueViews),
             Stat::make('Bounce Rate', $bounceRate),
-            Stat::make('Average Time on Page', $avgTimeOnPageFormatted),
+            Stat::make('Average Time on Laboratory Usage', $avgTimeOnPageFormatted),
         ];
     }
 }
