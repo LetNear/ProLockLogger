@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\LabSchedule;
 use App\Models\User;
 use App\Models\UserInformation;
@@ -346,5 +347,44 @@ class LabScheduleController extends Controller
 
         // Return all schedules as a JSON response
         return response()->json($schedules, 200);
+    }
+
+    public function getAllLabSchedules()
+    {
+        $labSchedules = LabSchedule::all();
+
+        // Check if there are any lab schedules
+        if ($labSchedules->isEmpty()) {
+            return response()->json(['message' => 'No lab schedules found'], 404);
+        }
+
+        return response()->json($labSchedules, 200);
+    }
+
+    public function enrollStudentToCourse(Request $request)
+    {
+        // Validate the incoming request
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:user_informations,id',
+            'course_id' => 'required|exists:courses,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Retrieve the student and course
+        $student = UserInformation::find($request->student_id);
+        $course = Course::find($request->course_id);
+
+        // Check if the student is already enrolled in the course
+        if ($student->courses()->where('course_id', $course->id)->exists()) {
+            return response()->json(['message' => 'Student is already enrolled in this course'], 409);
+        }
+
+        // Enroll the student in the course
+        $student->courses()->attach($course->id);
+
+        return response()->json(['message' => 'Student enrolled successfully'], 201);
     }
 }
