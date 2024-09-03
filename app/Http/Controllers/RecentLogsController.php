@@ -123,11 +123,7 @@ class RecentLogsController extends Controller
 
             // Save the data to StudentAttendance table
             StudentAttendance::create([
-                'name' => $userInformation->user->name,
-                'course' => $courseName, // Ensure the course is saved correctly
-                'year' => $validated['year'],
-                'block' => $userInformation->block->block ?? 'Unknown',
-                'student_number' => $userInformation->user_number,
+                'user_information_id' => $userInformation->id,
                 'time_in' => $validated['time_in'],
                 'time_out' => null, // Initially null, will be updated later
                 'status' => 'In Progress', // Assuming initial status
