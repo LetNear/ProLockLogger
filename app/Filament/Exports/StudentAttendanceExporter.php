@@ -11,52 +11,24 @@ class StudentAttendanceExporter extends Exporter
 {
     protected static ?string $model = StudentAttendance::class;
 
-    /**
-     * Define the columns to be exported.
-     *
-     * @return array
-     */
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('student_number')
-                ->label('Student Number'),
-
-            ExportColumn::make('name')
-                ->label('Name'),
-
-            ExportColumn::make('course')
-                ->label('Course'),
-
-            ExportColumn::make('year')
-                ->label('Year Level'),
-
-            ExportColumn::make('block')
-                ->label('Block'),
-
-            ExportColumn::make('time_in')
-                ->label('Time In'),
-
-            ExportColumn::make('time_out')
-                ->label('Time Out'),
-
-            ExportColumn::make('status')
-                ->label('Status'),
-
-            ExportColumn::make('created_at')
-                ->label('Created At'),
-
-            ExportColumn::make('updated_at')
-                ->label('Updated At'),
+            ExportColumn::make('id')
+                ->label('ID'),
+            ExportColumn::make('name'),
+            ExportColumn::make('course'),
+            ExportColumn::make('year'),
+            ExportColumn::make('block'),
+            ExportColumn::make('student_number'),
+            ExportColumn::make('time_in'),
+            ExportColumn::make('time_out'),
+            ExportColumn::make('status'),
+            ExportColumn::make('created_at'),
+            ExportColumn::make('updated_at'),
         ];
     }
 
-    /**
-     * Get the notification body for completed export.
-     *
-     * @param Export $export
-     * @return string
-     */
     public static function getCompletedNotificationBody(Export $export): string
     {
         $body = 'Your student attendance export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
