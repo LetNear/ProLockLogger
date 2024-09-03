@@ -365,7 +365,7 @@ class LabScheduleController extends Controller
     {
         // Validate the incoming request
         $validator = Validator::make($request->all(), [
-            'student_id' => 'required|exists:user_informations,id',
+            'user_id' => 'required|exists:user_informations,id',
             'course_id' => 'required|exists:courses,id',
         ]);
 
