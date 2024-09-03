@@ -64,14 +64,14 @@ class LabScheduleImporter extends Importer
         }
 
         // Check for duplicate subject_code
-        $existingSchedule = LabSchedule::where('course_code', $this->data['course_code'])->first();
+        $existingSchedule = LabSchedule::where('course_code', $this->data['subject_code'])->first();
         if ($existingSchedule) {
             throw new RowImportFailedException('Duplicate subject code');
         }
 
         return LabSchedule::create([
-            'course_code' => $this->data['course_code'],
-            'course_name' => $this->data['course_name'],
+            'course_code' => $this->data['subject_code'],
+            'course_name' => $this->data['subject_name'],
             'instructor_id' => $instructor->id,
             'block_id' => $block->id,
             'year' => $this->data['year'],
