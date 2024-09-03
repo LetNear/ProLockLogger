@@ -5,6 +5,7 @@ namespace App\Filament\Imports;
 use App\Models\LabSchedule;
 use App\Models\User;
 use App\Models\Block;
+use App\Models\Course;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -68,10 +69,15 @@ class LabScheduleImporter extends Importer
         if ($existingSchedule) {
             throw new RowImportFailedException('Duplicate subject code');
         }
+        $course = Course::where('course_code', $this->data['course_code'])->first();
 
+        if (!$course) {
+            throw new RowImportFailedException('Course not found');
+        }
         return LabSchedule::create([
             'course_code' => $this->data['course_code'],
             'course_name' => $this->data['course_name'],
+            'course_id' => $course->id,
             'instructor_id' => $instructor->id,
             'block_id' => $block->id,
             'year' => $this->data['year'],
