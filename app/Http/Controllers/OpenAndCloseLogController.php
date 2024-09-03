@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Door;
 use App\Models\DoorController;
 use App\Models\User;
 use Carbon\Carbon;
@@ -25,7 +26,7 @@ class OpenAndCloseLogController extends Controller
         $openTime = $now->format('H:i:s');
 
         // Create a new log entry for door opening
-        $log = DoorController::create([
+        $log = Door::create([
             'instructor_name' => $user->name,
             'instructor_email' => $user->email,
             'open_time' => $openTime,
@@ -56,7 +57,7 @@ class OpenAndCloseLogController extends Controller
         $closeTime = $now->format('H:i:s');
 
         // Create a new log entry for door closing
-        $log = DoorController::create([
+        $log = Door::create([
             'instructor_name' => $user->name,
             'instructor_email' => $user->email,
             'close_time' => $closeTime,
