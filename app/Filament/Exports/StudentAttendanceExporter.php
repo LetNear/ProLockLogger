@@ -34,15 +34,15 @@ class StudentAttendanceExporter extends Exporter
     public static function modifyQuery(Builder $query): Builder
     {
         $user = auth()->user();
-        
+
         if ($user->role_number === 2) {
-            return StudentAttendance::whereHas('userInformation', function ($query) use ($user) {
-                $query->whereHas('courses', function ($query) use ($user) {
-                    $query->whereHas('labSchedules', function ($query) use ($user) {
+            $query->whereHas('userInformation', function (Builder $query) use ($user) {
+                $query->whereHas('courses', function (Builder $query) use ($user) {
+                    $query->whereHas('labSchedules', function (Builder $query) use ($user) {
                         $query->where('instructor_id', $user->id);
                     });
                 });
-            })->getQuery();
+            });
         }
 
         return $query;
