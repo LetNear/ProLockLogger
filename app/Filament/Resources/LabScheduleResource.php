@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -94,6 +95,10 @@ class LabScheduleResource extends Resource
                                     ->label('Class End Time')
                                     ->required()
                                     ->seconds(false),
+                                TextInput::make('password')
+                                    ->label('Password')
+                                    ->required()
+                                    ->placeholder('Enter the password for the laboratory schedule'),
                             ]),
                     ]),
             ]);

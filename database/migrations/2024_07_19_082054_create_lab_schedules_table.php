@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('day_of_the_week')->nullable();
             $table->string('class_start')->nullable();
             $table->string('class_end')->nullable();
+            $table->string('password')->nullable();
             $table->timestamps();
         });
     }
