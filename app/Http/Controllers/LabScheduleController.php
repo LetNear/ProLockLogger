@@ -396,4 +396,43 @@ class LabScheduleController extends Controller
 
         return response()->json(['message' => 'User enrolled successfully'], 201);
     }
+
+
+    public function getEnrolledCoursesByEmail($email)
+    {
+        // Validate that the email exists in the users table
+        $validator = Validator::make(['email' => $email], [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Retrieve the user information by email
+        $student = UserInformation::whereHas('user', function ($query) use ($email) {
+            $query->where('email', $email);
+        })->first();
+
+        // Ensure that the student exists
+        if (!$student) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Get the courses the student is enrolled in using the pivot table
+        $enrolledCourses = $student->courses()
+            ->withPivot('schedule_id') // Include schedule details if needed
+            ->with(['labSchedules' => function($query) {
+                $query->select('id', 'subject_code', 'subject_name', 'class_start', 'class_end', 'day_of_the_week'); // Add fields from lab schedules as needed
+            }])
+            ->get(['courses.id', 'courses.course_name', 'courses.course_code']);
+
+        // Check if there are any enrolled courses
+        if ($enrolledCourses->isEmpty()) {
+            return response()->json(['message' => 'No enrolled courses found for this user'], 404);
+        }
+
+        // Return the list of enrolled courses with any pivot data if needed
+        return response()->json($enrolledCourses, 200);
+    }
 }

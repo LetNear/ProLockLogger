@@ -64,6 +64,7 @@ Route::get('/current-date-time', [UserController::class, 'getCurrentDateTime']);
 Route::get('/student/lab-schedule/rfid/{rfid_number}', [LabScheduleController::class, 'getLabScheduleOfStudentByRFID']);
 Route::get('/lab-schedules', [LabScheduleController::class, 'getAllLabSchedules']);
 Route::post('/enroll-student', [LabScheduleController::class, 'enrollStudentToCourse']);
+Route::get('/enrolled-courses/{email}', [LabScheduleController::class, 'getEnrolledCoursesByEmail']);
 
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 // Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
