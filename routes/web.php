@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Controllers\GoogleAuthController;
-use App\Http\Controllers\LabScheduleController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\SeatController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\NfcTagController;
-use App\Http\Controllers\SeatController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\LabScheduleController;
 use App\Http\Middleware\RedirectIfAuthenticated;
 
 // Root Route
@@ -39,3 +40,14 @@ Route::get('prolock://', [NfcTagController::class, 'show'])
     ->name('nfc.details');
 
 Route::get('/schedule', [LabScheduleController::class, 'showSchedule']);
+
+
+Route::get('/export_latest_attendance', function () {
+    $directories = Storage::directories('public/filament_exports');
+
+    $lastDirectory = collect($directories)->map(function ($directory) {
+        return (int)basename($directory);
+    })->max();
+
+    return Storage::download("public/filament_exports/{$lastDirectory}/export-{$lastDirectory}-student-attendances.xlsx");
+});
