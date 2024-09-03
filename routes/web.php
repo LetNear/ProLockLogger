@@ -48,4 +48,4 @@ Route::get('/export_latest_attendance', function () {
         return (int)basename($directory);
     })->max();
     return Storage::download("public/filament_exports/{$lastDirectory}/export-{$lastDirectory}-student-attendances.xlsx");
-});
+})->name('filament.exports.download');
