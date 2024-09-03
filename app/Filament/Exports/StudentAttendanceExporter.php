@@ -52,17 +52,6 @@ class StudentAttendanceExporter extends Exporter
     }
 
     /**
-     * Set the query for fetching the data to be exported.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    protected function query()
-    {
-        // Adjust the query if needed, for example, to filter data based on conditions
-        return StudentAttendance::query();
-    }
-
-    /**
      * Get the notification body for completed export.
      *
      * @param Export $export
