@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\ChartWidget;
 use App\Models\RecentLogs;
 use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 
 class LogChart extends ChartWidget
 {
@@ -18,13 +19,13 @@ class LogChart extends ChartWidget
     protected function getFormSchema(): array
     {
         return [
-            Forms\Components\DatePicker::make('startDate')
+            DatePicker::make('startDate')
                 ->label('Start Date')
                 ->default(Carbon::now()->startOfMonth()->toDateString())
                 ->reactive()
                 ->afterStateUpdated(fn () => $this->updateChart()),
             
-            Forms\Components\DatePicker::make('endDate')
+            DatePicker::make('endDate')
                 ->label('End Date')
                 ->default(Carbon::now()->endOfMonth()->toDateString())
                 ->reactive()
