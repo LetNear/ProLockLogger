@@ -44,4 +44,4 @@ Route::get('/schedule', [LabScheduleController::class, 'showSchedule']);
 
 Route::get('/filament/imports/{import}/failed-rows/download', function ($import) {
     return Storage::download("public/filament_exports/{$import}/export-{$import}-student-attendances.xlsx");
-})->name('filament.exports.download');
+});
