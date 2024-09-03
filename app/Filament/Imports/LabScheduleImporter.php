@@ -5,6 +5,7 @@ namespace App\Filament\Imports;
 use App\Models\LabSchedule;
 use App\Models\User;
 use App\Models\Block;
+use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Filament\Actions\Imports\ImportColumn;
@@ -52,14 +53,20 @@ class LabScheduleImporter extends Importer
             ->where('role_number', 2)
             ->first();
 
+        if (!$instructor) {
+            return new RowImportFailedException('Instructor not found');
+        }
         // Validate block name
         $block = Block::where('block', $this->data['block_name'])->first();
 
+        if (!$block) {
+            return new RowImportFailedException('Block not found');
+        }
+
         // Check for duplicate subject_code
         $existingSchedule = LabSchedule::where('subject_code', $this->data['subject_code'])->first();
-
-        if (!$instructor || !$block || $existingSchedule) {
-            return null; // Skip processing for this schedule
+        if ($existingSchedule) {
+            return new RowImportFailedException('Duplicate subject code');
         }
 
         return LabSchedule::create([
@@ -73,23 +80,7 @@ class LabScheduleImporter extends Importer
             'class_end' => $this->data['class_end'],
         ]);
     }
-
-    public function afterImport()
-    {
-        // Store errors in session for display
-        if (!empty($this->invalidInstructors)) {
-            Session::flash('invalidInstructors', $this->invalidInstructors);
-        }
-
-        if (!empty($this->invalidBlocks)) {
-            Session::flash('invalidBlocks', $this->invalidBlocks);
-        }
-
-        if (!empty($this->duplicateSchedules)) {
-            Session::flash('duplicateSchedules', $this->duplicateSchedules);
-        }
-    }
-
+    
     public static function getCompletedNotificationBody(Import $import): string
     {
         $body = 'Your lab schedule import has completed with ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' successfully imported.';

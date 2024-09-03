@@ -14,9 +14,6 @@ use Filament\Actions\Imports\Models\Import;
 class UserImporter extends Importer
 {
     protected static ?string $model = User::class;
-    protected array $duplicateEmails = [];
-    protected array $invalidEmails = [];
-    protected array $duplicateUserNumbers = [];
 
     public static function getColumns(): array
     {
@@ -92,21 +89,6 @@ class UserImporter extends Importer
         return $roles[$roleNumber] ?? null;
     }
 
-    public function afterImport()
-    {
-        // Store errors in session for display
-        if (!empty($this->duplicateEmails)) {
-            Session::flash('duplicateEmails', $this->duplicateEmails);
-        }
-
-        if (!empty($this->invalidEmails)) {
-            Session::flash('invalidEmails', $this->invalidEmails);
-        }
-
-        if (!empty($this->duplicateUserNumbers)) {
-            Session::flash('duplicateUserNumbers', $this->duplicateUserNumbers);
-        }
-    }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
