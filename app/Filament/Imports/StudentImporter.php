@@ -55,12 +55,12 @@ class StudentImporter extends Importer
 
         // Check if the email already exists
         if (User::where('email', $this->data['email'])->exists()) {
-            return new RowImportFailedException('Email already exists');
+            throw new RowImportFailedException('Email already exists');
         }
 
         // Check if the user number already exists
         if (UserInformation::where('user_number', ['user_number'])->exists()) {
-            return new RowImportFailedException('User number already exists');
+            throw new RowImportFailedException('User number already exists');
         }
 
         // Create the user

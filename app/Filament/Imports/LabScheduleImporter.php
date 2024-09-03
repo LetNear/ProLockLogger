@@ -54,19 +54,19 @@ class LabScheduleImporter extends Importer
             ->first();
 
         if (!$instructor) {
-            return new RowImportFailedException('Instructor not found');
+            throw new RowImportFailedException('Instructor not found');
         }
         // Validate block name
         $block = Block::where('block', $this->data['block_name'])->first();
 
         if (!$block) {
-            return new RowImportFailedException('Block not found');
+            throw new RowImportFailedException('Block not found');
         }
 
         // Check for duplicate subject_code
         $existingSchedule = LabSchedule::where('subject_code', $this->data['subject_code'])->first();
         if ($existingSchedule) {
-            return new RowImportFailedException('Duplicate subject code');
+            throw new RowImportFailedException('Duplicate subject code');
         }
 
         return LabSchedule::create([
@@ -80,7 +80,7 @@ class LabScheduleImporter extends Importer
             'class_end' => $this->data['class_end'],
         ]);
     }
-    
+
     public static function getCompletedNotificationBody(Import $import): string
     {
         $body = 'Your lab schedule import has completed with ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' successfully imported.';
