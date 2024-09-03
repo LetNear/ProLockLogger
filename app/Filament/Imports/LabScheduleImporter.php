@@ -19,9 +19,9 @@ class LabScheduleImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('subject_code')
+            ImportColumn::make('course_code')
                 ->rules(['required', 'max:255']),
-            ImportColumn::make('subject_name')
+            ImportColumn::make('course_name')
                 ->rules(['required', 'max:255']),
             ImportColumn::make('instructor_name')
                 ->fillRecordUsing(function ($record, $state) {
@@ -63,15 +63,15 @@ class LabScheduleImporter extends Importer
             throw new RowImportFailedException('Block not found');
         }
 
-        // Check for duplicate subject_code
-        $existingSchedule = LabSchedule::where('course_code', $this->data['subject_code'])->first();
+        // Check for duplicate course_code
+        $existingSchedule = LabSchedule::where('course_code', $this->data['course_code'])->first();
         if ($existingSchedule) {
             throw new RowImportFailedException('Duplicate subject code');
         }
 
         return LabSchedule::create([
-            'course_code' => $this->data['subject_code'],
-            'course_name' => $this->data['subject_name'],
+            'course_code' => $this->data['course_code'],
+            'course_name' => $this->data['course_name'],
             'instructor_id' => $instructor->id,
             'block_id' => $block->id,
             'year' => $this->data['year'],
