@@ -68,6 +68,7 @@ Route::post('/enroll-student', [LabScheduleController::class, 'enrollStudentToCo
 Route::get('/enrolled-courses/{email}', [LabScheduleController::class, 'getEnrolledCoursesByEmail']);
 Route::post('/door/open', [OpenAndCloseLogController::class, 'openDoor']);
 Route::post('/door/close', [OpenAndCloseLogController::class, 'closeDoor']);
+Route::get('/logs', [OpenAndCloseLogController::class, 'getAllLogs']);
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 // Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
 // Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);

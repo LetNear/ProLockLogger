@@ -71,4 +71,16 @@ class OpenAndCloseLogController extends Controller
             'log' => $log,
         ], 201);
     }
+
+    public function getAllLogs()
+    {
+        // Retrieve all door logs from the database
+        $logs = Door::all();
+
+        // Return a JSON response with the logs
+        return response()->json([
+            'message' => 'Logs retrieved successfully.',
+            'logs' => $logs,
+        ]);
+    }
 }
