@@ -4,6 +4,7 @@ namespace App\Filament\Imports;
 
 use App\Models\User;
 use App\Models\UserInformation;
+use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Facades\Session;
 use Filament\Actions\Imports\ImportColumn;
@@ -25,13 +26,13 @@ class UserImporter extends Importer
                 ->rules(['required', 'max:255']),
             ImportColumn::make('email')
                 ->requiredMapping()
-                ->rules(['required', 'email', 'max:255']),
+                ->rules(['required', 'email', 'max:255', 'unique:users,email']),
             ImportColumn::make('user_number')
-            ->fillRecordUsing(function ($record, $state) {
-                return;
-            })
+                ->fillRecordUsing(function ($record, $state) {
+                    return;
+                })
                 ->requiredMapping()
-                ->rules(['required', 'max:20']),
+                ->rules(['required', 'max:20', 'unique:users,user_number']),
         ];
     }
 
@@ -41,24 +42,19 @@ class UserImporter extends Importer
 
         // Validate email format
         if (!$this->isValidEmail($this->data['email'])) {
-            $this->invalidEmails[] = $this->data['email'];
-            return null; // Skip processing for this user
+            throw new RowImportFailedException("Invalid email");
         }
 
         // Check for existing email
         $user = User::where('email', $this->data['email'])->first();
         if ($user) {
-            // Collect duplicate emails
-            $this->duplicateEmails[] = $this->data['email'];
-            return null; // Skip processing for this user
+            throw new RowImportFailedException("Duplicate email");
         }
 
         // Check for duplicate user_number
         $userInfo = UserInformation::where('user_number', $this->data['user_number'])->first();
         if ($userInfo) {
-            // Collect duplicate user_numbers
-            $this->duplicateUserNumbers[] = $this->data['user_number'];
-            return null; // Skip processing for this user
+            throw new RowImportFailedException("Duplicate user number");
         }
 
         $user = User::create([

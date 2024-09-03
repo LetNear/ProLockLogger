@@ -42,6 +42,6 @@ Route::get('prolock://', [NfcTagController::class, 'show'])
 Route::get('/schedule', [LabScheduleController::class, 'showSchedule']);
 
 
-Route::get('/filament/imports/{import}/failed-rows/download', function ($import) {
-    return Storage::download("public/filament_exports/{$import}/export-{$import}-student-attendances.xlsx");
+Route::get('/filament/exports/{export}/download', function ($export) {
+    return Storage::download("public/filament_exports/{$export}/export-{$export}-student-attendances.xlsx");
 });
