@@ -29,7 +29,7 @@ class UserImporter extends Importer
                     return;
                 })
                 ->requiredMapping()
-                ->rules(['required', 'max:20', 'unique:users,user_number']),
+                ->rules(['required', 'max:20', 'unique:user_information,user_number']),
         ];
     }
 
