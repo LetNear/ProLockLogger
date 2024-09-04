@@ -38,7 +38,7 @@ class RecentLogsController extends Controller
                         'block_name' => $log->block->block ?? 'Unknown',
                         'year' => $log->year ?? 'Unknown',
                         'time_in' => $log->time_in ?? 'N/A',
-                        'time_out' => $log->time_out ?? 'N/A',
+                        'time_out' => $log->time_out ?? '',
                         'UID' => $log->nfc->rfid_number ?? 'Unknown',
                         'user_number' => $log->user_number ?? 'Unknown',
                         'block_id' => $log->block_id ?? 'Unknown',
