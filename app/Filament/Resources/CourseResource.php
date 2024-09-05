@@ -75,6 +75,17 @@ class CourseResource extends Resource
                     ->wrap() // Wrap text for long descriptions
                     ->limit(50), // Limit displayed text for better readability
 
+                TextColumn::make('yearAndSemester.school_year')
+                    ->label('School Year')
+                    ->sortable()
+                    ->tooltip('The school year of the course.')
+                    ->searchable(),
+
+                TextColumn::make('yearAndSemester.semester')
+                    ->label('Semester')
+                    ->sortable()
+                    ->tooltip('The semester of the course.')
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('M d, Y h:i A')
@@ -92,7 +103,7 @@ class CourseResource extends Resource
             ])
             ->actions([
                 EditAction::make()
-                    
+
                     ->tooltip('Edit Course'), // Tooltip for clarity
 
                 DeleteAction::make()

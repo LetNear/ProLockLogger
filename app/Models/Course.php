@@ -13,6 +13,7 @@ class Course extends Model
         'course_name',
         'course_code',
         'course_description',
+        'year_and_semester_id',
     ];
 
     public function labSchedules()
@@ -27,10 +28,29 @@ class Course extends Model
             ->withTimestamps();
     }
 
-    
+
 
     public function students()
     {
         return $this->belongsToMany(UserInformation::class, 'course_user_information', 'course_id', 'user_information_id');
+    }
+
+    public function yearAndSemester()
+    {
+        return $this->belongsTo(YearAndSemester::class, 'year_and_semester_id');
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        // Automatically set the on-going year and semester on creating a course
+        static::creating(function ($course) {
+            $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+
+            if ($onGoingYearAndSemester) {
+                $course->year_and_semester_id = $onGoingYearAndSemester->id;
+            }
+        });
     }
 }
