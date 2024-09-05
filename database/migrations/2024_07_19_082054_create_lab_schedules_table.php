@@ -5,6 +5,7 @@ use App\Models\Course;
 use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\YearAndProgram;
+use App\Models\YearAndSemester;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -22,13 +23,16 @@ return new class extends Migration
             $table->foreignIdFor(Course::class, 'course_id')->nullable();
             $table->foreignIdFor(User::class, 'instructor_id')->nullable();
             $table->foreignIdFor(Block::class)->nullable();
+            $table->foreignIdFor(YearAndSemester::class, 'year_and_semester_id')->nullable();
             $table->string('year')->nullable();
+            $table->string('specific_date')->nullable();
             $table->string('course_code')->nullable();
             $table->string('course_name')->nullable();
             $table->string('day_of_the_week')->nullable();
             $table->string('class_start')->nullable();
             $table->string('class_end')->nullable();
             $table->string('password')->nullable();
+            $table->boolean('is_makeup_class')->default(false);
             $table->timestamps();
         });
     }

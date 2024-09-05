@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\CourseImporter;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Models\Course;
 use Filament\Forms;
@@ -15,7 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
-
+use Filament\Tables\Actions\ImportAction;
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
@@ -58,6 +59,12 @@ class CourseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('5s')
+            ->headerActions([
+                ImportAction::make()
+                    ->importer(CourseImporter::class)
+                    ->label('Import Course')
+            ])
             ->columns([
                 TextColumn::make('course_name')
                     ->label('Name')
