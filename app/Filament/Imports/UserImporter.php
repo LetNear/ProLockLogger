@@ -4,9 +4,9 @@ namespace App\Filament\Imports;
 
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Models\YearAndSemester; // Import the YearAndSemester model
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Facades\Log as FacadesLog;
-use Illuminate\Support\Facades\Session;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -52,10 +52,20 @@ class UserImporter extends Importer
             throw new RowImportFailedException("Duplicate user number");
         }
 
+        // Fetch the active 'on-going' Year and Semester
+        $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+
+        if (!$onGoingYearAndSemester) {
+            // Handle the case where there is no active 'on-going' Year and Semester
+            throw new RowImportFailedException("No active (on-going) Year and Semester found. Please set one before importing users.");
+        }
+
+        // Create the user and associate with the active Year and Semester
         $user = User::create([
             'name' => $this->data['name'],
             'email' => $this->data['email'],
             'role_number' => 2,
+            'year_and_semester_id' => $onGoingYearAndSemester->id, // Associate the active Year and Semester
         ]);
 
         $roleName = $this->getRoleNameByNumber($user->role_number);
@@ -86,7 +96,6 @@ class UserImporter extends Importer
 
         return $roles[$roleNumber] ?? null;
     }
-
 
     public static function getCompletedNotificationBody(Import $import): string
     {

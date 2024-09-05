@@ -6,6 +6,7 @@ use App\Models\IdCard;
 use App\Models\Nfc;
 use App\Models\Seat;
 use App\Models\User;
+use App\Models\YearAndSemester;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -37,6 +38,7 @@ return new class extends Migration
             $table->string('gender')->nullable();
             $table->string('contact_number')->nullable();
             $table->string('complete_address')->nullable();
+            $table->foreignIdFor(YearAndSemester::class, 'year_and_semester_id')->nullable(); // Add year_and_semester_id column
             $table->timestamps();
         });
     }

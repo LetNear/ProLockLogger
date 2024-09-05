@@ -30,6 +30,7 @@ class UserInformation extends Model implements Auditable
         'gender',
         'contact_number',
         'complete_address',
+        'year_and_semester_id',
     ];
 
     // Define the relationship with the User model
@@ -87,4 +88,22 @@ class UserInformation extends Model implements Auditable
         return $this->hasMany(StudentAttendance::class);
     }
 
+    public function yearAndSemester()
+    {
+        return $this->belongsTo(YearAndSemester::class, 'year_and_semester_id');
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        // Automatically set the on-going year and semester on creating UserInformation
+        static::creating(function ($userInformation) {
+            $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+
+            if ($onGoingYearAndSemester) {
+                $userInformation->year_and_semester_id = $onGoingYearAndSemester->id;
+            }
+        });
+    }
 }

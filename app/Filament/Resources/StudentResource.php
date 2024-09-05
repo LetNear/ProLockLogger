@@ -57,6 +57,7 @@ class StudentResource extends Resource
                                     ->label('Roles')
                                     ->default(3)
                                     ->disabled(),
+
                             ]),
                     ]),
                 Section::make('Verification & Security')
@@ -87,7 +88,7 @@ class StudentResource extends Resource
                 ImportAction::make()
                     ->importer(StudentImporter::class)
                     ->label('Import Students')
-                    // ->visible(fn() => Auth::user()->hasRole('Instructor')), // Only visible to Administrators
+                // ->visible(fn() => Auth::user()->hasRole('Instructor')), // Only visible to Administrators
                 // ImportAction::make()
                 //     ->importer(UserImporter::class)
                 //     ->label('Import Students')
@@ -104,17 +105,22 @@ class StudentResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->tooltip('The email address of the student.'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->tooltip('The date and time when the student was created.'),
                 Tables\Columns\TextColumn::make('role_number')
                     ->label('Roles')
                     ->getStateUsing(fn($record) => 'Student')
                     ->sortable()
                     ->tooltip('The roles assigned to the student.'),
+
+                TextColumn::make('yearAndSemester.school_year')
+                    ->label('School Year')
+                    ->sortable()
+                    ->tooltip('The school year of the user.'),
+
+                TextColumn::make('yearAndSemester.semester')
+                    ->label('Semester')
+                    ->sortable()
+                    ->tooltip('The semester of the user.'),
+
 
             ])
             ->actions([
