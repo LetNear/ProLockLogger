@@ -16,6 +16,8 @@ Route::put('/userInfo/update', [UserInformationController::class, 'updateUserDet
 
 Route::get('getuserbyfingerprint/{fingerprint_id}', [UserController::class, 'getUsersByFingerprint']);
 Route::get('users/role/{role_id}', [UserController::class, 'getUsersByRole']);
+Route::get('admin/role/{role_id}', [UserController::class, 'getUsersByRole1']);
+
 
 
 Route::put('/users/update-fingerprint', [UserController::class, 'updateFingerprintByEmail']);
