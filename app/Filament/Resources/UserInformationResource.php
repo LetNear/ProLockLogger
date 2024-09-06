@@ -125,7 +125,7 @@ class UserInformationResource extends Resource
                                         foreach ($courses as $course) {
                                             foreach ($course->labSchedules as $schedule) {
                                                 // Create a unique identifier combining course and schedule
-                                                $options[$schedule->id] = $course->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')';
+                                                $options[$schedule->id] = $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '');
                                             }
                                         }
 
@@ -146,26 +146,6 @@ class UserInformationResource extends Resource
                                         }
                                     })
                                     ->disabled(fn($get) => $get('isRestricted')),
-
-                                Select::make('school_year')
-                                    ->options([
-                                        '2024-2025' => '2024-2025',
-                                        '2025-2026' => '2025-2026',
-                                        '2026-2027' => '2026-2027',
-                                        '2027-2028' => '2027-2028',
-                                        '2028-2029' => '2028-2029',
-                                        '2029-2030' => '2029-2030',
-                                    ])
-                                    ->label('School Year')
-                                    ->required(),
-                                Select::make('semester')
-                                    ->options([
-                                        '1st Semester' => '1st Semester',
-                                        '2nd Semester' => '2nd Semester',
-                                    ])
-                                    ->label('Semester')
-                                    ->required(),
-
                             ]),
                     ]),
                 Section::make('Personal Information')
@@ -292,7 +272,9 @@ class UserInformationResource extends Resource
                     ->alignLeft()
                     ->getStateUsing(function ($record) {
                         // Joins course names into a string
-                        return $record->courses->pluck('course_name')->join(', ');
+                        return $record->labSchedules->map(function ($schedule) {
+                            return $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '');
+                        })->implode(', ');
                     }),
 
                 TextColumn::make('first_name')

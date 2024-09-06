@@ -15,7 +15,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
@@ -146,11 +148,12 @@ class LabScheduleResource extends Resource
                     ->searchable(),
                 TextColumn::make('day_of_the_week')
                     ->label('Day of the Week')
+                    ->getStateUsing(fn($record) => $record->day_of_the_week ?? '-----')
                     ->searchable()
                     ->sortable(), // Check if record exists
                 TextColumn::make('specific_date')
                     ->label('Makeup Class Date')
-
+                    ->getStateUsing(fn($record) => $record->specific_date ?? '-----')
                     ->sortable()
                     ->searchable(),
 
@@ -193,6 +196,33 @@ class LabScheduleResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('Crete Makeup Class')
+                    ->label('Create Makeup Class')
+                    ->form([
+                        DatePicker::make('specific_date')
+                            ->label('Specific Date')
+                            ->required(),
+                        TimePicker::make('class_start')
+                            ->label('Class Start Time')
+                            ->required()
+                            ->seconds(false),
+                        TimePicker::make('class_end')
+                            ->label('Class End Time')
+                            ->required()
+                            ->seconds(false),
+                    ])
+                    ->action(function (array $data, $record) {
+                        $newRecord = $record->replicate(['day_of_the_week'])->fill([...$data, 'is_makeup_class' => true,]);
+                        $newRecord = LabSchedule::create($newRecord->toArray());
+                        $newRecord->update(['course_name' => $record->course->course_name . ' (Makeup)']);
+                        $students = $record->course->students->each(function ($student) use ($newRecord) {
+                            $newRecord->students()->attach($student->id, ['course_id' => $newRecord->course->id]);
+                        });
+
+                        return redirect(LabScheduleResource::getUrl('edit', ['record' => $newRecord]));
+                    })
+                    ->disabled(fn($record) => $record->is_makeup_class),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

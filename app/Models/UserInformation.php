@@ -72,7 +72,9 @@ class UserInformation extends Model implements Auditable
     // Define the relationship with the LabSchedule model
     public function labSchedules()
     {
-        return $this->hasMany(LabSchedule::class);
+        return $this->belongsToMany(LabSchedule::class, 'course_user_information', 'user_information_id', 'schedule_id')
+            ->withPivot('course_id')
+            ->withTimestamps();
     }
 
     // Define the many-to-many relationship with Course model

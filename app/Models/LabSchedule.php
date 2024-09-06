@@ -48,6 +48,11 @@ class LabSchedule extends Model implements Auditable
         return $this->hasMany(Seat::class);
     }
 
+    public function students()
+    {
+        return $this->belongsToMany(UserInformation::class, 'course_user_information', 'schedule_id', 'user_information_id')->withPivot('course_id');
+    }
+
     // Accessor for course code, which will be used in your Blade
     public function getCourseCodeAttribute()
     {
