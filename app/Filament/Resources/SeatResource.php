@@ -33,96 +33,109 @@ class SeatResource extends Resource
 
     protected static ?string $navigationGroup = 'Laboratory Management';
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('Seat Details')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Select::make('instructor_id')
-                                    ->label('Instructor')
-                                    ->options(function () {
-                                        return User::where('role_number', 2)->pluck('name', 'id');
-                                    })
-                                    ->default(Auth::id()) // Set the default to the current user's ID
-                                    ->required()
-                                    ->reactive(),
 
-                                Select::make('course_id')
-                                    ->label('Course')
-                                    ->options(function () {
-                                        $instructorId = Auth::id();
-                                        return LabSchedule::with('course')
-                                            ->where('instructor_id', $instructorId)
+ public static function form(Form $form): Form
+{
+    return $form
+        ->schema([
+            Forms\Components\Section::make('Seat Details')
+                ->schema([
+                    Forms\Components\Grid::make(2)
+                        ->schema([
+                            Select::make('instructor_id')
+                                ->label('Instructor')
+                                ->options(function () {
+                                    return User::where('role_number', 2)->pluck('name', 'id');
+                                })
+                                ->default(Auth::id()) // Set the default to the current user's ID
+                                ->required()
+                                ->reactive()
+                                ->disabled(fn($record) => $record !== null), // Disable if editing
+
+                            Select::make('course_id')
+                                ->label('Course')
+                                ->options(function () {
+                                    $instructorId = Auth::id();
+                                    return LabSchedule::with('course')
+                                        ->where('instructor_id', $instructorId)
+                                        ->where('is_makeup_class', false) // Filter to exclude makeup classes
+                                        ->get()
+                                        ->mapWithKeys(function ($schedule) {
+                                            $classStart = Carbon::parse($schedule->class_start)->format('H:i');
+                                            $classEnd = Carbon::parse($schedule->class_end)->format('H:i');
+                                            $displayText = "{$schedule->course->course_name} - {$schedule->day_of_the_week}, {$classStart} - {$classEnd}";
+                                            return [$schedule->id => $displayText]; // Save schedule_id
+                                        });
+                                })
+                                ->required()
+                                ->searchable()
+                                ->placeholder('Select Course')
+                                ->reactive(),
+
+                            Select::make('student_id')
+                                ->label('Student')
+                                ->options(function ($get) {
+                                    $scheduleId = $get('course_id');
+
+                                    if ($scheduleId) {
+                                        $assignedStudentIds = Seat::pluck('student_id')->toArray();
+
+                                        return UserInformation::whereHas('courses', function ($query) use ($scheduleId) {
+                                            $query->where('course_user_information.schedule_id', $scheduleId);
+                                        })
+                                            ->whereNotIn('id', $assignedStudentIds) // Exclude assigned students
+                                            ->with('user')
                                             ->get()
-                                            ->mapWithKeys(function ($schedule) {
-                                                $classStart = Carbon::parse($schedule->class_start)->format('H:i');
-                                                $classEnd = Carbon::parse($schedule->class_end)->format('H:i');
-                                                $displayText = "{$schedule->course->course_name} - {$schedule->day_of_the_week}, {$classStart} - {$classEnd}";
-                                                return [$schedule->id => $displayText]; // Save schedule_id
-                                            });
-                                    })
-                                    ->required()
-                                    ->searchable()
-                                    ->placeholder('Select Course')
-                                    ->reactive(),
+                                            ->pluck('user.name', 'id');
+                                    }
 
-                                Select::make('student_id')
-                                    ->label('Student')
-                                    ->options(function ($get) {
-                                        $scheduleId = $get('course_id');
+                                    return [];
+                                })
+                                ->default(fn($record) => $record ? $record->student_id : null)
+                                ->searchable()
+                                ->required()
+                                ->placeholder('Select Student')
+                                ->formatStateUsing(function ($state) {
+                                    if ($state) {
+                                        $student = UserInformation::with('user')->find($state);
+                                        return $student ? $student->user->name : $state; // Show the student's name if available
+                                    }
+                                    return null;
+                                }),
 
-                                        if ($scheduleId) {
-                                            $assignedStudentIds = Seat::pluck('student_id')->toArray();
+                            Select::make('computer_id')
+                                ->label('Computer')
+                                ->options(function ($get) {
+                                    $courseId = $get('course_id');
 
-                                            return UserInformation::whereHas('courses', function ($query) use ($scheduleId) {
-                                                $query->where('course_user_information.schedule_id', $scheduleId);
-                                            })
-                                                ->whereNotIn('id', $assignedStudentIds) // Exclude assigned students
-                                                ->with('user')
-                                                ->get()
-                                                ->pluck('user.name', 'id');
-                                        }
+                                    if ($courseId) {
+                                        $assignedComputerIds = Seat::where('course_id', $courseId)
+                                            ->pluck('computer_id')
+                                            ->toArray();
 
-                                        return [];
-                                    })
-                                    ->default(fn($record) => $record ? $record->student_id : null)
-                                    ->searchable()
-                                    ->required()
-                                    ->placeholder('Select Student')
-                                    ->formatStateUsing(function ($state) {
-                                        if ($state) {
-                                            $student = UserInformation::with('user')->find($state);
-                                            return $student ? $student->user->name : $state; // Show the student's name if available
-                                        }
-                                        return null;
-                                    }),
+                                        return Computer::whereNotIn('id', $assignedComputerIds)
+                                            ->pluck('computer_number', 'id');
+                                    }
 
-                                Select::make('computer_id')
-                                    ->label('Computer')
-                                    ->options(function ($get) {
-                                        $courseId = $get('course_id');
+                                    return [];
+                                })
+                                ->searchable()
+                                ->required()
+                                ->placeholder('Select Computer')
+                                ->formatStateUsing(function ($state) {
+                                    if ($state) {
+                                        $computer = Computer::find($state);
+                                        return $computer ? $computer->computer_number : $state; // Show computer number instead of ID
+                                    }
+                                    return null;
+                                }),
+                        ]),
+                ]),
+        ]);
+}
 
-                                        if ($courseId) {
-                                            $assignedComputerIds = Seat::where('course_id', $courseId)
-                                                ->pluck('computer_id')
-                                                ->toArray();
+    
 
-                                            return Computer::whereNotIn('id', $assignedComputerIds)
-                                                ->pluck('computer_number', 'id');
-                                        }
-
-                                        return [];
-                                    })
-                                    ->searchable()
-                                    ->required()
-                                    ->placeholder('Select Computer'),
-                            ]),
-                    ]),
-                ]);
-    }
 
     public static function table(Table $table): Table
     {

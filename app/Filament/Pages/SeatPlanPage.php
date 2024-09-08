@@ -1,15 +1,18 @@
 <?php
+
 namespace App\Filament\Pages;
 
 use App\Models\LabSchedule;
 use App\Models\Seat;
+use App\Models\Computer;
 use App\Models\UserInformation;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
 class SeatPlanPage extends Page
 {
-    public $seats;
+    public $computers; // Store the list of computers
+    public $seats; // Store seat details to reflect assigned seats per course
     public $students;
     public $selectedStudent;
     public $selectedSeat;
@@ -20,9 +23,7 @@ class SeatPlanPage extends Page
 
     public function mount()
     {
-        
-
-        // Initialize properties
+        $this->computers = collect();
         $this->seats = collect();
         $this->students = collect();
         $this->selectedCourse = null;
@@ -34,15 +35,17 @@ class SeatPlanPage extends Page
             $query->where('role_number', 3);
         })->whereNull('seat_id')->get();
 
-        // Fetch courses associated with the instructor's schedules
+        // Fetch courses associated with the instructor's regular schedules
         if (auth()->check() && auth()->user()->role_number == 2) {
+            // Assuming there's a field `is_regular` in the `LabSchedule` table
             $this->courses = LabSchedule::where('instructor_id', auth()->user()->id)
+                ->where('is_makeup_class', false) // Filter to include only regular class schedules
                 ->with('course')
                 ->get()
                 ->mapWithKeys(function ($schedule) {
                     $courseName = $schedule->course->course_name ?? 'Unknown Course';
-                    $displayText = "{$courseName} - {$schedule->day_of_the_week}, {$schedule->class_start} - {$schedule->class_end}";
-                    return [$schedule->id => $displayText]; // Map schedule ID to display text
+                    $displayText = "{$schedule->day_of_the_week} - {$courseName}, {$schedule->class_start} - {$schedule->class_end}";
+                    return [$schedule->course_id => $displayText]; // Use course_id to match seats
                 });
         }
     }
@@ -61,11 +64,16 @@ class SeatPlanPage extends Page
     public function loadSeatPlanDetails()
     {
         if (!empty($this->selectedCourse)) {
-            // Fetch seats based on the selected course (use course_id instead of schedule_id)
-            $this->seats = Seat::where('course_id', $this->selectedCourse) // Change to course_id
+            // Fetch computers
+            $this->computers = Computer::all();
+
+            // Fetch seats based on the selected course
+            $this->seats = Seat::where('course_id', $this->selectedCourse) // Ensure seats are filtered by course
                 ->with('computer', 'student.user') // Load related computer and student data
-                ->get();
+                ->get()
+                ->keyBy('computer_id'); // Key by computer_id for easy access
         } else {
+            $this->computers = collect(); // Clear computers if no course is selected
             $this->seats = collect(); // Clear seats if no course is selected
         }
     }
@@ -93,21 +101,29 @@ class SeatPlanPage extends Page
     }
 
     public function removeStudentFromSeat($seatId)
-    {
-        DB::transaction(function () use ($seatId) {
-            $seat = Seat::find($seatId);
+{
+    DB::transaction(function () use ($seatId) {
+        // Find the seat by ID
+        $seat = Seat::find($seatId);
 
-            if ($seat && $seat->student) {
+        if ($seat) {
+            // If the seat has an associated student, unassign the seat from the student
+            if ($seat->student) {
                 $student = UserInformation::find($seat->student->id);
                 if ($student) {
+                    // Unassign the student from the seat
                     $student->seat_id = null;
                     $student->save();
                 }
-                $seat->student_id = null;
-                $seat->save();
             }
-        });
 
-        $this->loadSeatPlanDetails();
-    }
+            // Delete the entire seat record from the database
+            $seat->delete();
+        }
+    });
+
+    // Refresh the seat plan details after deletion
+    $this->loadSeatPlanDetails();
+}
+
 }

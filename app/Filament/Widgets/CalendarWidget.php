@@ -6,6 +6,8 @@ use App\Models\LabSchedule;
 use Filament\Widgets\Widget;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use Carbon\Carbon;
+use Filament\Actions\Action;
+use Saade\FilamentFullCalendar\Actions\ViewAction;
 
 class CalendarWidget extends FullCalendarWidget
 {
@@ -37,7 +39,7 @@ class CalendarWidget extends FullCalendarWidget
                     'title' => 'Makeup: ' . $event->course_name,
                     'start' => Carbon::parse($event->specific_date . ' ' . $event->class_start)->toIso8601String(),
                     'end' => Carbon::parse($event->specific_date . ' ' . $event->class_end)->toIso8601String(),
-                    'url' => route('filament.admin.resources.lab-schedules.edit', ['record' => $event->id]),
+                    // 'url' => route('filament.admin.resources.lab-schedules.index', ['record' => $event->id]),
                     'shouldOpenUrlInNewTab' => true,
                 ];
             } else {
@@ -64,7 +66,7 @@ class CalendarWidget extends FullCalendarWidget
                 'title' => $event->course_name . ' - ' . $event->course_code,
                 'start' => $current->copy()->setTimeFromTimeString($event->class_start)->toIso8601String(),
                 'end' => $current->copy()->setTimeFromTimeString($event->class_end)->toIso8601String(),
-                'url' => route('filament.admin.resources.lab-schedules.edit', ['record' => $event->id]),
+                // 'url' => route('filament.admin.resources.lab-schedules.index ', ['record' => $event->id]),
                 'shouldOpenUrlInNewTab' => true,
             ];
 
@@ -87,6 +89,11 @@ class CalendarWidget extends FullCalendarWidget
 
             'events' => $this->fetchEvents(),
         ];
+    }
+
+    protected function viewAction(): Action
+    {
+        return ViewAction::make();
     }
 
     // ->plugin(
