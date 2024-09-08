@@ -13,7 +13,7 @@ class SeatPlanPage extends Page
 {
     public $computers; // Store the list of computers
     public $seats; // Store seat details to reflect assigned seats per course
-    public $students;
+    public $students; // To store the list of students eligible for seat assignment
     public $selectedStudent;
     public $selectedSeat;
     public $selectedCourse; // Replaces selectedBlockYear
@@ -30,22 +30,19 @@ class SeatPlanPage extends Page
         $this->selectedStudent = null;
         $this->selectedSeat = null;
 
-        // Fetch students without seats assigned
-        $this->students = UserInformation::whereHas('user', function ($query) {
-            $query->where('role_number', 3);
-        })->whereNull('seat_id')->get();
+        // Initially fetch students without seats assigned
+        $this->loadEligibleStudents();
 
         // Fetch courses associated with the instructor's regular schedules
         if (auth()->check() && auth()->user()->role_number == 2) {
-            // Assuming there's a field `is_regular` in the `LabSchedule` table
             $this->courses = LabSchedule::where('instructor_id', auth()->user()->id)
-                ->where('is_makeup_class', false) // Filter to include only regular class schedules
+                ->where('is_makeup_class', false)
                 ->with('course')
                 ->get()
                 ->mapWithKeys(function ($schedule) {
                     $courseName = $schedule->course->course_name ?? 'Unknown Course';
                     $displayText = "{$schedule->day_of_the_week} - {$courseName}, {$schedule->class_start} - {$schedule->class_end}";
-                    return [$schedule->course_id => $displayText]; // Use course_id to match seats
+                    return [$schedule->course_id => $displayText];
                 });
         }
     }
@@ -57,73 +54,128 @@ class SeatPlanPage extends Page
 
     public function updatedSelectedCourse($value)
     {
-        // Load seat plan details when the selectedCourse changes
         $this->loadSeatPlanDetails();
+        $this->loadEligibleStudents(); // Load eligible students whenever the selected course changes
     }
 
     public function loadSeatPlanDetails()
     {
         if (!empty($this->selectedCourse)) {
-            // Fetch computers
             $this->computers = Computer::all();
 
-            // Fetch seats based on the selected course
-            $this->seats = Seat::where('course_id', $this->selectedCourse) // Ensure seats are filtered by course
-                ->with('computer', 'student.user') // Load related computer and student data
+            $this->seats = Seat::where('course_id', $this->selectedCourse)
+                ->with('computer', 'student.user')
                 ->get()
-                ->keyBy('computer_id'); // Key by computer_id for easy access
+                ->keyBy('computer_id');
         } else {
-            $this->computers = collect(); // Clear computers if no course is selected
-            $this->seats = collect(); // Clear seats if no course is selected
+            $this->computers = collect();
+            $this->seats = collect();
+        }
+    }
+
+    public function loadEligibleStudents()
+    {
+        if ($this->selectedCourse) {
+            // Fetch students enrolled in the selected course and not assigned to any seat
+            $this->students = UserInformation::whereHas('user', function ($query) {
+                $query->where('role_number', 3);
+            })
+                ->whereHas('courses', function ($query) {
+                    $query->where('course_id', $this->selectedCourse);
+                })
+                ->whereNull('seat_id')
+                ->get();
+        } else {
+            $this->students = collect();
         }
     }
 
     public function selectSeat($seatId)
     {
-        $this->selectedSeat = Seat::find($seatId);
+
+
+        // Fetch the seat associated with the computer ID
+        $this->selectedSeat = Computer::where('id', $seatId)->first();
+
+        // Debugging: Check the selected seat
+        if (!$this->selectedSeat) {
+            dd('No seat found for computer ID: ' . $seatId);
+        }
+
+        // Check the selected seat details
+
     }
 
     public function assignStudentToSeat()
     {
         if ($this->selectedStudent && $this->selectedSeat) {
             DB::transaction(function () {
+                // Fetch the student using UserInformation model
                 $student = UserInformation::find($this->selectedStudent);
-                $student->seat_id = $this->selectedSeat->id;
-                $student->save();
 
-                $this->selectedSeat->student_id = $student->user_id;
-                $this->selectedSeat->save();
+                // Ensure the student exists and is valid
+                if (!$student) {
+                    dd('Student not found with ID: ' . $this->selectedStudent);
+                }
+
+                // Fetch the seat and ensure it exists
+                $seat = Seat::where('computer_id', $this->selectedSeat->id)
+                    ->where('course_id', $this->selectedCourse)
+                    ->first();
+
+                // Check if a seat entry exists for the selected computer and course
+                if (!$seat) {
+                    $seat = new Seat();
+                    $seat->computer_id = $this->selectedSeat->id;
+                    $seat->course_id = $this->selectedCourse;
+                }
+
+                // Check if the student is already assigned to another seat in the same course
+                if ($student->seat_id && $student->seat_id !== $seat->id) {
+                    dd('Student is already assigned to another seat.');
+                }
+
+                // Assign the student to the selected seat
+                $seat->student_id = $student->id;
+                $seat->instructor_id = auth()->user()->id; // Assuming instructor is logged in
+                $seat->instructor_name = auth()->user()->name; // Assuming the instructor's name
+                $seat->course_name = $student->courses->first()->course_name ?? null; // Assuming student has a course
+
+                // Save the seat assignment
+                $seat->save();
+
+                // Update the student's seat_id
+                $student->seat_id = $seat->id;
+                $student->save();
             });
 
+            // Reset selected seat and student to clear the form
             $this->reset(['selectedSeat', 'selectedStudent']);
-            $this->loadSeatPlanDetails();
+            $this->loadSeatPlanDetails(); // Refresh seat details
+            $this->loadEligibleStudents(); // Refresh eligible students list
+        } else {
+            dd('Missing selected student or seat');
         }
     }
 
-    public function removeStudentFromSeat($seatId)
-{
-    DB::transaction(function () use ($seatId) {
-        // Find the seat by ID
-        $seat = Seat::find($seatId);
 
-        if ($seat) {
-            // If the seat has an associated student, unassign the seat from the student
-            if ($seat->student) {
+    public function removeStudentFromSeat($seatId)
+    {
+        DB::transaction(function () use ($seatId) {
+            $seat = Seat::find($seatId);
+
+            if ($seat && $seat->student) {
                 $student = UserInformation::find($seat->student->id);
                 if ($student) {
-                    // Unassign the student from the seat
                     $student->seat_id = null;
                     $student->save();
                 }
             }
 
-            // Delete the entire seat record from the database
             $seat->delete();
-        }
-    });
+        });
 
-    // Refresh the seat plan details after deletion
-    $this->loadSeatPlanDetails();
-}
-
+        $this->loadSeatPlanDetails();
+        $this->loadEligibleStudents(); // Refresh eligible students list after removal
+    }
 }
