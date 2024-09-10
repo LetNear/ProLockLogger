@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
-use Filament\Actions\Imports\Models\Import;
+use App\Models\YearAndSemester;
 use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
@@ -19,8 +19,8 @@ use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 
 class UserResource extends Resource
 {
@@ -54,24 +54,15 @@ class UserResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s email address')
-                                    ->helperText('The email address of the user.'),
-                                // ->rules(function () {
-                                //     $rules = ['required', 'email'];
-                                //     if (request()->routeIs('filament.resources.users.create')) {
-                                //         $rules[] = 'unique:users,email';
-                                //     } else {
-                                //         $userId = request()->route('record');
-                                //         $rules[] = "unique:users,email,$userId";
-                                //     }
-                                //     return $rules;
-                                // }),
+                                    ->helperText('The email address of the user.')
+                                    ->unique(ignoreRecord: true), // Make email unique
 
-                                // TODO make validations
                                 Select::make('role_number')
                                     ->label('Roles')
                                     ->relationship('roles', 'name')
-                                    ->preload(3)
+                                    ->preload()
                                     ->required(),
+
                                 Repeater::make('fingerprint_id')
                                     ->label('Fingerprint IDs')
                                     ->schema([
@@ -81,10 +72,19 @@ class UserResource extends Resource
                                     ])
                                     ->minItems(0)
                                     ->maxItems(2)
-                                    ->helperText('Add exactly two fingerprint IDs.')
+                                    ->helperText('Add exactly two fingerprint IDs.'),
+
+                                // Select::make('year_and_semester_id')
+                                //     ->label('Year and Semester')
+                                //     ->relationship('yearAndSemester', 'school_year')
+                                //     ->getOptionLabelFromRecordUsing(function ($record) {
+                                //         return "{$record->school_year} - {$record->semester}"; // Display school year and semester together
+                                //     })
+                                //     ->searchable()
+                                //     ->preload()
+                                //     ->required(),
 
                             ]),
-
                     ]),
                 Section::make('Verification & Security')
                     ->schema([
@@ -140,7 +140,7 @@ class UserResource extends Resource
                             2 => 'Faculty',
                             3 => 'Student',
                         ];
-    
+
                         return $roles[$record->role_number] ?? 'Unknown';
                     })
                     ->sortable()
@@ -149,30 +149,36 @@ class UserResource extends Resource
                     ->label('Fingerprint IDs')
                     ->getStateUsing(function ($record) {
                         $fingerprintData = $record->fingerprint_id;
-    
-                        // Handle fingerprintData: decode if it's a string, or ensure it's an array
+
                         if (is_string($fingerprintData)) {
                             $fingerprintData = json_decode($fingerprintData, true);
                         }
-    
-                        // Ensure $fingerprintData is an array
+
                         if (!is_array($fingerprintData)) {
                             $fingerprintData = [];
                         }
-    
-                        // Extract fingerprint IDs from the array
-                        $fingerprintIds = array_map(function($item) {
+
+                        $fingerprintIds = array_map(function ($item) {
                             return $item['fingerprint_id'] ?? null;
                         }, $fingerprintData);
-    
-                        // Filter out null values and return as a comma-separated string
+
                         $fingerprintIds = array_filter($fingerprintIds);
-    
+
                         return empty($fingerprintIds) ? 'No fingerprints' : implode(', ', $fingerprintIds);
                     })
                     ->searchable()
                     ->sortable()
                     ->tooltip('The fingerprint IDs of the user.'),
+                TextColumn::make('yearAndSemester.school_year')
+                    ->label('School Year')
+                    ->sortable()
+                    ->tooltip('The school year of the user.')
+                    ->searchable(),
+                TextColumn::make('yearAndSemester.semester')
+                    ->label('Semester')
+                    ->sortable()
+                    ->tooltip('The semester of the user.')
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -182,13 +188,36 @@ class UserResource extends Resource
                     ->icon('heroicon-s-trash')
                     ->tooltip('Delete this user'),
             ])
+            // ->filters([
+            //     SelectFilter::make('year_and_semester_id')
+            //         ->label('School Year')
+            //         ->relationship('yearAndSemester', 'school_year')
+            //         ->options(
+            //             YearAndSemester::query()
+            //                 ->distinct('school_year') // Fetch distinct school years
+            //                 ->pluck('school_year', 'id')
+            //         )
+            //         ->placeholder('All School Years')
+            //         ->searchable(),
+
+            //     SelectFilter::make('semester')
+            //         ->label('Semester')
+            //         ->relationship('yearAndSemester', 'semester')
+            //         ->options(
+            //             YearAndSemester::query()
+            //                 ->distinct('semester') // Fetch distinct semesters
+            //                 ->pluck('semester', 'semester') // Ensure unique semester values
+            //         )
+            //         ->placeholder('All Semesters')
+            //         ->searchable(),
+            // ])
+
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
                     ->icon('heroicon-s-trash')
                     ->tooltip('Delete selected users'),
             ]);
     }
-    
 
     public static function getRelations(): array
     {

@@ -5,12 +5,12 @@ namespace App\Filament\Imports;
 use App\Models\Block;
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Models\YearAndSemester; // Import the YearAndSemester model
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Log as FacadesLog;
-use Illuminate\Support\Facades\Session;
 
 class StudentImporter extends Importer
 {
@@ -59,15 +59,24 @@ class StudentImporter extends Importer
         }
 
         // Check if the user number already exists
-        if (UserInformation::where('user_number', ['user_number'])->exists()) {
+        if (UserInformation::where('user_number', $this->data['user_number'])->exists()) {
             throw new RowImportFailedException('User number already exists');
         }
 
-        // Create the user
+        // Fetch the active 'on-going' Year and Semester
+        $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+
+        if (!$onGoingYearAndSemester) {
+            // Handle the case where there is no active 'on-going' Year and Semester
+            throw new RowImportFailedException("No active (on-going) Year and Semester found. Please set one before importing students.");
+        }
+
+        // Create the user and associate with the active Year and Semester
         $user = User::create([
             'name' => $this->data['name'],
             'email' => $this->data['email'],
             'role_number' => 3, // Set role_number for students
+            'year_and_semester_id' => $onGoingYearAndSemester->id, // Associate the active Year and Semester
         ]);
 
         // Sync role based on role_number
@@ -78,14 +87,12 @@ class StudentImporter extends Importer
 
         // Find the block_id based on the block name
         $block = Block::where('block', $this->data['block'])->first();
-
         $blockId = $block ? $block->id : null;
 
-
         // Log before updating or creating UserInformation
-        FacadesLog::info('Creating or updating UserInformation for user ID:', ['user_id' => $user->id, 'user_number' => ['user_number']]);
+        FacadesLog::info('Creating or updating UserInformation for user ID:', ['user_id' => $user->id, 'user_number' => $this->data['user_number']]);
 
-        // Update or create UserInformation including year
+        // Update or create UserInformation including year and block
         UserInformation::updateOrCreate(
             ['user_id' => $user->id],
             [

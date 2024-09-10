@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\YearAndSemester;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('courses', function (Blueprint $table) {
+        Schema::create('year_and_semesters', function (Blueprint $table) {
             $table->id();
-            $table->string('course_name');
-            $table->string('course_code');
-            $table->string('course_description');
-            $table->foreignIdFor(YearAndSemester::class, 'year_and_semester_id')->nullable(); // Add this line
+            $table->string('school_year');
+            $table->string('semester');
+            $table->string('status');
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('courses');
+        Schema::dropIfExists('year_and_semesters');
     }
 };

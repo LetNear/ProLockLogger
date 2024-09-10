@@ -17,6 +17,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -54,6 +55,28 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])->spa()
-            ->databaseNotifications();
+            ->databaseNotifications()
+            ->plugin(
+                FilamentFullCalendarPlugin::make()
+                ->selectable()
+            );
     }
 }
+
+ // ->plugin(
+    //     FilamentFullCalendarPlugin::make()
+    //         ->schedulerLicenseKey('CC-Attribution-NonCommercial-NoDerivatives')
+    //         ->timezone('Asia/Manila') // Set the timezone to the Philippines
+    //         ->locale('en')     // Set the locale (you can change this to 'fil' for Filipino)
+    //         ->plugins(['interaction', 'resourceTimeline'])
+    //         ->config([
+    //             'headerToolbar' => [
+    //                 'left' => 'prev,next today',
+    //                 'center' => 'title',
+    //                 'right' => 'resourceTimelineDay,resourceTimelineWeek',
+    //             ],
+    //             'initialView' => 'resourceTimelineWeek', // Set initial view to resource timeline
+    //             'nowIndicator' => true, // Show current time indicator
+    //             // 'height' => '10', // Set calendar height to auto
+    //         ])
+    // );

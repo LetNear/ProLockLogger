@@ -29,7 +29,7 @@ class Seat extends Model implements Auditable
 
     public function computer()
     {
-        return $this->belongsTo(Computer::class);
+        return $this->belongsTo(Computer::class, 'computer_id');
     }
 
     public function course()
@@ -65,6 +65,8 @@ class Seat extends Model implements Auditable
     {
         return $this->belongsTo(LabSchedule::class, 'course_id'); // assuming course_id is being used for schedule_id
     }
+
+
 
     public static function boot()
     {

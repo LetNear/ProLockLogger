@@ -23,6 +23,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use App\Models\User;
+use App\Models\YearAndSemester;
 
 class UserInformationResource extends Resource
 {
@@ -77,7 +78,7 @@ class UserInformationResource extends Resource
                                     ->disabled(fn($get) => $get('isRestricted')),
 
 
-                       
+
 
                                 TextInput::make('user_number')
                                     ->label('User ID Card Number')
@@ -105,7 +106,7 @@ class UserInformationResource extends Resource
                                     ->placeholder('Select the year')
                                     ->helperText('Choose the year level of the user.')
                                     ->disabled(fn($get) => $get('isRestricted')),
-                                    Select::make('courses')
+                                Select::make('courses')
                                     ->label('Courses')
                                     ->relationship('courses', 'course_name') // Relates to the many-to-many relationship in the model
                                     ->placeholder('Select courses')
@@ -118,22 +119,22 @@ class UserInformationResource extends Resource
                                         $courses = Course::whereHas('labSchedules')
                                             ->with('labSchedules') // Ensure schedules are loaded
                                             ->get();
-                                
+
                                         // Map the courses and schedules to create separate entries
                                         $options = [];
                                         foreach ($courses as $course) {
                                             foreach ($course->labSchedules as $schedule) {
                                                 // Create a unique identifier combining course and schedule
-                                                $options[$schedule->id] = $course->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')';
+                                                $options[$schedule->id] = $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '');
                                             }
                                         }
-                                
+
                                         return $options;
                                     })
                                     ->saveRelationshipsUsing(function ($state, $record) {
                                         // Reset the current relationships to ensure all are saved
                                         $record->courses()->detach();
-                                
+
                                         // Handle saving of multiple courses with their schedules
                                         foreach ($state as $scheduleId) {
                                             // Find the schedule and get the corresponding course ID
@@ -144,7 +145,7 @@ class UserInformationResource extends Resource
                                             }
                                         }
                                     })
-                                    ->disabled(fn($get) => $get('isRestricted'))
+                                    ->disabled(fn($get) => $get('isRestricted')),
                             ]),
                     ]),
                 Section::make('Personal Information')
@@ -248,9 +249,6 @@ class UserInformationResource extends Resource
                     ->searchable()
                     ->tooltip('The user\'s ID card number.')
                     ->alignLeft(),
-
-               
-
                 TextColumn::make('block.block')
                     ->label('Block')
                     ->sortable()
@@ -274,7 +272,9 @@ class UserInformationResource extends Resource
                     ->alignLeft()
                     ->getStateUsing(function ($record) {
                         // Joins course names into a string
-                        return $record->courses->pluck('course_name')->join(', ');
+                        return $record->labSchedules->map(function ($schedule) {
+                            return $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '');
+                        })->implode(', ');
                     }),
 
                 TextColumn::make('first_name')
@@ -333,6 +333,17 @@ class UserInformationResource extends Resource
                     ->searchable()
                     ->tooltip('The user\'s complete address.')
                     ->alignLeft(),
+                TextColumn::make('yearAndSemester.school_year')
+                    ->label('School Year')
+                    ->sortable()
+                    ->searchable()
+                    ->tooltip('The school year of the user.'),
+
+                TextColumn::make('yearAndSemester.semester')
+                    ->label('Semester')
+                    ->sortable()
+                    ->searchable()
+                    ->tooltip('The semester of the user.'),
 
                 TextColumn::make('created_at')
                     ->label('Created At')

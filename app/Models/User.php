@@ -29,6 +29,7 @@ class User extends Authenticatable implements Auditable, FilamentUser
         'google_id',
         'role_number',
         'fingerprint_id',
+        'year_and_semester_id',
     ];
 
     /**
@@ -84,5 +85,25 @@ class User extends Authenticatable implements Auditable, FilamentUser
     {
         // Encode array to JSON string for storage
         $this->attributes['fingerprint_id'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    public function yearAndSemester()
+    {
+        return $this->belongsTo(YearAndSemester::class, 'year_and_semester_id');
+    }
+
+
+    public static function boot()
+    {
+        parent::boot();
+
+        // Automatically set the active year and semester on creating
+        static::creating(function ($user) {
+            $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+
+            if ($onGoingYearAndSemester) {
+                $user->year_and_semester_id = $onGoingYearAndSemester->id;
+            }
+        });
     }
 }

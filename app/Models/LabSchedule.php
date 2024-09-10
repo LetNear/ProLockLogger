@@ -23,6 +23,9 @@ class LabSchedule extends Model implements Auditable
         'class_start',
         'class_end',
         'password',
+        'year_and_semester_id',
+        'is_makeup_class',
+        'specific_date',
     ];
 
     public function course()
@@ -45,6 +48,11 @@ class LabSchedule extends Model implements Auditable
         return $this->hasMany(Seat::class);
     }
 
+    public function students()
+    {
+        return $this->belongsToMany(UserInformation::class, 'course_user_information', 'schedule_id', 'user_information_id')->withPivot('course_id');
+    }
+
     // Accessor for course code, which will be used in your Blade
     public function getCourseCodeAttribute()
     {
@@ -54,5 +62,22 @@ class LabSchedule extends Model implements Auditable
     public function getCourseNameAttribute()
     {
         return $this->course ? $this->course->course_name : 'N/A';
+    }
+    public function yearAndSemester()
+    {
+        return $this->belongsTo(YearAndSemester::class, 'year_and_semester_id');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($labSchedule) {
+            $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+
+            if ($onGoingYearAndSemester) {
+                $labSchedule->year_and_semester_id = $onGoingYearAndSemester->id;
+            }
+        });
     }
 }

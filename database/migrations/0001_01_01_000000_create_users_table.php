@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Role;
+use App\Models\YearAndSemester;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,7 @@ return new class extends Migration
             $table->string('google_id')->nullable()->unique();
             $table->json('fingerprint_id')->nullable();  // JSON field named fingerprint_id
             $table->foreignIdFor(Role::class, 'role_number')->nullable();
+            $table->foreignIdFor(YearAndSemester::class, 'year_and_semester_id')->nullable();
             $table->rememberToken()->nullable();
             $table->timestamps();
         });

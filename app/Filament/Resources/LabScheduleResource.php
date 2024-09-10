@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources;
 
 use App\Filament\Imports\LabScheduleImporter;
@@ -10,10 +11,13 @@ use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
@@ -45,7 +49,6 @@ class LabScheduleResource extends Resource
                                     ->placeholder('Select a course')
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        // Fetch the course by the selected course_id and set the course_code and course_name
                                         if ($course = Course::find($state)) {
                                             $set('course_code', $course->course_code);
                                             $set('course_name', $course->course_name);
@@ -70,6 +73,11 @@ class LabScheduleResource extends Resource
                                         '4' => '4th Year',
                                     ])
                                     ->required(),
+                                Forms\Components\Toggle::make('is_makeup_class')
+                                    ->label('Makeup Class')
+                                    ->inline(false)
+                                    ->reactive()
+                                    ->helperText('Toggle on for makeup classes.'),
                             ]),
                     ]),
                 Forms\Components\Section::make('Schedule Details')
@@ -86,7 +94,12 @@ class LabScheduleResource extends Resource
                                         'Saturday' => 'Saturday',
                                         'Sunday' => 'Sunday',
                                     ])
-                                    ->required(),
+                                    ->required()
+                                    ->visible(fn($get) => !$get('is_makeup_class')), // Show only for regular classes
+                                DatePicker::make('specific_date')
+                                    ->label('Specific Date')
+                                    ->required()
+                                    ->visible(fn($get) => $get('is_makeup_class')), // Show only for makeup classes
                                 TimePicker::make('class_start')
                                     ->label('Class Start Time')
                                     ->required()
@@ -135,8 +148,15 @@ class LabScheduleResource extends Resource
                     ->searchable(),
                 TextColumn::make('day_of_the_week')
                     ->label('Day of the Week')
+                    ->getStateUsing(fn($record) => $record->day_of_the_week ?? '-----')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable(), // Check if record exists
+                TextColumn::make('specific_date')
+                    ->label('Makeup Class Date')
+                    ->getStateUsing(fn($record) => $record->specific_date ?? '-----')
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('class_start')
                     ->label('Class Start Time')
                     ->searchable()
@@ -145,6 +165,21 @@ class LabScheduleResource extends Resource
                     ->label('Class End Time')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('class_type') // Display class type
+                    ->label('Class Type')
+                    ->getStateUsing(fn($record) => $record && $record->is_makeup_class ? 'Makeup' : 'Regular')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('yearAndSemester.school_year')
+                    ->label('School Year')
+                    ->sortable()
+                    ->tooltip('The school year of the schedule.')
+                    ->searchable(),
+                TextColumn::make('yearAndSemester.semester')
+                    ->label('Semester')
+                    ->sortable()
+                    ->tooltip('The semester of the schedule.')
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
@@ -161,6 +196,33 @@ class LabScheduleResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('Crete Makeup Class')
+                    ->label('Create Makeup Class')
+                    ->form([
+                        DatePicker::make('specific_date')
+                            ->label('Specific Date')
+                            ->required(),
+                        TimePicker::make('class_start')
+                            ->label('Class Start Time')
+                            ->required()
+                            ->seconds(false),
+                        TimePicker::make('class_end')
+                            ->label('Class End Time')
+                            ->required()
+                            ->seconds(false),
+                    ])
+                    ->action(function (array $data, $record) {
+                        $newRecord = $record->replicate(['day_of_the_week'])->fill([...$data, 'is_makeup_class' => true,]);
+                        $newRecord = LabSchedule::create($newRecord->toArray());
+                        $newRecord->update(['course_name' => $record->course->course_name . ' (Makeup)']);
+                        $students = $record->course->students->each(function ($student) use ($newRecord) {
+                            $newRecord->students()->attach($student->id, ['course_id' => $newRecord->course->id]);
+                        });
+
+                        return redirect(LabScheduleResource::getUrl('edit', ['record' => $newRecord]));
+                    })
+                    ->disabled(fn($record) => $record->is_makeup_class),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -168,6 +230,8 @@ class LabScheduleResource extends Resource
                 ]),
             ]);
     }
+
+
 
     public static function getRelations(): array
     {

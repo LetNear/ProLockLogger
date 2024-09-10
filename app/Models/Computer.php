@@ -14,9 +14,9 @@ class Computer extends Model
         'serial_number',
     ];
 
-    public function seats()
+    public function seat()
     {
-        return $this->hasOne(Seat::class);
+        return $this->hasOne(Seat::class, 'computer_id');
     }
     use HasFactory;
 }

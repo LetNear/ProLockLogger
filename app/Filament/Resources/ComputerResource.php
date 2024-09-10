@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\ComputerImporter;
 use App\Filament\Resources\ComputerResource\Pages;
 use App\Filament\Resources\ComputerResource\RelationManagers;
 use App\Models\Computer;
@@ -12,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\ImportAction;
 
 class ComputerResource extends Resource
 {
@@ -40,12 +42,8 @@ class ComputerResource extends Resource
                                     ->minValue(1)
                                     ->placeholder('Enter the computer number')
                                     ->helperText('The unique number assigned to the computer.')
-                                    ->rules([
-                                        'required',
-                                        'max:20',
-                                        'unique:computers,computer_number', // Ensure uniqueness in the 'user_informations' table for the 'serial_number' column
-                                    ])
-                                    ->disabled(fn($record) => $record !== null),
+                                    ->unique(ignoreRecord: true) // Ignore uniqueness validation when editing
+                                    ->disabled(fn($record) => $record !== null), // Disable the field in edit mode
                                 Forms\Components\TextInput::make('brand')
                                     ->label('Brand')
                                     ->required()
@@ -78,6 +76,12 @@ class ComputerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('5s')
+            ->headerActions([
+                ImportAction::make()
+                    ->importer(ComputerImporter::class)
+                    ->label('Import Computers')
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('computer_number')
                     ->label('Computer Number')
