@@ -28,7 +28,7 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
 
-        $labSchedules = LabSchedule::where('year', $activeYearSemester->school_year)->get();
+        $labSchedules = LabSchedule::where('year', $activeYearSemester->id)->get();
 
         return response()->json($labSchedules, 200);
     }
@@ -58,7 +58,7 @@ class LabScheduleController extends Controller
         }
 
         // Add the active year to the lab schedule
-        $labSchedule = LabSchedule::create(array_merge($request->all(), ['year' => $activeYearSemester->school_year]));
+        $labSchedule = LabSchedule::create(array_merge($request->all(), ['year' => $activeYearSemester->id]));
 
         return response()->json($labSchedule, 201);
     }
@@ -74,7 +74,7 @@ class LabScheduleController extends Controller
         }
 
         $labSchedule = LabSchedule::where('id', $id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
 
         if (!$labSchedule) {
@@ -95,7 +95,7 @@ class LabScheduleController extends Controller
         }
 
         $labSchedule = LabSchedule::where('id', $id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
 
         if (!$labSchedule) {
@@ -132,7 +132,7 @@ class LabScheduleController extends Controller
         }
 
         $labSchedule = LabSchedule::where('id', $id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
 
         if (!$labSchedule) {
@@ -162,7 +162,7 @@ class LabScheduleController extends Controller
         }
 
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->get();
 
         if ($labSchedules->isEmpty()) {
@@ -190,7 +190,7 @@ class LabScheduleController extends Controller
         }
 
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->get();
 
         if ($labSchedules->isEmpty()) {
@@ -218,7 +218,7 @@ class LabScheduleController extends Controller
         }
 
         $scheduleCount = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->count();
 
         return response()->json([
@@ -246,7 +246,7 @@ class LabScheduleController extends Controller
         }
 
         $nextSchedule = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->where('class_start', '>', now())
             ->orderBy('class_start', 'asc')
             ->first();
@@ -302,7 +302,7 @@ class LabScheduleController extends Controller
         }
 
         $scheduleCount = LabSchedule::where('block_id', $student->block_id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->count();
 
         return response()->json([
@@ -328,9 +328,12 @@ class LabScheduleController extends Controller
 
         // Get the lab schedules for the instructor within the active year
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year_and_semester_id', $activeYearSemester->id)
             ->with(['course', 'block'])
             ->get();
+
+        // Debug: Output the fetched lab schedules
+        // dd('Fetched Lab Schedules:', $labSchedules);
 
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this instructor'], 404);
@@ -373,7 +376,7 @@ class LabScheduleController extends Controller
 
         // Fetch lab schedules based on course_name, class_start, and class_end within the active year
         $labSchedules = LabSchedule::where('block_id', $student->block_id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->whereNotNull('course_name')
             ->whereNotNull('class_start')
             ->whereNotNull('class_end')
@@ -397,7 +400,7 @@ class LabScheduleController extends Controller
 
         // Eager load 'course' relationship to ensure 'course_code' and 'course_name' are available
         $weekSchedule = LabSchedule::with('course')
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->get()
             ->groupBy('day_of_the_week')
             ->map(function ($schedules) {
@@ -440,7 +443,7 @@ class LabScheduleController extends Controller
             ->join('lab_schedules', 'course_user_information.schedule_id', '=', 'lab_schedules.id')
             ->join('courses', 'course_user_information.course_id', '=', 'courses.id')
             ->where('course_user_information.user_information_id', $student->id)
-            ->where('lab_schedules.year', $activeYearSemester->school_year)
+            ->where('lab_schedules.year', $activeYearSemester->id)
             ->select(
                 'courses.course_name',
                 'courses.course_code',
@@ -466,7 +469,7 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
 
-        $labSchedules = LabSchedule::where('year', $activeYearSemester->school_year)->get();
+        $labSchedules = LabSchedule::where('year', $activeYearSemester->id)->get();
 
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No lab schedules found'], 404);
@@ -542,7 +545,7 @@ class LabScheduleController extends Controller
     
         // Get the courses the student is enrolled in using the pivot table
         $enrolledCourses = $student->courses()
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->withPivot('schedule_id')
             ->with(['labSchedules' => function ($query) {
                 $query->select('id', 'subject_code', 'subject_name', 'class_start', 'class_end', 'day_of_the_week');
