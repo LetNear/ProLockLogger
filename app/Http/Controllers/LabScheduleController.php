@@ -6,27 +6,48 @@ use App\Models\Course;
 use App\Models\LabSchedule;
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Models\YearAndSemester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class LabScheduleController extends Controller
 {
+
+    protected function getActiveYearAndSemester()
+    {
+        return YearAndSemester::where('status', 'on-going')->first(); // Fetch the record with status 'on-going'
+    }
+
     // Display a listing of the lab schedules.
     public function index()
     {
-        return response()->json(LabSchedule::all(), 200);
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        $labSchedules = LabSchedule::where('year', $activeYearSemester->school_year)->get();
+
+        return response()->json($labSchedules, 200);
     }
+
 
     // Store a newly created lab schedule.
     public function store(Request $request)
     {
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         $validator = Validator::make($request->all(), [
             'subject_code' => 'required|string|max:255',
             'subject_name' => 'required|string|max:255',
             'instructor_name' => 'required|string|max:255',
             'block_id' => 'required|exists:blocks,id',
-            'year' => 'required|string|max:255',
             'day_of_the_week' => 'required|string|max:255',
             'class_start' => 'required|string|max:255',
             'class_end' => 'required|string|max:255',
@@ -36,15 +57,25 @@ class LabScheduleController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $labSchedule = LabSchedule::create($request->all());
+        // Add the active year to the lab schedule
+        $labSchedule = LabSchedule::create(array_merge($request->all(), ['year' => $activeYearSemester->school_year]));
 
         return response()->json($labSchedule, 201);
     }
 
+
     // Display the specified lab schedule.
     public function show($id)
     {
-        $labSchedule = LabSchedule::find($id);
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        $labSchedule = LabSchedule::where('id', $id)
+            ->where('year', $activeYearSemester->school_year)
+            ->first();
 
         if (!$labSchedule) {
             return response()->json(['message' => 'Lab schedule not found'], 404);
@@ -53,10 +84,19 @@ class LabScheduleController extends Controller
         return response()->json($labSchedule, 200);
     }
 
+
     // Update the specified lab schedule.
     public function update(Request $request, $id)
     {
-        $labSchedule = LabSchedule::find($id);
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        $labSchedule = LabSchedule::where('id', $id)
+            ->where('year', $activeYearSemester->school_year)
+            ->first();
 
         if (!$labSchedule) {
             return response()->json(['message' => 'Lab schedule not found'], 404);
@@ -67,7 +107,6 @@ class LabScheduleController extends Controller
             'subject_name' => 'string|max:255',
             'instructor_name' => 'string|max:255',
             'block_id' => 'exists:blocks,id',
-            'year' => 'string|max:255',
             'day_of_the_week' => 'string|max:255',
             'class_start' => 'string|max:255',
             'class_end' => 'string|max:255',
@@ -82,10 +121,19 @@ class LabScheduleController extends Controller
         return response()->json($labSchedule, 200);
     }
 
+
     // Remove the specified lab schedule.
     public function destroy($id)
     {
-        $labSchedule = LabSchedule::find($id);
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        $labSchedule = LabSchedule::where('id', $id)
+            ->where('year', $activeYearSemester->school_year)
+            ->first();
 
         if (!$labSchedule) {
             return response()->json(['message' => 'Lab schedule not found'], 404);
@@ -96,9 +144,15 @@ class LabScheduleController extends Controller
         return response()->json(['message' => 'Lab schedule deleted'], 200);
     }
 
+
     public function getFacultyScheduleByFingerprintId($fingerprint_id)
     {
-        // Find the instructor by fingerprint ID and role_number 2 (Faculty)
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         $instructor = User::where('fingerprint_id', $fingerprint_id)
             ->where('role_number', 2)
             ->first();
@@ -107,8 +161,9 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'Instructor not found'], 404);
         }
 
-        // Get the lab schedules for the instructor
-        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)->get();
+        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
+            ->where('year', $activeYearSemester->school_year)
+            ->get();
 
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this instructor'], 404);
@@ -116,10 +171,16 @@ class LabScheduleController extends Controller
 
         return response()->json($labSchedules, 200);
     }
+
 
     public function getFacultyScheduleByEmail($email)
     {
-        // Find the instructor by email and role_number 2 (Faculty)
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         $instructor = User::where('email', $email)
             ->where('role_number', 2)
             ->first();
@@ -128,8 +189,9 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'Instructor not found'], 404);
         }
 
-        // Get the lab schedules for the instructor
-        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)->get();
+        $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
+            ->where('year', $activeYearSemester->school_year)
+            ->get();
 
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this instructor'], 404);
@@ -138,9 +200,15 @@ class LabScheduleController extends Controller
         return response()->json($labSchedules, 200);
     }
 
+
     public function getInstructorScheduleCountByEmail($email)
     {
-        // Find the instructor by email and role_number 2 (Faculty)
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         $instructor = User::where('email', $email)
             ->where('role_number', 2)
             ->first();
@@ -149,19 +217,26 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'Instructor not found'], 404);
         }
 
-        // Get the count of lab schedules for the instructor
-        $scheduleCount = LabSchedule::where('instructor_id', $instructor->id)->count();
+        $scheduleCount = LabSchedule::where('instructor_id', $instructor->id)
+            ->where('year', $activeYearSemester->school_year)
+            ->count();
 
         return response()->json([
             'instructor' => $instructor->name,
             'email' => $email,
-            'schedule_count' => $scheduleCount
+            'schedule_count' => $scheduleCount,
         ], 200);
     }
 
+
     public function getNextScheduleTimeByEmail($email)
     {
-        // Find the instructor by email and role_number 2 (Faculty)
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         $instructor = User::where('email', $email)
             ->where('role_number', 2)
             ->first();
@@ -170,9 +245,9 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'Instructor not found'], 404);
         }
 
-        // Get the next lab schedule for the instructor
         $nextSchedule = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('class_start', '>', now()) // Ensure it's a future schedule
+            ->where('year', $activeYearSemester->school_year)
+            ->where('class_start', '>', now())
             ->orderBy('class_start', 'asc')
             ->first();
 
@@ -188,10 +263,11 @@ class LabScheduleController extends Controller
                 'subject_name' => $nextSchedule->subject_name,
                 'class_start' => $nextSchedule->class_start,
                 'class_end' => $nextSchedule->class_end,
-                'day_of_the_week' => $nextSchedule->day_of_the_week
-            ]
+                'day_of_the_week' => $nextSchedule->day_of_the_week,
+            ],
         ], 200);
     }
+
 
     /**
      * Get the total count of lab schedules for a student based on email.
@@ -201,7 +277,12 @@ class LabScheduleController extends Controller
      */
     public function getStudentScheduleCountByEmail(Request $request)
     {
-        // Validate the request
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:users,email',
         ]);
@@ -210,10 +291,8 @@ class LabScheduleController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Retrieve the email from the request
         $email = $request->query('email');
 
-        // Find the student by email
         $student = UserInformation::whereHas('user', function ($query) use ($email) {
             $query->where('email', $email);
         })->first();
@@ -222,19 +301,24 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        // Count the lab schedules based on block_id and year
         $scheduleCount = LabSchedule::where('block_id', $student->block_id)
-            ->where('year', $student->year)
+            ->where('year', $activeYearSemester->school_year)
             ->count();
 
         return response()->json([
             'student' => $email,
-            'schedule_count' => $scheduleCount
+            'schedule_count' => $scheduleCount,
         ], 200);
     }
 
     public function getLabScheduleDataByFingerprintId($fingerprint_id)
     {
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         // Find the instructor by fingerprint ID, accounting for JSON structure
         $instructor = User::whereJsonContains('fingerprint_id', ['fingerprint_id' => $fingerprint_id])->first();
 
@@ -242,8 +326,9 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'Instructor not found'], 404);
         }
 
-        // Get the lab schedules for the instructor, eager loading related data
+        // Get the lab schedules for the instructor within the active year
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
+            ->where('year', $activeYearSemester->school_year)
             ->with(['course', 'block'])
             ->get();
 
@@ -268,44 +353,59 @@ class LabScheduleController extends Controller
         return response()->json($formattedSchedules, 200);
     }
 
+
     public function getStudentScheduleByEmail($email)
     {
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         // Find the student by email
         $student = UserInformation::whereHas('user', function ($query) use ($email) {
             $query->where('email', $email);
         })->first();
-    
+
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
         }
-    
-        // Fetch lab schedules based on course_name, class_start, and class_end
-        $labSchedules = LabSchedule::where(function ($query) {
-                // Update the query conditions according to your requirements
-                $query->whereNotNull('course_name') // Ensure the course_name exists
-                      ->whereNotNull('class_start') // Ensure the class_start exists
-                      ->whereNotNull('class_end');  // Ensure the class_end exists
-            })->get();
-    
+
+        // Fetch lab schedules based on course_name, class_start, and class_end within the active year
+        $labSchedules = LabSchedule::where('block_id', $student->block_id)
+            ->where('year', $activeYearSemester->school_year)
+            ->whereNotNull('course_name')
+            ->whereNotNull('class_start')
+            ->whereNotNull('class_end')
+            ->get();
+
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this student'], 404);
         }
-    
+
         return response()->json($labSchedules, 200);
     }
 
+
     public function showSchedule()
     {
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
         // Eager load 'course' relationship to ensure 'course_code' and 'course_name' are available
-        $weekSchedule = LabSchedule::with('course') // Eager loading the 'course' relationship
+        $weekSchedule = LabSchedule::with('course')
+            ->where('year', $activeYearSemester->school_year)
             ->get()
             ->groupBy('day_of_the_week')
             ->map(function ($schedules) {
                 return $schedules->mapToGroups(function ($schedule) {
                     return [
                         $schedule->class_start => [
-                            'course_code' => $schedule->course->course_code ?? 'N/A', // Safely access course_code
-                            'course_name' => $schedule->course->course_name ?? 'N/A', // Safely access course_name
+                            'course_code' => $schedule->course->course_code ?? 'N/A',
+                            'course_name' => $schedule->course->course_name ?? 'N/A',
                             'class_start' => $schedule->class_start,
                             'class_end' => $schedule->class_end,
                         ]
@@ -317,23 +417,30 @@ class LabScheduleController extends Controller
         return view('schedules.index', compact('weekSchedule'));
     }
 
+
     public function getLabScheduleOfStudentByRFID($rfid_number)
     {
-        // Step 1: Find the student using the RFID number
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        // Find the student using the RFID number
         $student = UserInformation::whereHas('idCard', function ($query) use ($rfid_number) {
             $query->where('rfid_number', $rfid_number);
         })->first();
 
-        // Check if the student exists
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        // Step 2: Retrieve schedules for the student using the join table 'course_user_information'
+        // Retrieve schedules for the student using the join table 'course_user_information'
         $schedules = DB::table('course_user_information')
             ->join('lab_schedules', 'course_user_information.schedule_id', '=', 'lab_schedules.id')
             ->join('courses', 'course_user_information.course_id', '=', 'courses.id')
             ->where('course_user_information.user_information_id', $student->id)
+            ->where('lab_schedules.year', $activeYearSemester->school_year)
             ->select(
                 'courses.course_name',
                 'courses.course_code',
@@ -343,20 +450,24 @@ class LabScheduleController extends Controller
             )
             ->get();
 
-        // Check if there are any schedules
         if ($schedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this student'], 404);
         }
 
-        // Return all schedules as a JSON response
         return response()->json($schedules, 200);
     }
 
+
     public function getAllLabSchedules()
     {
-        $labSchedules = LabSchedule::all();
+        $activeYearSemester = $this->getActiveYearAndSemester();
 
-        // Check if there are any lab schedules
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        $labSchedules = LabSchedule::where('year', $activeYearSemester->school_year)->get();
+
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No lab schedules found'], 404);
         }
@@ -364,78 +475,85 @@ class LabScheduleController extends Controller
         return response()->json($labSchedules, 200);
     }
 
+
     public function enrollStudentToCourse(Request $request)
     {
-        // Validate the incoming request
+        $activeYearSemester = $this->getActiveYearAndSemester();
+    
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+    
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email', // Validate email exists in the users table
+            'email' => 'required|email|exists:users,email',
             'course_id' => 'required|exists:courses,id',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
-        // Retrieve the student by email
+    
         $student = UserInformation::whereHas('user', function ($query) use ($request) {
             $query->where('email', $request->email);
         })->first();
-
-        // Ensure that the student exists
+    
         if (!$student) {
             return response()->json(['message' => 'User not found'], 404);
         }
-
-        // Retrieve the course
+    
         $course = Course::find($request->course_id);
-
-        // Check if the student is already enrolled in the course
+    
+        // Check if the student is already enrolled in the course within the active year
         if ($student->courses()->where('course_id', $course->id)->exists()) {
             return response()->json(['message' => 'User is already enrolled in this course'], 409);
         }
-
+    
         // Enroll the student in the course
         $student->courses()->attach($course->id);
-
+    
         return response()->json(['message' => 'User enrolled successfully'], 201);
     }
+    
 
 
     public function getEnrolledCoursesByEmail($email)
     {
-        // Validate that the email exists in the users table
+        $activeYearSemester = $this->getActiveYearAndSemester();
+    
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+    
         $validator = Validator::make(['email' => $email], [
             'email' => 'required|email|exists:users,email',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
-        // Retrieve the user information by email
+    
         $student = UserInformation::whereHas('user', function ($query) use ($email) {
             $query->where('email', $email);
         })->first();
-
-        // Ensure that the student exists
+    
         if (!$student) {
             return response()->json(['message' => 'User not found'], 404);
         }
-
+    
         // Get the courses the student is enrolled in using the pivot table
         $enrolledCourses = $student->courses()
-            ->withPivot('schedule_id') // Include schedule details if needed
-            ->with(['labSchedules' => function($query) {
-                $query->select('id', 'subject_code', 'subject_name', 'class_start', 'class_end', 'day_of_the_week'); // Add fields from lab schedules as needed
+            ->where('year', $activeYearSemester->school_year)
+            ->withPivot('schedule_id')
+            ->with(['labSchedules' => function ($query) {
+                $query->select('id', 'subject_code', 'subject_name', 'class_start', 'class_end', 'day_of_the_week');
             }])
             ->get(['courses.id', 'courses.course_name', 'courses.course_code']);
-
-        // Check if there are any enrolled courses
+    
         if ($enrolledCourses->isEmpty()) {
             return response()->json(['message' => 'No enrolled courses found for this user'], 404);
         }
-
-        // Return the list of enrolled courses with any pivot data if needed
+    
         return response()->json($enrolledCourses, 200);
     }
+    
 }
