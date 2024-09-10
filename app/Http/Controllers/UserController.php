@@ -196,6 +196,16 @@ class UserController extends Controller
         return response()->json($users, 200);
     }
 
+    public function getUsersByRole1()
+    {
+        // Retrieve all users with role_number of 2
+        $users = User::where('role_number', 1)
+            ->get(['name', 'email', 'role_number', 'fingerprint_id']);
+
+        // Return the users' name, email, and role_number with a 200 response
+        return response()->json($users, 200);
+    }
+
 
     public function updateFingerprintByEmail(Request $request)
     {
