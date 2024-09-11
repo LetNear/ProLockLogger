@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Widgets;
 
 use App\Models\LabSchedule;
@@ -28,21 +27,23 @@ class CalendarWidget extends FullCalendarWidget
             ->get();
 
         foreach ($labSchedules as $event) {
+            $instructorName = $event->instructor ? $event->instructor->name : 'No Instructor';
+
             if ($event->is_makeup_class) {
                 $events[] = [
-                    'title' => 'Makeup: ' . $event->course_name,
+                    'title' => $event->course_code . ' - ' . $instructorName . ' (Make-up Class)',
                     'start' => Carbon::parse($event->specific_date . ' ' . $event->class_start)->toIso8601String(),
                     'end' => Carbon::parse($event->specific_date . ' ' . $event->class_end)->toIso8601String(),
                 ];
             } else {
-                $events = array_merge($events, $this->getWeeklyOccurrences($event, $start, $end));
+                $events = array_merge($events, $this->getWeeklyOccurrences($event, $start, $end, $instructorName));
             }
         }
 
         return $events;
     }
 
-    private function getWeeklyOccurrences(LabSchedule $event, Carbon $start, Carbon $end): array
+    private function getWeeklyOccurrences(LabSchedule $event, Carbon $start, Carbon $end, $instructorName): array
     {
         $occurrences = [];
         $dayOfWeek = Carbon::parse($event->day_of_the_week)->dayOfWeek;
@@ -50,7 +51,7 @@ class CalendarWidget extends FullCalendarWidget
 
         while ($current->lte($end)) {
             $occurrences[] = [
-                'title' => $event->course_name . ' - ' . $event->course_code,
+                'title' => $event->course_code . ' - ' . $instructorName,
                 'start' => $current->copy()->setTimeFromTimeString($event->class_start)->toIso8601String(),
                 'end' => $current->copy()->setTimeFromTimeString($event->class_end)->toIso8601String(),
             ];
@@ -74,6 +75,19 @@ class CalendarWidget extends FullCalendarWidget
             'selectable' => false,
             'eventClick' => fn($event) => false,
             'dateClick' => fn($date) => false,
+            'slotMinTime' => '06:00:00', // Show calendar starting at 6 AM
+            'slotMaxTime' => '21:00:00', // Show calendar ending at 9 PM
+            'slotDuration' => '00:30:00', // Sets slot duration to 30 minutes
+            'height' => 'auto', // Makes the calendar height responsive
+            'contentHeight' => '90vh', // Adjusts the calendar to fill 90% of the viewport height
+            'slotLabelInterval' => '01:00', // Label every hour
+            'slotLabelFormat' => [
+                'hour' => 'numeric',
+                'minute' => '2-digit',
+                'omitZeroMinute' => false,
+            ],
+            'slotEventOverlap' => false, // Prevents overlapping events for clarity
+            'eventDisplay' => 'block', // Ensures events are displayed as blocks
         ];
     }
 

@@ -30,7 +30,7 @@ class UserInformationController extends Controller
 
         // Retrieve all user information records with related user data and NFC data
         $userInformations = UserInformation::with('user', 'idCard')
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->whereHas('user', function ($query) {
                 $query->where('role_number', 3); // Ensure that the user has role_id of 3
             })
@@ -66,7 +66,7 @@ class UserInformationController extends Controller
 
         // Get user information linked to the active year and semester
         $userInformation = UserInformation::where('user_id', $user->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
 
         if ($userInformation === null) {
@@ -141,7 +141,7 @@ class UserInformationController extends Controller
 
         // Find the user information by user ID and active year
         $userInformation = UserInformation::where('user_id', $user->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
 
         if (!$userInformation) {
@@ -194,7 +194,7 @@ class UserInformationController extends Controller
 
         // Find the user information by user_number and active year
         $userInformation = UserInformation::where('user_number', $request->input('user_number'))
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
 
         if (!$userInformation) {
@@ -230,7 +230,7 @@ class UserInformationController extends Controller
 
         // Find the user information associated with the NFC record and active year
         $userInformation = UserInformation::where('id_card_id', $nfc->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
 
         if (!$userInformation) {
@@ -265,7 +265,7 @@ class UserInformationController extends Controller
     
         // Find the user information associated with the NFC record and active year
         $userInformation = UserInformation::where('id_card_id', $nfc->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
     
         if (!$userInformation) {
@@ -324,7 +324,7 @@ class UserInformationController extends Controller
     
         // Find the user information by user_number and active year
         $userInformation = UserInformation::where('user_number', $request->input('user_number'))
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
     
         if (!$userInformation) {
@@ -349,7 +349,7 @@ class UserInformationController extends Controller
     
         // Find the user information by user_number and active year
         $userInformation = UserInformation::where('user_number', $user_number)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->first();
     
         if (!$userInformation) {
@@ -377,7 +377,7 @@ class UserInformationController extends Controller
     
         // Get all the lab schedules for the instructor within the active year
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->school_year)
+            ->where('year', $activeYearSemester->id)
             ->get();
     
         $studentCount = 0;
