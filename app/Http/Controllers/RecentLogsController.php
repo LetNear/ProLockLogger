@@ -61,6 +61,7 @@ class RecentLogsController extends Controller
                         'role_name' => $log->role->name ?? 'Unknown',
                         'seat_number' => $log->seat->seat_number ?? 'Unassigned',
                         'computer_number' => $log->seat->computer->computer_number ?? 'Unassigned',
+                        'created_at' => $log->created_at ? $log->created_at->format('m/d/Y') : 'Unknown', // Format the created_at date
                     ];
                 });
     
@@ -70,6 +71,7 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
     
     /**
      * Record time-in using the NFC UID.
