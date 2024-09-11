@@ -313,32 +313,35 @@ class LabScheduleController extends Controller
 
     public function getLabScheduleDataByFingerprintId($fingerprint_id)
     {
+        // Retrieve the active year and semester
         $activeYearSemester = $this->getActiveYearAndSemester();
-
+    
+        
+        // Check if there is an ongoing year and semester
         if (!$activeYearSemester) {
+            // No ongoing year and semester, return an empty response or a specific message
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
-
+    
         // Find the instructor by fingerprint ID, accounting for JSON structure
         $instructor = User::whereJsonContains('fingerprint_id', ['fingerprint_id' => $fingerprint_id])->first();
-
+    
         if (!$instructor) {
+            // If the instructor is not found, return a not found response
             return response()->json(['message' => 'Instructor not found'], 404);
         }
-
-        // Get the lab schedules for the instructor within the active year
+    
+        // Get the lab schedules for the instructor that are associated with the active year and semester
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year_and_semester_id', $activeYearSemester->id)
-            ->with(['course', 'block'])
+            ->where('year_and_semester_id', $activeYearSemester->id) // Ensure the schedules match the active semester
+            ->with(['course', 'block']) // Eager load related data
             ->get();
-
-        // Debug: Output the fetched lab schedules
-        // dd('Fetched Lab Schedules:', $labSchedules);
-
+    
+        // If no lab schedules are found, return a specific message
         if ($labSchedules->isEmpty()) {
-            return response()->json(['message' => 'No schedules found for this instructor'], 404);
+            return response()->json(['message' => 'No schedules found for this instructor in the active year and semester.'], 404);
         }
-
+    
         // Format the response with detailed information
         $formattedSchedules = $labSchedules->map(function ($schedule) {
             return [
@@ -352,9 +355,11 @@ class LabScheduleController extends Controller
                 'class_end' => $schedule->class_end,
             ];
         });
-
+    
+        // Return the formatted schedules
         return response()->json($formattedSchedules, 200);
     }
+    
 
 
     public function getStudentScheduleByEmail($email)
