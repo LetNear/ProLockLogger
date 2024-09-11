@@ -58,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->plugin(
                 FilamentFullCalendarPlugin::make()
-                ->selectable()
+               
             );
     }
 }
