@@ -6,6 +6,7 @@ use App\Models\Nfc;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Models\YearAndSemester;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -29,6 +30,8 @@ return new class extends Migration
             $table->string('rfid_number')->nullable();
             $table->string('user_name')->nullable();
             $table->string('fingerprint_id')->nullable();
+            $table->foreignIdFor(YearAndSemester::class, 'year_and_semester_id')->nullable();
+
             $table->timestamps();
         });
     }

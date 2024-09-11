@@ -20,6 +20,7 @@ class RecentLogs extends Model implements Auditable
         'time_out',
         'id_card_id',
         'fingerprint_id',
+        'year_and_semester_id',
     ];
 
 
@@ -59,5 +60,9 @@ class RecentLogs extends Model implements Auditable
     public function computer()
     {
         return $this->belongsTo(Computer::class, 'computer_id'); // Assuming computer_id links to Computer
+    }
+    public function yearAndSemester()
+    {
+        return $this->belongsTo(YearAndSemester::class, 'year_and_semester_id');
     }
 }
