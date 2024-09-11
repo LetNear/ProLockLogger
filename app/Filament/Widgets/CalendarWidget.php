@@ -88,8 +88,14 @@ class CalendarWidget extends FullCalendarWidget
             ],
             'slotEventOverlap' => false, // Prevents overlapping events for clarity
             'eventDisplay' => 'block', // Ensures events are displayed as blocks
+            'eventContent' => function($event) {
+                return [
+                    'html' => '<div style="white-space:normal;">' . $event['title'] . '</div>',
+                ];
+            },
         ];
     }
+    
 
     protected function viewAction(): Action
     {

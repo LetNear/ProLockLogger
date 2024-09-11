@@ -448,7 +448,7 @@ class LabScheduleController extends Controller
             ->join('lab_schedules', 'course_user_information.schedule_id', '=', 'lab_schedules.id')
             ->join('courses', 'course_user_information.course_id', '=', 'courses.id')
             ->where('course_user_information.user_information_id', $student->id)
-            ->where('lab_schedules.year', $activeYearSemester->id)
+            ->where('lab_schedules.year_and_semester_id', $activeYearSemester->id)
             ->select(
                 'courses.course_name',
                 'courses.course_code',
