@@ -45,7 +45,7 @@ class RecentLogsController extends Controller
                     'seat.computer', 
                 ])
                 ->where('role_id', 3)
-                ->where('year', $activeYearSemester->school_year) // Assuming 'year' column matches 'school_year'
+                ->where('year_and_semester_id', $activeYearSemester->id) // Assuming 'year' column matches 'id'
                 ->get()
                 ->map(function ($log) {
                     return [
@@ -195,7 +195,7 @@ class RecentLogsController extends Controller
             $log = RecentLogs::where('id_card_id', $nfc->id)
                 ->whereNotNull('time_in')
                 ->whereNull('time_out')
-                ->where('year', $activeYearSemester->school_year)
+                ->where('year_and_semester_id', $activeYearSemester->id)
                 ->first();
     
             if (!$log) {
@@ -264,7 +264,7 @@ class RecentLogsController extends Controller
             // Fetch recent logs associated with this NFC UID
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user.course.instructor'])
                 ->where('id_card_id', $nfc->id)
-                ->where('year', $activeYearSemester->school_year)
+                ->where('year_and_semester_id', $activeYearSemester->id)
                 ->get()
                 ->map(function ($log) {
                     $user = $log->userInformation->user ?? null;
@@ -351,7 +351,7 @@ class RecentLogsController extends Controller
             $log = RecentLogs::create([
                 'user_number' => $user->user_number,
                 'block_id' => $user->block_id,
-                'year' => $activeYearSemester->school_year,
+                'year' => $activeYearSemester->id,
                 'time_in' => $validated['time_in'],
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
@@ -422,7 +422,7 @@ class RecentLogsController extends Controller
             $log = RecentLogs::where('id_card_id', $user->id_card_id)
                 ->whereNotNull('time_in')
                 ->whereNull('time_out')
-                ->where('year', $activeYearSemester->school_year)
+                ->where('year_and_semester_id', $activeYearSemester->id)
                 ->first();
     
             if (!$log) {
@@ -483,7 +483,7 @@ class RecentLogsController extends Controller
     
             $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user', 'role'])
                 ->where('id_card_id', $user->id_card_id)
-                ->where('year', $activeYearSemester->school_year)
+                ->where('year_and_semester_id', $activeYearSemester->id)
                 ->get()
                 ->map(function ($log) {
                     return [
@@ -567,7 +567,7 @@ class RecentLogsController extends Controller
     
             // Get the count of logs for the student
             $logCount = RecentLogs::where('user_number', $userInformation->user_number)
-                ->where('year', $activeYearSemester->school_year)
+                ->where('year_and_semester_id', $activeYearSemester->id)
                 ->count();
     
             return response()->json([
