@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class CalendarWidget extends FullCalendarWidget
 {
-    // Ensure that the type matches the parent class and initialize with null
     public Model|string|int|null $record = null;
 
     public function fetchEvents(array $fetchInfo): array
@@ -34,7 +33,6 @@ class CalendarWidget extends FullCalendarWidget
                     'title' => 'Makeup: ' . $event->course_name,
                     'start' => Carbon::parse($event->specific_date . ' ' . $event->class_start)->toIso8601String(),
                     'end' => Carbon::parse($event->specific_date . ' ' . $event->class_end)->toIso8601String(),
-                    'shouldOpenUrlInNewTab' => true,
                 ];
             } else {
                 $events = array_merge($events, $this->getWeeklyOccurrences($event, $start, $end));
@@ -55,7 +53,6 @@ class CalendarWidget extends FullCalendarWidget
                 'title' => $event->course_name . ' - ' . $event->course_code,
                 'start' => $current->copy()->setTimeFromTimeString($event->class_start)->toIso8601String(),
                 'end' => $current->copy()->setTimeFromTimeString($event->class_end)->toIso8601String(),
-                'shouldOpenUrlInNewTab' => true,
             ];
             $current->addWeek();
         }
@@ -66,17 +63,17 @@ class CalendarWidget extends FullCalendarWidget
     protected function getOptions(): array
     {
         return [
-            'initialView' => 'resourceTimelineWeek',
+            'initialView' => 'timeGridWeek',
             'headerToolbar' => [
                 'left' => 'prev,next today',
                 'center' => 'title',
-                'right' => 'resourceTimelineDay,resourceTimelineWeek',
+                'right' => 'timeGridDay,timeGridWeek',
             ],
             'events' => $this->fetchEvents(),
             'editable' => false,
             'selectable' => false,
-            'eventClick' => fn($event) => false, // Disable event clicks
-            'dateClick' => fn($date) => false,  // Disable date clicks
+            'eventClick' => fn($event) => false,
+            'dateClick' => fn($date) => false,
         ];
     }
 
@@ -84,7 +81,7 @@ class CalendarWidget extends FullCalendarWidget
     {
         return ViewAction::make('view')
             ->label('View')
-            ->disabled(true) // Disable the action
-            ->visible(false); // Hide the action completely
+            ->disabled(true)
+            ->visible(false);
     }
 }

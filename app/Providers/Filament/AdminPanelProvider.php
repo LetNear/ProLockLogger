@@ -58,25 +58,20 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->plugin(
                 FilamentFullCalendarPlugin::make()
-               
+                    ->schedulerLicenseKey('CC-Attribution-NonCommercial-NoDerivatives')
+                    ->timezone('Asia/Manila')
+                    ->locale('en')
+                    ->plugins(['interaction', 'timeGrid']) // Use timeGrid plugin for the grid layout
+                    ->config([
+                        'headerToolbar' => [
+                            'left' => 'prev,next today',
+                            'center' => 'title',
+                            'right' => 'timeGridDay,timeGridWeek', // Update to timeGrid views
+                        ],
+                        'initialView' => 'timeGridWeek', // Use timeGridWeek for the initial view
+                        'nowIndicator' => true,
+                        'height' => 'auto',
+                    ])
             );
     }
 }
-
- // ->plugin(
-    //     FilamentFullCalendarPlugin::make()
-    //         ->schedulerLicenseKey('CC-Attribution-NonCommercial-NoDerivatives')
-    //         ->timezone('Asia/Manila') // Set the timezone to the Philippines
-    //         ->locale('en')     // Set the locale (you can change this to 'fil' for Filipino)
-    //         ->plugins(['interaction', 'resourceTimeline'])
-    //         ->config([
-    //             'headerToolbar' => [
-    //                 'left' => 'prev,next today',
-    //                 'center' => 'title',
-    //                 'right' => 'resourceTimelineDay,resourceTimelineWeek',
-    //             ],
-    //             'initialView' => 'resourceTimelineWeek', // Set initial view to resource timeline
-    //             'nowIndicator' => true, // Show current time indicator
-    //             // 'height' => '10', // Set calendar height to auto
-    //         ])
-    // );
