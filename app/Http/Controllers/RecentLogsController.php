@@ -143,6 +143,7 @@ class RecentLogsController extends Controller
                 'id_card_id' => $nfc->id,
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
+                'year_and_semester_id' => $activeYearSemester->id,
             ]);
     
             // Save the data to StudentAttendance table
@@ -151,6 +152,7 @@ class RecentLogsController extends Controller
                 'time_in' => $validated['time_in'],
                 'time_out' => null, 
                 'status' => 'In Progress',
+                'year_and_semester_id' => $activeYearSemester->id,
             ]);
     
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
