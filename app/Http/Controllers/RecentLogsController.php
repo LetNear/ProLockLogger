@@ -360,6 +360,7 @@ class RecentLogsController extends Controller
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
                 'fingerprint_id' => $validated['fingerprint_id'],
+                'year_and_semester_id' => $activeYearSemester->id,
             ]);
     
             // Save the data to LabAttendance table
@@ -372,6 +373,7 @@ class RecentLogsController extends Controller
                 'status' => 'In Progress',
                 'logdate' => now()->format('Y-m-d'),
                 'instructor' => $user->name,
+                'year_and_semester_id' => $activeYearSemester->id,
             ]);
     
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
