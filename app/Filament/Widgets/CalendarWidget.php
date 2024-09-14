@@ -75,9 +75,7 @@ class CalendarWidget extends FullCalendarWidget
             'selectable' => false,
             'eventClick' => fn($event) => false,
             'dateClick' => fn($date) => false,
-            'slotMinTime' => '06:00:00', // Show calendar starting at 6 AM
-            'slotMaxTime' => '21:00:00', // Show calendar ending at 9 PM
-            'slotDuration' => '00:30:00', // Sets slot duration to 30 minutes
+           
             'height' => 'auto', // Makes the calendar height responsive
             'contentHeight' => '90vh', // Adjusts the calendar to fill 90% of the viewport height
             'slotLabelInterval' => '01:00', // Label every hour
@@ -86,7 +84,7 @@ class CalendarWidget extends FullCalendarWidget
                 'minute' => '2-digit',
                 'omitZeroMinute' => false,
             ],
-            'slotEventOverlap' => false, // Prevents overlapping events for clarity
+
             'eventDisplay' => 'block', // Ensures events are displayed as blocks
             'eventContent' => function($event) {
                 return [

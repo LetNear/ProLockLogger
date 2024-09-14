@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Auditable as AuditingAuditable;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
+use Filament\Notifications\Notification;
 
 class User extends Authenticatable implements Auditable, FilamentUser
 {
@@ -30,6 +32,7 @@ class User extends Authenticatable implements Auditable, FilamentUser
         'role_number',
         'fingerprint_id',
         'year_and_semester_id',
+        'is_protected',
     ];
 
     /**
@@ -106,4 +109,23 @@ class User extends Authenticatable implements Auditable, FilamentUser
             }
         });
     }
+
+    // In User model or a service layer
+    public function delete()
+    {
+        // Check if the user is protected from deletion
+        if ($this->is_protected) {
+            // Show a notification using Filament's notification system
+            Notification::make()
+                ->title('Deletion Error')
+                ->body('This user cannot be deleted because they are protected.')
+                ->danger()
+                ->send();
+
+            return false; // Indicate that the deletion did not proceed
+        }
+
+        return parent::delete();
+    }
+
 }

@@ -15,6 +15,9 @@ class UserImporter extends Importer
 {
     protected static ?string $model = User::class;
 
+    // Define required columns for UserImporter
+    protected array $requiredColumns = ['name', 'email', 'user_number', 'import_type'];
+
     public static function getColumns(): array
     {
         return [
@@ -22,17 +25,43 @@ class UserImporter extends Importer
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
             ImportColumn::make('email')
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->rules(['required', 'email']),
             ImportColumn::make('user_number')
                 ->fillRecordUsing(function ($record, $state) {
                     return;
                 })
-                ->requiredMapping(),
+                ->requiredMapping()
+                ->rules(['required', 'max:20']),
+            ImportColumn::make('import_type')
+                ->fillRecordUsing(function ($record, $state) {
+                    return;
+                })
+                ->requiredMapping()
+                ->rules(['required', 'in:instructor']), // Ensure the import_type is 'instructor' for UserImporter
         ];
+    }
+
+    // Method to validate columns
+    public function validateColumns(array $data): void
+    {
+        $columns = array_keys($data);
+
+        // Check if the incoming data columns match the required columns
+        if (array_diff($this->requiredColumns, $columns)) {
+            throw new RowImportFailedException("Invalid import data: expected columns are " . implode(', ', $this->requiredColumns));
+        }
+
+        // Check if the import type is correct
+        if ($data['import_type'] !== 'instructor') {
+            throw new RowImportFailedException("Invalid import type: expected 'instructor' for UserImporter.");
+        }
     }
 
     public function resolveRecord(): ?User
     {
+        $this->validateColumns($this->data); // Validate before processing
+
         FacadesLog::info('Importing user data:', $this->data);
 
         // Validate email format
@@ -56,7 +85,6 @@ class UserImporter extends Importer
         $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
 
         if (!$onGoingYearAndSemester) {
-            // Handle the case where there is no active 'on-going' Year and Semester
             throw new RowImportFailedException("No active (on-going) Year and Semester found. Please set one before importing users.");
         }
 
@@ -64,8 +92,8 @@ class UserImporter extends Importer
         $user = User::create([
             'name' => $this->data['name'],
             'email' => $this->data['email'],
-            'role_number' => 2,
-            'year_and_semester_id' => $onGoingYearAndSemester->id, // Associate the active Year and Semester
+            'role_number' => 2, // Role number for instructors
+            'year_and_semester_id' => $onGoingYearAndSemester->id,
         ]);
 
         $roleName = $this->getRoleNameByNumber($user->role_number);
@@ -83,7 +111,7 @@ class UserImporter extends Importer
 
     protected function isValidEmail(string $email): bool
     {
-        return str_ends_with($email, '@my.cspc.edu.ph');
+        return str_ends_with($email, '@cspc.edu.ph');
     }
 
     protected function getRoleNameByNumber(int $roleNumber): ?string

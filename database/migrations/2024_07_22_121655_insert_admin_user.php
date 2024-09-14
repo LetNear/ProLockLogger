@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-   /**
+    /**
      * Run the migrations.
      */
     public function up(): void
@@ -24,6 +24,7 @@ return new class extends Migration
                 'password' => Hash::make($adminPassword),
                 'created_at' => now(),
                 'updated_at' => now(),
+                'is_protected' => true, // Add a custom flag or column to indicate protected status
             ]);
         }
     }
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        // To prevent deletion, don't drop the specific admin user on migration rollback
     }
 };

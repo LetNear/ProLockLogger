@@ -16,6 +16,9 @@ class StudentImporter extends Importer
 {
     protected static ?string $model = User::class;
 
+    // Define required columns for StudentImporter
+    protected array $requiredColumns = ['name', 'email', 'user_number', 'year', 'block'];
+
     public static function getColumns(): array
     {
         return [
@@ -49,8 +52,21 @@ class StudentImporter extends Importer
         ];
     }
 
+    // Method to validate columns
+    public function validateColumns(array $data): void
+    {
+        $columns = array_keys($data);
+
+        // Check if the incoming data columns match the required columns
+        if (array_diff($this->requiredColumns, $columns)) {
+            throw new RowImportFailedException("Invalid import data: expected columns are " . implode(', ', $this->requiredColumns));
+        }
+    }
+
     public function resolveRecord(): ?User
     {
+        $this->validateColumns($this->data); // Validate before processing
+
         FacadesLog::info('Importing student data:', $this->data);
 
         // Check if the email already exists
@@ -67,7 +83,6 @@ class StudentImporter extends Importer
         $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
 
         if (!$onGoingYearAndSemester) {
-            // Handle the case where there is no active 'on-going' Year and Semester
             throw new RowImportFailedException("No active (on-going) Year and Semester found. Please set one before importing students.");
         }
 
@@ -76,7 +91,7 @@ class StudentImporter extends Importer
             'name' => $this->data['name'],
             'email' => $this->data['email'],
             'role_number' => 3, // Set role_number for students
-            'year_and_semester_id' => $onGoingYearAndSemester->id, // Associate the active Year and Semester
+            'year_and_semester_id' => $onGoingYearAndSemester->id,
         ]);
 
         // Sync role based on role_number

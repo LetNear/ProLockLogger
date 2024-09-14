@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignIdFor(Role::class, 'role_number')->nullable();
             $table->foreignIdFor(YearAndSemester::class, 'year_and_semester_id')->nullable();
             $table->rememberToken()->nullable();
+            $table->boolean('is_protected')->default(false);
             $table->timestamps();
         });
 
