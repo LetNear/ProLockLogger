@@ -39,7 +39,10 @@ class EditLabSchedule extends EditRecord
             $current->class_end !== $data['class_end'] ||
             $current->day_of_the_week !== $data['day_of_the_week'] ||
             $current->instructor_id !== $data['instructor_id'] ||
-            $current->specific_date !== $data['specific_date'];
+            $current->specific_date !== $data['specific_date'] ||
+            $current->block_id !== $data['block_id'] ||  // Check if block is changed
+            $current->year !== $data['year'] ||          // Check if year is changed
+            $current->course_id !== $data['course_id'];  // Check if course is changed
     }
 
     protected function validateSchedule(array $data): void
@@ -59,6 +62,9 @@ class EditLabSchedule extends EditRecord
                 'class_end' => ['Class end time must be after class start time.'],
             ]);
         }
+
+        // Validate unique instructor for block and year combination
+        $this->validateUniqueInstructorForBlockYear($data);
 
         // Check for schedule conflicts based on the class type
         if (!$classType && isset($data['day_of_the_week'])) {
@@ -122,6 +128,30 @@ class EditLabSchedule extends EditRecord
                     'class_start' => ['This schedule conflicts with another makeup class for the instructor on the specified date.'],
                 ]);
             }
+        }
+    }
+
+    /**
+     * Validate that the same block and year for a course cannot have different instructors.
+     */
+    protected function validateUniqueInstructorForBlockYear(array $data): void
+    {
+        $existing = LabSchedule::where('course_id', $data['course_id'])
+            ->where('block_id', $data['block_id'])
+            ->where('year', $data['year'])
+            ->where('instructor_id', '!=', $data['instructor_id'])
+            ->exists();
+
+        if ($existing) {
+            Notification::make()
+                ->title('Instructor Conflict')
+                ->danger()
+                ->body('This block and year combination for the course already has a different instructor.')
+                ->send();
+
+            throw ValidationException::withMessages([
+                'instructor_id' => ['This block and year combination for the course already has a different instructor.'],
+            ]);
         }
     }
 }

@@ -20,16 +20,15 @@ class CreateLabSchedule extends CreateRecord
             // Validate the schedule
             $this->validateSchedule($data);
         } catch (ValidationException $exception) {
-            // Log the exception or handle it accordingly
             \Log::error('Validation failed: ' . $exception->getMessage());
-            throw $exception; // rethrow to ensure Filament catches it
+            throw $exception;
         }
 
         // Set 'specific_date' to null if it's a regular class
         if (empty($data['is_makeup_class']) || !$data['is_makeup_class']) {
-            $data['specific_date'] = null; // Set Makeup Class Date to null for Regular classes
+            $data['specific_date'] = null;
         } else {
-            $data['day_of_the_week'] = null; // Set Day of the Week to null for Makeup classes
+            $data['day_of_the_week'] = null;
         }
 
         // Fetch course details if present
@@ -45,8 +44,9 @@ class CreateLabSchedule extends CreateRecord
     {
         $classStart = $data['class_start'];
         $classEnd = $data['class_end'];
-        $classType = $data['is_makeup_class'] ?? false; // Assume 'false' means regular class
+        $classType = $data['is_makeup_class'] ?? false;
 
+        // Validate time range
         if (strtotime($classEnd) <= strtotime($classStart)) {
             Notification::make()
                 ->title('Invalid Time Range')
@@ -59,9 +59,11 @@ class CreateLabSchedule extends CreateRecord
             ]);
         }
 
+        // Check for block, year, and course conflicts
+        $this->validateUniqueInstructorForBlockYear($data);
+
         // Check for schedule conflicts based on the class type
         if (!$classType && isset($data['day_of_the_week'])) {
-            // Regular class: check for conflicts using day_of_the_week
             $conflictingSchedule = LabSchedule::where('day_of_the_week', $data['day_of_the_week'])
                 ->where('instructor_id', $data['instructor_id'])
                 ->where('id', '!=', $this->record->id ?? null)
@@ -85,7 +87,6 @@ class CreateLabSchedule extends CreateRecord
                 ]);
             }
         } elseif ($classType && isset($data['specific_date'])) {
-            // Makeup class: check for conflicts using specific_date
             $specificDate = strtotime($data['specific_date']);
             if ($specificDate < strtotime(date('Y-m-d'))) {
                 Notification::make()
@@ -121,6 +122,30 @@ class CreateLabSchedule extends CreateRecord
                     'class_start' => ['This schedule conflicts with another makeup class for the instructor on the specified date.'],
                 ]);
             }
+        }
+    }
+
+    /**
+     * Validate that the same block and year for a course cannot have different instructors.
+     */
+    protected function validateUniqueInstructorForBlockYear(array $data): void
+    {
+        $existing = LabSchedule::where('course_id', $data['course_id'])
+            ->where('block_id', $data['block_id'])
+            ->where('year', $data['year'])
+            ->where('instructor_id', '!=', $data['instructor_id'])
+            ->exists();
+
+        if ($existing) {
+            Notification::make()
+                ->title('Instructor Conflict')
+                ->danger()
+                ->body('This block and year combination for the course already has a different instructor.')
+                ->send();
+
+            throw ValidationException::withMessages([
+                'instructor_id' => ['This block and year combination for the course already has a different instructor.'],
+            ]);
         }
     }
 }
