@@ -208,52 +208,65 @@ class UserController extends Controller
 
 
     public function updateFingerprintByEmail(Request $request)
-    {
+{
+    // Validate request inputs
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+        'fingerprint_id' => 'required|string|max:255',
+    ]);
+
+    // Check if the email is admin@admin.com to bypass year and semester validation
+    if ($request->email !== 'admin@admin.com') {
         $activeYearSemester = $this->getActiveYearAndSemester();
 
         if (!$activeYearSemester) {
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
 
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'fingerprint_id' => 'required|string|max:255',
-        ]);
-
+        // Find the user with active year and semester
         $user = User::where('email', $request->email)
             ->where('year_and_semester_id', $activeYearSemester->id)
             ->firstOrFail();
-
-        $allUsers = User::all();
-        $allFingerprints = [];
-        foreach ($allUsers as $singleUser) {
-            $fingerprints = $singleUser->fingerprint_id;
-            if (!is_array($fingerprints)) {
-                $fingerprints = json_decode($fingerprints, true) ?? [];
-            }
-            $allFingerprints = array_merge($allFingerprints, array_column($fingerprints, 'fingerprint_id'));
-        }
-
-        if (in_array($request->fingerprint_id, $allFingerprints)) {
-            return response()->json(['message' => 'Fingerprint already exists across all users.'], 400);
-        }
-
-        $existingFingerprints = $user->fingerprint_id;
-        if (!is_array($existingFingerprints)) {
-            $existingFingerprints = json_decode($existingFingerprints, true) ?? [];
-        }
-
-        if (count($existingFingerprints) < 2) {
-            $existingFingerprints[] = ['fingerprint_id' => $request->fingerprint_id];
-        } else {
-            return response()->json(['message' => 'Cannot add more than 2 fingerprints.'], 400);
-        }
-
-        $user->fingerprint_id = json_encode($existingFingerprints);
-        $user->save();
-
-        return response()->json($user, 200);
+    } else {
+        // Bypass year and semester check for admin@admin.com
+        $user = User::where('email', $request->email)->firstOrFail();
     }
+
+    // Retrieve all fingerprints from all users
+    $allUsers = User::all();
+    $allFingerprints = [];
+    foreach ($allUsers as $singleUser) {
+        $fingerprints = $singleUser->fingerprint_id;
+        if (!is_array($fingerprints)) {
+            $fingerprints = json_decode($fingerprints, true) ?? [];
+        }
+        $allFingerprints = array_merge($allFingerprints, array_column($fingerprints, 'fingerprint_id'));
+    }
+
+    // Check if the fingerprint already exists across all users
+    if (in_array($request->fingerprint_id, $allFingerprints)) {
+        return response()->json(['message' => 'Fingerprint already exists across all users.'], 400);
+    }
+
+    // Check and update user's existing fingerprints
+    $existingFingerprints = $user->fingerprint_id;
+    if (!is_array($existingFingerprints)) {
+        $existingFingerprints = json_decode($existingFingerprints, true) ?? [];
+    }
+
+    if (count($existingFingerprints) < 2) {
+        $existingFingerprints[] = ['fingerprint_id' => $request->fingerprint_id];
+    } else {
+        return response()->json(['message' => 'Cannot add more than 2 fingerprints.'], 400);
+    }
+
+    // Save the updated fingerprints
+    $user->fingerprint_id = json_encode($existingFingerprints);
+    $user->save();
+
+    return response()->json($user, 200);
+}
+
 
 
 

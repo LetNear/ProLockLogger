@@ -17,7 +17,7 @@ class CalendarWidget extends FullCalendarWidget
         $start = Carbon::parse($fetchInfo['start'])->startOfDay();
         $end = Carbon::parse($fetchInfo['end'])->endOfDay();
         $events = [];
-
+    
         $labSchedules = LabSchedule::query()
             ->where(function ($query) use ($start, $end) {
                 $query->where('is_makeup_class', true)
@@ -25,23 +25,38 @@ class CalendarWidget extends FullCalendarWidget
                     ->orWhere('is_makeup_class', false);
             })
             ->get();
-
+    
         foreach ($labSchedules as $event) {
             $instructorName = $event->instructor ? $event->instructor->name : 'No Instructor';
-
+    
             if ($event->is_makeup_class) {
+                // Ensure correct parsing of specific date, class start and end times
+                $specificDate = Carbon::parse($event->specific_date);
+                $startTime = Carbon::parse($event->class_start);
+                $endTime = Carbon::parse($event->class_end);
+    
+                // Combine date and time correctly
+                $startDateTime = $specificDate->setTimeFromTimeString($startTime->toTimeString())->toIso8601String();
+                $endDateTime = $specificDate->setTimeFromTimeString($endTime->toTimeString())->toIso8601String();
+    
+                // Log the datetime values for debugging
+                \Log::info('Make-up Class Start:', [$startDateTime]);
+                \Log::info('Make-up Class End:', [$endDateTime]);
+    
                 $events[] = [
                     'title' => $event->course_code . ' - ' . $instructorName . ' (Make-up Class)',
-                    'start' => Carbon::parse($event->specific_date . ' ' . $event->class_start)->toIso8601String(),
-                    'end' => Carbon::parse($event->specific_date . ' ' . $event->class_end)->toIso8601String(),
+                    'start' => $startDateTime,
+                    'end' => $endDateTime,
                 ];
             } else {
                 $events = array_merge($events, $this->getWeeklyOccurrences($event, $start, $end, $instructorName));
             }
         }
-
+    
         return $events;
     }
+    
+    
 
     private function getWeeklyOccurrences(LabSchedule $event, Carbon $start, Carbon $end, $instructorName): array
     {
