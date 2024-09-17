@@ -282,28 +282,32 @@ class UserInformationResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s first name.')
-                    ->alignLeft(),
+                    ->alignLeft()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('middle_name')
                     ->label('Middle Name')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s middle name.')
-                    ->alignLeft(),
+                    ->alignLeft()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('last_name')
                     ->label('Last Name')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s last name.')
-                    ->alignLeft(),
+                    ->alignLeft()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('suffix')
                     ->label('Suffix')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s suffix.')
-                    ->alignLeft(),
+                    ->alignLeft()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('date_of_birth')
                     ->label('Date of Birth')
@@ -313,6 +317,7 @@ class UserInformationResource extends Resource
                     ->tooltip('The user\'s date of birth.')
                     ->alignCenter(),
 
+
                 TextColumn::make('gender')
                     ->label('Gender')
                     ->sortable()
@@ -320,12 +325,14 @@ class UserInformationResource extends Resource
                     ->tooltip('The user\'s gender.')
                     ->alignLeft(),
 
+
                 TextColumn::make('contact_number')
                     ->label('Contact Number')
                     ->sortable()
                     ->searchable()
                     ->tooltip('The user\'s contact number.')
                     ->alignLeft(),
+
 
                 TextColumn::make('complete_address')
                     ->label('Complete Address')

@@ -86,22 +86,7 @@ class UserResource extends Resource
 
                             ]),
                     ]),
-                Section::make('Verification & Security')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                DateTimePicker::make('email_verified_at')
-                                    ->label('Email Verified At')
-                                    ->helperText('The date and time when the email was verified.'),
-                                TextInput::make('password')
-                                    ->label('Password')
-                                    ->password()
-                                    ->placeholder('Enter a new password')
-                                    ->dehydrated(fn($state) => filled($state))
-                                    ->maxLength(255)
-                                    ->helperText('The password for the user. Leave blank to keep the current password.'),
-                            ]),
-                    ]),
+               
             ]);
     }
 
@@ -188,29 +173,29 @@ class UserResource extends Resource
                     ->icon('heroicon-s-trash')
                     ->tooltip('Delete this user'),
             ])
-            // ->filters([
-            //     SelectFilter::make('year_and_semester_id')
-            //         ->label('School Year')
-            //         ->relationship('yearAndSemester', 'school_year')
-            //         ->options(
-            //             YearAndSemester::query()
-            //                 ->distinct('school_year') // Fetch distinct school years
-            //                 ->pluck('school_year', 'id')
-            //         )
-            //         ->placeholder('All School Years')
-            //         ->searchable(),
+            ->filters([
+                SelectFilter::make('year_and_semester_id')
+                    ->label('School Year')
+                    ->relationship('yearAndSemester', 'school_year')
+                    ->options(
+                        YearAndSemester::query()
+                            ->distinct('school_year') // Fetch distinct school years
+                            ->pluck('school_year', 'id')
+                    )
+                    ->placeholder('All School Years')
+                    ->searchable(),
 
-            //     SelectFilter::make('semester')
-            //         ->label('Semester')
-            //         ->relationship('yearAndSemester', 'semester')
-            //         ->options(
-            //             YearAndSemester::query()
-            //                 ->distinct('semester') // Fetch distinct semesters
-            //                 ->pluck('semester', 'semester') // Ensure unique semester values
-            //         )
-            //         ->placeholder('All Semesters')
-            //         ->searchable(),
-            // ])
+                SelectFilter::make('semester')
+                    ->label('Semester')
+                    ->relationship('yearAndSemester', 'semester')
+                    ->options(
+                        YearAndSemester::query()
+                            ->distinct('semester') // Fetch distinct semesters
+                            ->pluck('semester', 'semester') // Ensure unique semester values
+                    )
+                    ->placeholder('All Semesters')
+                    ->searchable(),
+            ])
 
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
