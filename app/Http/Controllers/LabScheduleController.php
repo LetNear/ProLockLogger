@@ -316,7 +316,6 @@ class LabScheduleController extends Controller
         // Retrieve the active year and semester
         $activeYearSemester = $this->getActiveYearAndSemester();
     
-        
         // Check if there is an ongoing year and semester
         if (!$activeYearSemester) {
             // No ongoing year and semester, return an empty response or a specific message
@@ -353,12 +352,15 @@ class LabScheduleController extends Controller
                 'day_of_the_week' => $schedule->day_of_the_week,
                 'class_start' => $schedule->class_start,
                 'class_end' => $schedule->class_end,
+                'is_makeup_class' => $schedule->is_makeup_class,
+                'specific_date' => $schedule->is_makeup_class ? $schedule->specific_date : null, // Include specific date only for makeup classes
             ];
         });
     
         // Return the formatted schedules
         return response()->json($formattedSchedules, 200);
     }
+    
     
 
 
