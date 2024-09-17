@@ -267,7 +267,7 @@ class UserInformationResource extends Resource
                 TextColumn::make('courses')
                 ->label('Courses')
                 ->sortable()
-                ->searchable()
+                ->searchable(false)
                 ->tooltip('The courses assigned to the user.')
                 ->alignLeft()
                 ->html() // Enable HTML rendering
@@ -375,18 +375,32 @@ class UserInformationResource extends Resource
                         '4' => '4th Year',
                     ]),
 
-                Tables\Filters\SelectFilter::make('gender')
-                    ->label('Gender')
-                    ->options([
-                        'Male' => 'Male',
-                        'Female' => 'Female',
-                        'Other' => 'Other',
-                    ]),
+
 
                 Tables\Filters\SelectFilter::make('block_id')
                     ->label('Block')
                     ->relationship('block', 'block'),
 
+
+                    Tables\Filters\SelectFilter::make('courses')
+                    ->label('Courses')
+                    ->relationship('courses', 'course_name')
+                    ->multiple() // Allows filtering by multiple courses
+                    ->searchable(), // Allows searching for courses within the filter
+
+                    Tables\Filters\SelectFilter::make('is_makeup_class')
+                    ->label('Makeup Class')
+                    ->options([
+                        '1' => 'Yes',
+                        '0' => 'No',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['value'])) {
+                            $query->whereHas('labSchedules', function ($query) use ($data) {
+                                $query->where('is_makeup_class', $data['value']);
+                            });
+                        }
+                    }),
                 // Tables\Filters\TrashedFilter::make('trashed'),
             ])
             ->actions([

@@ -431,20 +431,20 @@ class LabScheduleController extends Controller
     public function getLabScheduleOfStudentByRFID($rfid_number)
     {
         $activeYearSemester = $this->getActiveYearAndSemester();
-
+    
         if (!$activeYearSemester) {
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
-
+    
         // Find the student using the RFID number
         $student = UserInformation::whereHas('idCard', function ($query) use ($rfid_number) {
             $query->where('rfid_number', $rfid_number);
         })->first();
-
+    
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
         }
-
+    
         // Retrieve schedules for the student using the join table 'course_user_information'
         $schedules = DB::table('course_user_information')
             ->join('lab_schedules', 'course_user_information.schedule_id', '=', 'lab_schedules.id')
@@ -456,16 +456,32 @@ class LabScheduleController extends Controller
                 'courses.course_code',
                 'lab_schedules.class_start',
                 'lab_schedules.class_end',
-                'lab_schedules.day_of_the_week'
+                'lab_schedules.day_of_the_week',
+                'lab_schedules.is_makeup_class',  // Add the is_makeup_class field
+                'lab_schedules.specific_date'    // Add the specific_date field
             )
             ->get();
-
+    
         if ($schedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this student'], 404);
         }
-
-        return response()->json($schedules, 200);
+    
+        // Format the response to include makeup class info
+        $formattedSchedules = $schedules->map(function ($schedule) {
+            return [
+                'course_name' => $schedule->course_name,
+                'course_code' => $schedule->course_code,
+                'class_start' => $schedule->class_start,
+                'class_end' => $schedule->class_end,
+                'day_of_the_week' => $schedule->day_of_the_week,
+                'is_makeup_class' => $schedule->is_makeup_class ? 1 : 0, // Show if it's a makeup class
+                'specific_date' => $schedule->is_makeup_class ? $schedule->specific_date : 'N/A', // Show specific date if it's a makeup class
+            ];
+        });
+    
+        return response()->json($formattedSchedules, 200);
     }
+    
 
 
     public function getAllLabSchedules()
