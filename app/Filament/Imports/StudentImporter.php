@@ -70,7 +70,7 @@ class StudentImporter extends Importer
         FacadesLog::info('Importing student data:', $this->data);
     
         // Validate email domain
-        if (!str_ends_with($this->data['email'], '@my.cscp.edu.ph')) {
+        if (!str_ends_with($this->data['email'], '@my.cspc.edu.ph')) {
             throw new RowImportFailedException('Invalid email domain: Only emails ending with @my.cscp.edu.ph are allowed.');
         }
     

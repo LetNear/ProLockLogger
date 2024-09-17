@@ -35,6 +35,7 @@ class RecentLogsController extends Controller
             if (!$activeYearSemester) {
                 return response()->json(['message' => 'No active year and semester found.'], 404);
             }
+            
             // Eager load the related models and filter by active year and semester
             $recentLogs = RecentLogs::with([
                     'block',
@@ -44,7 +45,7 @@ class RecentLogsController extends Controller
                     'seat.computer', 
                 ])
                 ->where('role_id', 3)
-                ->where('year_and_semester_id', $activeYearSemester->id) // Assuming 'year' column matches 'id'
+                ->where('year_and_semester_id', $activeYearSemester->id)
                 ->get()
                 ->map(function ($log) {
                     return [
@@ -58,9 +59,9 @@ class RecentLogsController extends Controller
                         'block_id' => $log->block_id ?? 'Unknown',
                         'id_card_id' => $log->id_card_id ?? 'Unknown',
                         'role_name' => $log->role->name ?? 'Unknown',
-                        'seat_number' => $log->seat->seat_number ?? 'Unassigned',
-                        'computer_number' => $log->seat->computer->computer_number ?? 'Unassigned',
-                        'created_at' => $log->created_at ? $log->created_at->format('m/d/Y') : 'Unknown', // Format the created_at date
+                        'seat_number' => $log->seat->seat_number ?? 'Unassigned', // Fetching seat number
+                        'computer_number' => $log->seat->computer->computer_number ?? 'Unassigned', // Fetching computer number
+                        'created_at' => $log->created_at ? $log->created_at->format('m/d/Y') : 'Unknown',
                     ];
                 });
     
@@ -70,6 +71,7 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
     
     
     /**

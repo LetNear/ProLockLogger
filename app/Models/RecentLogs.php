@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,9 +20,8 @@ class RecentLogs extends Model implements Auditable
         'id_card_id',
         'fingerprint_id',
         'year_and_semester_id',
+        'seat_id', // Ensure seat_id is fillable
     ];
-
-
 
     public function block()
     {
@@ -40,27 +38,22 @@ class RecentLogs extends Model implements Auditable
         return $this->belongsTo(UserInformation::class, 'user_number', 'user_number');
     }
 
-
-    // If necessary, define these in the User model, not here.
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
 
-    // public function userInformation()
-    // {
-    //     return $this->belongsTo(UserInformation::class, 'user_id');
-    // }
-
     public function seat()
     {
-        return $this->belongsTo(Seat::class, 'seat_id'); // Assuming seat_id links to Seat
+        return $this->belongsTo(Seat::class, 'seat_id');
     }
 
     public function computer()
     {
-        return $this->belongsTo(Computer::class, 'computer_id'); // Assuming computer_id links to Computer
+        return $this->hasOneThrough(Computer::class, Seat::class, 'id', 'id', 'seat_id', 'computer_id');
+        // Ensure the above relationship correctly matches how Computer and Seat are related
     }
+
     public function yearAndSemester()
     {
         return $this->belongsTo(YearAndSemester::class, 'year_and_semester_id');

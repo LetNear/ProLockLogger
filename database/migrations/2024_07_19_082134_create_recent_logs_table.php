@@ -4,6 +4,7 @@ use App\Models\Block;
 use App\Models\LabAttendance;
 use App\Models\Nfc;
 use App\Models\Role;
+use App\Models\Seat;
 use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\YearAndSemester;
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->foreignIdFor(Block::class, 'block_id')->nullable();
             $table->foreignIdFor(Nfc::class, 'id_card_id')->nullable();
             $table->foreignIdFor(Role::class, 'role_id')->nullable();
+            $table->foreignIdFor(Seat::class, 'seat_id')->nullable(); // Add seat_id
             $table->string('user_number')->nullable();
             $table->string('year')->nullable();
             $table->string('time_in')->nullable();
