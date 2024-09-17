@@ -70,10 +70,17 @@ class StudentAttendanceResource extends Resource
                     ->label('Name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('userInformation.courses.course_name')
+                    Tables\Columns\TextColumn::make('userInformation.courses.course_name')
                     ->label('Course')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        // Explode the courses by comma and wrap each in a <div> for line breaks
+                        return collect(explode(', ', $state))->map(function ($course) {
+                            return "<div>{$course}</div>";
+                        })->implode('');
+                    })
+                    ->html(), // Enable HTML rendering
                 Tables\Columns\TextColumn::make('userInformation.year')
                     ->label('Year Level')
                     ->sortable()
