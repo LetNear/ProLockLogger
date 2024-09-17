@@ -79,7 +79,7 @@ class RecentLogsResource extends Resource
         return $table
             ->poll('2s')
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('userInformation.name')
                     ->label('User')
                     ->sortable()
                     ->searchable(),
