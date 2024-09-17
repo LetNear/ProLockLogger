@@ -37,7 +37,7 @@ class RecentLogs extends Model implements Auditable
 
     public function userInformation()
     {
-        return $this->belongsTo(UserInformation::class, 'user_number');
+        return $this->belongsTo(UserInformation::class, 'user_number', 'user_number');
     }
 
 
