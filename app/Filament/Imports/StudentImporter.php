@@ -66,26 +66,41 @@ class StudentImporter extends Importer
     public function resolveRecord(): ?User
     {
         $this->validateColumns($this->data); // Validate before processing
-
+        
         FacadesLog::info('Importing student data:', $this->data);
-
+    
+        // Validate email domain
+        if (!str_ends_with($this->data['email'], '@my.cscp.edu.ph')) {
+            throw new RowImportFailedException('Invalid email domain: Only emails ending with @my.cscp.edu.ph are allowed.');
+        }
+    
+        // Validate year to be one of 1, 2, 3, 4
+        if (!in_array($this->data['year'], ['1', '2', '3', '4'])) {
+            throw new RowImportFailedException('Invalid year: Only 1, 2, 3, or 4 are allowed.');
+        }
+    
+        // Validate block to be single letter A, B, C, etc.
+        if (!preg_match('/^[A-Z]$/', $this->data['block'])) {
+            throw new RowImportFailedException('Invalid block: Only single letters (A, B, C, etc.) are allowed.');
+        }
+    
         // Check if the email already exists
         if (User::where('email', $this->data['email'])->exists()) {
             throw new RowImportFailedException('Email already exists');
         }
-
+    
         // Check if the user number already exists
         if (UserInformation::where('user_number', $this->data['user_number'])->exists()) {
             throw new RowImportFailedException('User number already exists');
         }
-
+    
         // Fetch the active 'on-going' Year and Semester
         $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
-
+    
         if (!$onGoingYearAndSemester) {
             throw new RowImportFailedException("No active (on-going) Year and Semester found. Please set one before importing students.");
         }
-
+    
         // Create the user and associate with the active Year and Semester
         $user = User::create([
             'name' => $this->data['name'],
@@ -93,20 +108,20 @@ class StudentImporter extends Importer
             'role_number' => 3, // Set role_number for students
             'year_and_semester_id' => $onGoingYearAndSemester->id,
         ]);
-
+    
         // Sync role based on role_number
         $roleName = $this->getRoleNameByNumber($user->role_number);
         if ($roleName) {
             $user->syncRoles($roleName);
         }
-
+    
         // Find the block_id based on the block name
         $block = Block::where('block', $this->data['block'])->first();
         $blockId = $block ? $block->id : null;
-
+    
         // Log before updating or creating UserInformation
         FacadesLog::info('Creating or updating UserInformation for user ID:', ['user_id' => $user->id, 'user_number' => $this->data['user_number']]);
-
+    
         // Update or create UserInformation including year and block
         UserInformation::updateOrCreate(
             ['user_id' => $user->id],
@@ -116,9 +131,11 @@ class StudentImporter extends Importer
                 'block_id' => $blockId,  // Add block
             ]
         );
-
+    
         return $user;
     }
+    
+    
 
     protected function getRoleNameByNumber(int $roleNumber): ?string
     {
