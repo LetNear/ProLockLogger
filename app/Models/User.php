@@ -127,5 +127,6 @@ class User extends Authenticatable implements Auditable, FilamentUser
 
         return parent::delete();
     }
+    
 
 }

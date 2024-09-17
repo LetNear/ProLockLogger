@@ -32,8 +32,8 @@ return new class extends Migration
             $table->string('rfid_number')->nullable();
             $table->string('user_name')->nullable();
             $table->string('fingerprint_id')->nullable();
+            $table->string('assigned_instructor')->nullable();
             $table->foreignIdFor(YearAndSemester::class, 'year_and_semester_id')->nullable();
-
             $table->timestamps();
         });
     }

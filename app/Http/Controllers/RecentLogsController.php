@@ -7,10 +7,12 @@ use App\Models\RecentLogs;
 use App\Models\Nfc;
 use App\Models\StudentAttendance;
 use App\Models\User;
+use App\Models\Seat;
 use App\Models\UserInformation;
 use App\Models\YearAndSemester;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RecentLogsController extends Controller
@@ -35,14 +37,14 @@ class RecentLogsController extends Controller
             if (!$activeYearSemester) {
                 return response()->json(['message' => 'No active year and semester found.'], 404);
             }
-            
+    
             // Eager load the related models and filter by active year and semester
             $recentLogs = RecentLogs::with([
                     'block',
                     'nfc',
                     'userInformation.user',
                     'role',
-                    'seat.computer', 
+                    'seat', // Eager load seat relationship
                 ])
                 ->where('role_id', 3)
                 ->where('year_and_semester_id', $activeYearSemester->id)
@@ -53,17 +55,19 @@ class RecentLogsController extends Controller
                         'block_name' => $log->block->block ?? 'Unknown',
                         'year' => $log->year ?? 'Unknown',
                         'time_in' => $log->time_in ?? 'N/A',
-                        'time_out' => $log->time_out ?? null, 
+                        'time_out' => $log->time_out ?? null,
                         'UID' => $log->nfc->rfid_number ?? 'Unknown',
                         'user_number' => $log->user_number ?? 'Unknown',
                         'block_id' => $log->block_id ?? 'Unknown',
                         'id_card_id' => $log->id_card_id ?? 'Unknown',
                         'role_name' => $log->role->name ?? 'Unknown',
-                        'seat_number' => $log->seat->seat_number ?? 'Unassigned', // Fetching seat number
-                        'computer_number' => $log->seat->computer->computer_number ?? 'Unassigned', // Fetching computer number
-                        'created_at' => $log->created_at ? $log->created_at->format('m/d/Y') : 'Unknown',
+                        'seat_id' => $log->seat_id ?? 'Unassigned', // Emit the seat_id directly
+                        'date' => $log->created_at ? Carbon::parse($log->created_at)->format('m/d/Y') : 'Unknown', // Formatting date with Carbon
+                        'assigned_instructor' => $log->assigned_instructor ?? 'N/A',
                     ];
                 });
+
+       
     
             return response()->json($recentLogs, 200);
         } catch (\Exception $e) {
@@ -137,7 +141,14 @@ class RecentLogsController extends Controller
                 return response()->json(['message' => 'No valid schedule found for the provided time.'], 404);
             }
     
-            // Create a new log entry
+            // Retrieve assigned seat using student_id from seats table
+            $assignedSeat = Seat::where('student_id', $userInformation->id)->first();
+    
+            // Retrieve the computer details from the assigned seat
+            $computer = $assignedSeat ? $assignedSeat->computer : null;
+            $computerNumber = $computer ? $computer->computer_number : 'Unassigned';
+    
+            // Create a new log entry with the seat_id and instructor name
             $log = RecentLogs::create([
                 'user_number' => $userInformation->user_number,
                 'block_id' => $userInformation->block_id,
@@ -147,23 +158,38 @@ class RecentLogsController extends Controller
                 'role_id' => $validated['role_id'],
                 'user_name' => $validated['user_name'],
                 'year_and_semester_id' => $activeYearSemester->id,
+                'seat_id' => $assignedSeat->id ?? null, // Assign seat_id if found
+                'assigned_instructor' => $assignedSeat->instructor_name ?? 'N/A', // Ensure this value is being saved
             ]);
     
-            // Save the data to StudentAttendance table
+            // Save the data to StudentAttendance table with the seat_id
             StudentAttendance::create([
                 'user_information_id' => $userInformation->id,
                 'time_in' => $validated['time_in'],
                 'time_out' => null, 
                 'status' => 'In Progress',
                 'year_and_semester_id' => $activeYearSemester->id,
+                'seat_id' => $assignedSeat->id ?? null, // Assign seat_id if found
             ]);
     
-            return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
+            // Prepare response including the assigned seat
+            $response = [
+                'message' => 'Time-In recorded successfully.',
+                'log' => $log,
+                'assigned_seat' => $assignedSeat ? [
+                    'seat_id' => $assignedSeat->id,
+                    'seat_number' => $computerNumber, // Include the computer number
+                ] : 'Unassigned',
+                'assigned_instructor' => $assignedSeat->instructor_name ?? 'N/A',
+            ];
+    
+            return response()->json($response, 201);
         } catch (\Exception $e) {
             \Log::error('An error occurred while creating the log entry.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
     
 
 
@@ -236,77 +262,76 @@ class RecentLogsController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function getRecentLogsByUID(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'rfid_number' => 'required|string',
-        ]);
-    
-        try {
-            $activeYearSemester = $this->getActiveYearAndSemester();
-    
-            if (!$activeYearSemester) {
-                return response()->json(['message' => 'No active year and semester found.'], 404);
-            }
-    
-            $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-    
-            if (!$nfc) {
-                return response()->json(['message' => 'NFC UID not found.'], 404);
-            }
-    
-            $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
-    
-            if (!$userInformation) {
-                return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
-            }
-    
-            // Check if the user information is associated with the active year and semester
-            if ($userInformation->year_and_semester_id !== $activeYearSemester->id) {
-                return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
-            }
-    
-            // Fetch recent logs associated with this NFC UID
-            $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user.course.instructor'])
-                ->where('id_card_id', $nfc->id)
-                ->where('year_and_semester_id', $activeYearSemester->id)
-                ->get()
-                ->map(function ($log) {
-                    $user = $log->userInformation->user ?? null;
-                    $course = $user ? $user->course : null;
-                    $instructor = $course ? $course->instructor : null;
-    
-                    return [
-                        'date' => $log->created_at->toDateString(),
-                        'name' => $log->user_name ?? ($user ? $user->name : 'Unknown'),
-                        'pc_number' => $log->nfc->pc_number ?? 'Unknown',
-                        'student_number' => $log->user_number ?? 'Unknown',
-                        'year' => $log->year ?? 'Unknown',
-                        'block' => $log->block->block ?? 'Unknown',
-                        'instructor' => $instructor ? $instructor->name : 'Unknown',
-                        'time_in' => $log->time_in,
-                        'time_out' => $log->time_out,
-                    ];
-                });
-    
-            // Save each log entry to the StudentAttendance table if time_out is not null
-            foreach ($recentLogs as $log) {
-                if (!is_null($log['time_out'])) {
-                    StudentAttendance::create([
+   public function getRecentLogsByUID(Request $request): JsonResponse
+{
+    $validated = $request->validate([
+        'rfid_number' => 'required|string',
+    ]);
+
+    try {
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        // Find NFC by RFID number
+        $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
+
+        if (!$nfc) {
+            return response()->json(['message' => 'NFC UID not found.'], 404);
+        }
+
+        // Find User Information by NFC ID
+        $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
+
+        if (!$userInformation) {
+            return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
+        }
+
+        // Check if the user information is associated with the active year and semester
+        if ($userInformation->year_and_semester_id !== $activeYearSemester->id) {
+            return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
+        }
+
+        // Fetch recent logs associated with this NFC UID
+        $recentLogs = RecentLogs::with(['block', 'nfc', 'userInformation.user'])
+            ->where('id_card_id', $nfc->id)
+            ->where('year_and_semester_id', $activeYearSemester->id)
+            ->get()
+            ->map(function ($log) {
+                $user = $log->userInformation->user ?? null;
+                return [
+                    'date' => $log->created_at ? $log->created_at->toDateString() : 'Unknown',
+                    'name' => $log->user_name ?? ($user ? $user->name : 'Unknown'),
+                    'time_in' => $log->time_in ?? 'Unknown',
+                    'time_out' => $log->time_out ?? null,
+                ];
+            });
+
+        // Save each log entry to the StudentAttendance table if time_out is not null
+        foreach ($recentLogs as $log) {
+            if (!is_null($log['time_out'])) {
+                StudentAttendance::updateOrCreate(
+                    [
                         'user_information_id' => $userInformation->id,
                         'time_in' => $log['time_in'],
                         'time_out' => $log['time_out'],
+                    ],
+                    [
                         'status' => 'Completed',
-                    ]);
-                }
+                    ]
+                );
             }
-    
-            return response()->json($recentLogs, 200);
-        } catch (\Exception $e) {
-            \Log::error('An error occurred while fetching recent logs by UID.', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
+
+        return response()->json($recentLogs, 200);
+    } catch (\Exception $e) {
+        \Log::error('An error occurred while fetching recent logs by UID.', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
     }
+}
+
     
 
 

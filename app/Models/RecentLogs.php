@@ -21,6 +21,7 @@ class RecentLogs extends Model implements Auditable
         'fingerprint_id',
         'year_and_semester_id',
         'seat_id', // Ensure seat_id is fillable
+        'assigned_instructor',
     ];
 
     public function block()
@@ -50,8 +51,7 @@ class RecentLogs extends Model implements Auditable
 
     public function computer()
     {
-        return $this->hasOneThrough(Computer::class, Seat::class, 'id', 'id', 'seat_id', 'computer_id');
-        // Ensure the above relationship correctly matches how Computer and Seat are related
+        return $this->seat->computer(); // Indirectly access through the seat relationship
     }
 
     public function yearAndSemester()

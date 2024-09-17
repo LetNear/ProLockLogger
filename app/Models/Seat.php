@@ -20,6 +20,7 @@ class Seat extends Model implements Auditable
         'student_id',
         'lab_attendance_id',
         'course_id',
+        'seat_number'
     ];
 
     public function userInformation()
