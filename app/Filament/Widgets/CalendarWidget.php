@@ -14,10 +14,13 @@ class CalendarWidget extends FullCalendarWidget
 
     public function fetchEvents(array $fetchInfo): array
     {
-        $start = Carbon::parse($fetchInfo['start'])->startOfDay();
-        $end = Carbon::parse($fetchInfo['end'])->endOfDay();
+        $start = Carbon::parse($fetchInfo['start'])->startOfDay()->setTimezone('Asia/Manila');
+        $end = Carbon::parse($fetchInfo['end'])->endOfDay()->setTimezone('Asia/Manila');
         $events = [];
-    
+
+        // Debug logging to verify start and end times
+        \Log::info('Fetching events from:', [$start->toDateTimeString(), $end->toDateTimeString()]);
+
         $labSchedules = LabSchedule::query()
             ->where(function ($query) use ($start, $end) {
                 $query->where('is_makeup_class', true)
@@ -25,24 +28,23 @@ class CalendarWidget extends FullCalendarWidget
                     ->orWhere('is_makeup_class', false);
             })
             ->get();
-    
+
         foreach ($labSchedules as $event) {
             $instructorName = $event->instructor ? $event->instructor->name : 'No Instructor';
-    
+
             if ($event->is_makeup_class) {
-                // Ensure correct parsing of specific date, class start and end times
-                $specificDate = Carbon::parse($event->specific_date);
-                $startTime = Carbon::parse($event->class_start);
-                $endTime = Carbon::parse($event->class_end);
-    
-                // Combine date and time correctly
-                $startDateTime = $specificDate->setTimeFromTimeString($startTime->toTimeString())->toIso8601String();
-                $endDateTime = $specificDate->setTimeFromTimeString($endTime->toTimeString())->toIso8601String();
-    
-                // Log the datetime values for debugging
+                // Ensure correct parsing of specific date, class start, and end times
+                $specificDate = Carbon::parse($event->specific_date)->setTimezone('Asia/Manila');
+                $startTime = Carbon::createFromFormat('H:i', $event->class_start, 'Asia/Manila');
+                $endTime = Carbon::createFromFormat('H:i', $event->class_end, 'Asia/Manila');
+
+                // Combine date and time correctly, log for verification
+                $startDateTime = $specificDate->copy()->setTime($startTime->hour, $startTime->minute)->toIso8601String();
+                $endDateTime = $specificDate->copy()->setTime($endTime->hour, $endTime->minute)->toIso8601String();
+
                 \Log::info('Make-up Class Start:', [$startDateTime]);
                 \Log::info('Make-up Class End:', [$endDateTime]);
-    
+
                 $events[] = [
                     'title' => $event->course_code . ' - ' . $instructorName . ' (Make-up Class)',
                     'start' => $startDateTime,
@@ -52,11 +54,12 @@ class CalendarWidget extends FullCalendarWidget
                 $events = array_merge($events, $this->getWeeklyOccurrences($event, $start, $end, $instructorName));
             }
         }
-    
+
+        // Log the final events array for debugging
+        \Log::info('Final Events:', $events);
+
         return $events;
     }
-    
-    
 
     private function getWeeklyOccurrences(LabSchedule $event, Carbon $start, Carbon $end, $instructorName): array
     {
@@ -65,10 +68,13 @@ class CalendarWidget extends FullCalendarWidget
         $current = $start->copy()->next($dayOfWeek);
 
         while ($current->lte($end)) {
+            $startTime = Carbon::createFromFormat('H:i', $event->class_start, 'Asia/Manila');
+            $endTime = Carbon::createFromFormat('H:i', $event->class_end, 'Asia/Manila');
+
             $occurrences[] = [
                 'title' => $event->course_code . ' - ' . $instructorName,
-                'start' => $current->copy()->setTimeFromTimeString($event->class_start)->toIso8601String(),
-                'end' => $current->copy()->setTimeFromTimeString($event->class_end)->toIso8601String(),
+                'start' => $current->copy()->setTime($startTime->hour, $startTime->minute)->toIso8601String(),
+                'end' => $current->copy()->setTime($endTime->hour, $endTime->minute)->toIso8601String(),
             ];
             $current->addWeek();
         }
@@ -88,19 +94,18 @@ class CalendarWidget extends FullCalendarWidget
             'events' => $this->fetchEvents(),
             'editable' => false,
             'selectable' => false,
-            'eventClick' => fn($event) => false,
-            'dateClick' => fn($date) => false,
-           
-            'height' => 'auto', // Makes the calendar height responsive
-            'contentHeight' => '90vh', // Adjusts the calendar to fill 90% of the viewport height
-            'slotLabelInterval' => '01:00', // Label every hour
+            'slotMinTime' => '00:00:00',
+            'slotMaxTime' => '24:00:00',
+            'timeZone' => 'Asia/Manila', // Set FullCalendar to display in Asia/Manila time zone
+            'height' => 'auto',
+            'contentHeight' => '90vh',
+            'slotLabelInterval' => '01:00',
             'slotLabelFormat' => [
                 'hour' => 'numeric',
                 'minute' => '2-digit',
                 'omitZeroMinute' => false,
             ],
-
-            'eventDisplay' => 'block', // Ensures events are displayed as blocks
+            'eventDisplay' => 'block',
             'eventContent' => function($event) {
                 return [
                     'html' => '<div style="white-space:normal;">' . $event['title'] . '</div>',
@@ -108,7 +113,6 @@ class CalendarWidget extends FullCalendarWidget
             },
         ];
     }
-    
 
     protected function viewAction(): Action
     {

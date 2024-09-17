@@ -265,17 +265,18 @@ class UserInformationResource extends Resource
 
                 // Add this column to display courses
                 TextColumn::make('courses')
-                    ->label('Courses')
-                    ->sortable()
-                    ->searchable()
-                    ->tooltip('The courses assigned to the user.')
-                    ->alignLeft()
-                    ->getStateUsing(function ($record) {
-                        // Joins course names into a string
-                        return $record->labSchedules->map(function ($schedule) {
-                            return $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '');
-                        })->implode(', ');
-                    }),
+                ->label('Courses')
+                ->sortable()
+                ->searchable()
+                ->tooltip('The courses assigned to the user.')
+                ->alignLeft()
+                ->html() // Enable HTML rendering
+                ->getStateUsing(function ($record) {
+                    // Map the courses to create HTML formatted entries for each course on a new line
+                    return $record->labSchedules->map(function ($schedule) {
+                        return '<div>' . $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '') . '</div>';
+                    })->implode(''); // Use implode to join all HTML divs without spaces
+                }),
 
                 TextColumn::make('first_name')
                     ->label('First Name')
