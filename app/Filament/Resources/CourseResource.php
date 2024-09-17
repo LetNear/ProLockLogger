@@ -78,7 +78,7 @@ class CourseResource extends Resource
 
                 TextColumn::make('course_description')
                     ->label('Description')
-                    ->searchable()
+
                     ->wrap() // Wrap text for long descriptions
                     ->limit(50), // Limit displayed text for better readability
 

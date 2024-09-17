@@ -59,31 +59,14 @@ class StudentResource extends Resource
                                     ->disabled(),
 
                             ]),
-                    ]),
-                Section::make('Verification & Security')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                DateTimePicker::make('email_verified_at')
-                                    ->label('Email Verified At')
-                                    ->helperText('The date and time when the email was verified.'),
-                                TextInput::make('password')
-                                    ->label('Password')
-                                    ->password()
-                                    ->placeholder('Enter a new password')
-                                    ->dehydrated(fn($state) => filled($state))
-                                    ->required(fn(string $context): bool => $context === 'create')
-                                    ->maxLength(255)
-                                    ->helperText('The password for the student. Leave blank to keep the current password.'),
-                            ]),
-                    ]),
+                    ]),      
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->poll('5s')
+            ->poll('2s')
             ->headerActions([
                 ImportAction::make()
                     ->importer(StudentImporter::class)
@@ -122,6 +105,18 @@ class StudentResource extends Resource
                     ->tooltip('The semester of the user.'),
 
 
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('yearAndSemester.school_year')
+                ->label('School Year')
+                ->relationship('yearAndSemester', 'school_year')
+                ->searchable(),
+
+            // Filter by Semester
+            Tables\Filters\SelectFilter::make('yearAndSemester.semester')
+                ->label('Semester')
+                ->relationship('yearAndSemester', 'semester')
+                ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
