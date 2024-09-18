@@ -10,6 +10,8 @@ use App\Models\UserInformation;
 use App\Models\YearAndSemester;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+
 
 class UserInformationController extends Controller
 {
@@ -377,23 +379,27 @@ class UserInformationController extends Controller
             return response()->json(['error' => 'Instructor not found'], 404);
         }
     
-        // Get all the lab schedules for the instructor within the active year
+        // Get all the lab schedules for the instructor within the active year and semester, excluding makeup classes
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
             ->where('year_and_semester_id', $activeYearSemester->id)
+            ->where('is_makeup_class', false) // Exclude makeup classes
             ->get();
     
         $studentCount = 0;
     
         foreach ($labSchedules as $schedule) {
-            $count = UserInformation::where('year', $schedule->year)
-                ->where('block_id', $schedule->block_id)
+            // Count students enrolled in the course for the specific schedule and year
+            $studentsInCourse = DB::table('course_user_information')
+                ->where('course_id', $schedule->course_id)
+                ->where('schedule_id', $schedule->id)
                 ->count();
     
-            $studentCount += $count;
+            $studentCount += $studentsInCourse;
         }
     
         return response()->json(['student_count' => $studentCount], 200);
     }
+    
     
 }
 
