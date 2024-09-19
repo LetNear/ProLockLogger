@@ -215,6 +215,19 @@ class LabScheduleResource extends Resource
                             ->seconds(false),
                     ])
                     ->action(function (array $data, $record) {
+                        // 1. Validate if the specific date is in the past
+                    if (strtotime($data['specific_date']) < strtotime(now()->format('Y-m-d'))) {
+                        Notification::make()
+                            ->title('Invalid Makeup Class Date')
+                            ->danger()
+                            ->body('Makeup class date must be today or a future date.')
+                            ->send();
+
+                        throw ValidationException::withMessages([
+                            'specific_date' => ['Makeup class date must be today or a future date.'],
+                        ]);
+                    }
+
                         // Validate if the makeup class conflicts with any other makeup class
                         $conflictingSchedule = LabSchedule::where('specific_date', $data['specific_date'])
                             ->where('is_makeup_class', true)
