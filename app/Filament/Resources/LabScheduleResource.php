@@ -21,6 +21,9 @@ use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
+use Filament\Notifications\Notification;
+use Illuminate\Validation\ValidationException;
+
 
 class LabScheduleResource extends Resource
 {
@@ -196,7 +199,7 @@ class LabScheduleResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Action::make('Crete Makeup Class')
+                Action::make('Create Makeup Class')
                     ->label('Create Makeup Class')
                     ->form([
                         DatePicker::make('specific_date')
@@ -212,17 +215,42 @@ class LabScheduleResource extends Resource
                             ->seconds(false),
                     ])
                     ->action(function (array $data, $record) {
-                        $newRecord = $record->replicate(['day_of_the_week'])->fill([...$data, 'is_makeup_class' => true,]);
+                        // Validate if the makeup class conflicts with any other makeup class
+                        $conflictingSchedule = LabSchedule::where('specific_date', $data['specific_date'])
+                            ->where('is_makeup_class', true)
+                            ->where(function ($query) use ($data) {
+                                $query->whereTime('class_start', '<', $data['class_end'])
+                                      ->whereTime('class_end', '>', $data['class_start']);
+                            })
+                            ->where('id', '!=', $record->id ?? null) // Exclude the current record if editing
+                            ->exists();
+    
+                        if ($conflictingSchedule) {
+                            Notification::make()
+                                ->title('Makeup Class Conflict')
+                                ->danger()
+                                ->body('This makeup class conflicts with another makeup class.')
+                                ->send();
+    
+                            throw ValidationException::withMessages([
+                                'specific_date' => ['This makeup class conflicts with another makeup class.'],
+                            ]);
+                        }
+    
+                        // Create the makeup class if no conflicts are found
+                        $newRecord = $record->replicate(['day_of_the_week'])->fill(array_merge($data, ['is_makeup_class' => true]));
                         $newRecord = LabSchedule::create($newRecord->toArray());
                         $newRecord->update(['course_name' => $record->course->course_name . ' (Makeup)']);
+    
+                        // Optionally link students to the new makeup class
                         $students = $record->course->students->each(function ($student) use ($newRecord) {
                             $newRecord->students()->attach($student->id, ['course_id' => $newRecord->course->id]);
                         });
-
+    
+                        // Redirect to the edit page for the new makeup class
                         return redirect(LabScheduleResource::getUrl('edit', ['record' => $newRecord]));
                     })
-                    ->disabled(fn($record) => $record->is_makeup_class),
-
+                    ->disabled(fn($record) => $record->is_makeup_class), // Disable action if the record is already a makeup class
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

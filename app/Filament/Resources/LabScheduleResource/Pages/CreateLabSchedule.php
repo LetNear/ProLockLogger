@@ -59,9 +59,49 @@ class CreateLabSchedule extends CreateRecord
             ]);
         }
     
-        // Check for overlapping schedules for regular class (day_of_the_week)
+        // Validation for Makeup Classes (check conflicts only with other makeup classes)
+        if ($classType && isset($data['specific_date'])) {
+            $specificDate = $data['specific_date'];
+    
+            if (strtotime($specificDate) < strtotime(date('Y-m-d'))) {
+                Notification::make()
+                    ->title('Invalid Makeup Class Date')
+                    ->danger()
+                    ->body('Makeup class date must be set to a future date.')
+                    ->send();
+    
+                throw ValidationException::withMessages([
+                    'specific_date' => ['Makeup class date must be set to a future date.'],
+                ]);
+            }
+    
+            // Check for conflicting schedules (makeup classes only)
+            $conflictingSchedule = LabSchedule::where('specific_date', $specificDate)
+                ->where('is_makeup_class', true) // Only check conflicts with other makeup classes
+                ->where(function ($query) use ($classStart, $classEnd) {
+                    $query->where(function ($subQuery) use ($classStart, $classEnd) {
+                        $subQuery->whereTime('class_start', '<', $classEnd)
+                                 ->whereTime('class_end', '>', $classStart);
+                    });
+                })
+                ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
+                ->exists();
+    
+            if ($conflictingSchedule) {
+                Notification::make()
+                    ->title('Makeup Class Conflict')
+                    ->danger()
+                    ->body('This makeup class conflicts with another makeup class in the laboratory.')
+                    ->send();
+    
+                throw ValidationException::withMessages([
+                    'specific_date' => ['This makeup class conflicts with another makeup class in the laboratory.'],
+                ]);
+            }
+        }
+    
+        // Additional validation for regular classes (no conflicts with other regular classes)
         if (!$classType && isset($data['day_of_the_week'])) {
-            // Query for any overlapping schedules on the same day in the lab
             $conflictingSchedule = LabSchedule::where('day_of_the_week', $data['day_of_the_week'])
                 ->where(function ($query) use ($classStart, $classEnd) {
                     // Check if any schedule overlaps with the new one
@@ -82,44 +122,6 @@ class CreateLabSchedule extends CreateRecord
     
                 throw ValidationException::withMessages([
                     'class_start' => ['This schedule conflicts with another schedule in the laboratory on the same day.'],
-                ]);
-            }
-        } elseif ($classType && isset($data['specific_date'])) {
-            // Handle conflicts for makeup class (specific_date)
-            $specificDate = $data['specific_date'];
-    
-            if (strtotime($specificDate) < strtotime(date('Y-m-d'))) {
-                Notification::make()
-                    ->title('Invalid Makeup Class Date')
-                    ->danger()
-                    ->body('Makeup class date must be set to a future date.')
-                    ->send();
-    
-                throw ValidationException::withMessages([
-                    'specific_date' => ['Makeup class date must be set to a future date.'],
-                ]);
-            }
-    
-            // Query for overlapping schedules on the same specific date in the lab
-            $conflictingSchedule = LabSchedule::where('specific_date', $specificDate)
-                ->where(function ($query) use ($classStart, $classEnd) {
-                    $query->where(function ($subQuery) use ($classStart, $classEnd) {
-                        $subQuery->whereTime('class_start', '<', $classEnd)
-                                 ->whereTime('class_end', '>', $classStart);
-                    });
-                })
-                ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
-                ->exists();
-    
-            if ($conflictingSchedule) {
-                Notification::make()
-                    ->title('Schedule Conflict')
-                    ->danger()
-                    ->body('This makeup class conflicts with another schedule in the laboratory on the same date.')
-                    ->send();
-    
-                throw ValidationException::withMessages([
-                    'class_start' => ['This makeup class conflicts with another schedule in the laboratory on the same date.'],
                 ]);
             }
         }
@@ -144,6 +146,7 @@ class CreateLabSchedule extends CreateRecord
             ]);
         }
     }
+    
     
     
     
