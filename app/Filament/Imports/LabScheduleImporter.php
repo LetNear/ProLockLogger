@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Filament\Imports;
 
 use App\Models\LabSchedule;
@@ -7,11 +6,10 @@ use App\Models\User;
 use App\Models\Block;
 use App\Models\Course;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
-use Filament\Actions\Imports\Models\Import;
+use Filament\Actions\Imports\Models\Import; // Correct import
+use Illuminate\Support\Facades\Log;
 
 class LabScheduleImporter extends Importer
 {
@@ -25,14 +23,8 @@ class LabScheduleImporter extends Importer
             ImportColumn::make('course_name')
                 ->rules(['required', 'max:255']),
             ImportColumn::make('instructor_name')
-                ->fillRecordUsing(function ($record, $state) {
-                    return;
-                })
                 ->rules(['required', 'max:255']),
             ImportColumn::make('block_name')
-                ->fillRecordUsing(function ($record, $state) {
-                    return;
-                })
                 ->rules(['required', 'max:255']),
             ImportColumn::make('year')
                 ->rules(['required', 'in:1,2,3,4']),
@@ -49,44 +41,61 @@ class LabScheduleImporter extends Importer
     {
         Log::info('Importing lab schedule data:', $this->data);
 
-        // Validate instructor name
-        $instructor = User::where('name', $this->data['instructor_name'])
+        // Validate instructor name and fetch the instructor_id
+        $instructor = User::where('name', $this->data['instructor_name']) // Correct column 'name'
             ->where('role_number', 2)
             ->first();
 
         if (!$instructor) {
             throw new RowImportFailedException('Instructor not found');
         }
-        // Validate block name
+
+        // Validate block name and get the block_id
         $block = Block::where('block', $this->data['block_name'])->first();
 
         if (!$block) {
             throw new RowImportFailedException('Block not found');
         }
 
-        // Check for duplicate course_code
-        $existingSchedule = LabSchedule::where('course_code', $this->data['course_code'])->first();
-        if ($existingSchedule) {
-            throw new RowImportFailedException('Duplicate subject code');
-        }
+        // Validate the course exists
         $course = Course::where('course_code', $this->data['course_code'])->first();
-
         if (!$course) {
             throw new RowImportFailedException('Course not found');
         }
+
+        // Validate that class_end is after class_start
+        if (strtotime($this->data['class_end']) <= strtotime($this->data['class_start'])) {
+            throw new RowImportFailedException('Class end time must be after class start time.');
+        }
+
+        // Check for conflicting schedules
+        $conflictingSchedule = LabSchedule::where('day_of_the_week', $this->data['day_of_the_week'])
+            ->where('block_id', $block->id)
+            ->where(function ($query) {
+                $query->whereTime('class_start', '<', $this->data['class_end'])
+                      ->whereTime('class_end', '>', $this->data['class_start']);
+            })
+            ->exists();
+
+        if ($conflictingSchedule) {
+            throw new RowImportFailedException('This schedule conflicts with another schedule in the laboratory on the same day.');
+        }
+
+        // Create the lab schedule
         return LabSchedule::create([
-            'course_code' => $this->data['course_code'],
-            'course_name' => $this->data['course_name'],
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'block_id' => $block->id,
-            'year' => $this->data['year'],
-            'day_of_the_week' => $this->data['day_of_the_week'],
-            'class_start' => $this->data['class_start'],
-            'class_end' => $this->data['class_end'],
+            'course_code'    => $this->data['course_code'],
+            'course_name'    => $this->data['course_name'],
+            'course_id'      => $course->id,
+            'instructor_id'  => $instructor->id, // Use the instructor ID here
+            'block_id'       => $block->id, // Use the block ID here
+            'year'           => $this->data['year'],
+            'day_of_the_week'=> $this->data['day_of_the_week'],
+            'class_start'    => $this->data['class_start'],
+            'class_end'      => $this->data['class_end'],
         ]);
     }
 
+    // Use the correct Import class for the completed notification body
     public static function getCompletedNotificationBody(Import $import): string
     {
         $body = 'Your lab schedule import has completed with ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' successfully imported.';
