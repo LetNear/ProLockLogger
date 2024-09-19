@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('student_attendances', function (Blueprint $table) {
             $table->dropColumn('name');
-            $table->dropColumn('course');
+            
             $table->dropColumn('year');
             $table->dropColumn('block');
             $table->dropColumn('student_number');
@@ -28,7 +28,7 @@ return new class extends Migration
     {
         Schema::table('student_attendances', function (Blueprint $table) {
             $table->string('name')->nullable();
-            $table->string('course')->nullable();
+            
             $table->string('year')->nullable();
             $table->string('block')->nullable();
             $table->string('student_number')->nullable();

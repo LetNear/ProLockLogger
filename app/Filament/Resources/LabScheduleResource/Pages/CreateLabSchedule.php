@@ -45,7 +45,7 @@ class CreateLabSchedule extends CreateRecord
         $classStart = $data['class_start'];
         $classEnd = $data['class_end'];
         $classType = $data['is_makeup_class'] ?? false;
-
+    
         // Validate time range
         if (strtotime($classEnd) <= strtotime($classStart)) {
             Notification::make()
@@ -53,99 +53,125 @@ class CreateLabSchedule extends CreateRecord
                 ->danger()
                 ->body('Class end time must be after class start time.')
                 ->send();
-
+    
             throw ValidationException::withMessages([
                 'class_end' => ['Class end time must be after class start time.'],
             ]);
         }
-
-        // Check for block, year, and course conflicts
-        $this->validateUniqueInstructorForBlockYear($data);
-
-        // Check for schedule conflicts based on the class type
+    
+        // Check for overlapping schedules for regular class (day_of_the_week)
         if (!$classType && isset($data['day_of_the_week'])) {
+            // Query for any overlapping schedules on the same day in the lab
             $conflictingSchedule = LabSchedule::where('day_of_the_week', $data['day_of_the_week'])
-                ->where('instructor_id', $data['instructor_id'])
-                ->where('id', '!=', $this->record->id ?? null)
                 ->where(function ($query) use ($classStart, $classEnd) {
+                    // Check if any schedule overlaps with the new one
                     $query->where(function ($subQuery) use ($classStart, $classEnd) {
                         $subQuery->whereTime('class_start', '<', $classEnd)
                                  ->whereTime('class_end', '>', $classStart);
                     });
                 })
+                ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
                 ->exists();
-
+    
             if ($conflictingSchedule) {
                 Notification::make()
                     ->title('Schedule Conflict')
                     ->danger()
-                    ->body('This schedule conflicts with another schedule for the instructor.')
+                    ->body('This schedule conflicts with another schedule in the laboratory on the same day.')
                     ->send();
-
+    
                 throw ValidationException::withMessages([
-                    'class_start' => ['This schedule conflicts with another schedule for the instructor.'],
+                    'class_start' => ['This schedule conflicts with another schedule in the laboratory on the same day.'],
                 ]);
             }
         } elseif ($classType && isset($data['specific_date'])) {
-            $specificDate = strtotime($data['specific_date']);
-            if ($specificDate < strtotime(date('Y-m-d'))) {
+            // Handle conflicts for makeup class (specific_date)
+            $specificDate = $data['specific_date'];
+    
+            if (strtotime($specificDate) < strtotime(date('Y-m-d'))) {
                 Notification::make()
                     ->title('Invalid Makeup Class Date')
                     ->danger()
                     ->body('Makeup class date must be set to a future date.')
                     ->send();
-
+    
                 throw ValidationException::withMessages([
                     'specific_date' => ['Makeup class date must be set to a future date.'],
                 ]);
             }
-
-            $conflictingSchedule = LabSchedule::where('specific_date', $data['specific_date'])
-                ->where('instructor_id', $data['instructor_id'])
-                ->where('id', '!=', $this->record->id ?? null)
+    
+            // Query for overlapping schedules on the same specific date in the lab
+            $conflictingSchedule = LabSchedule::where('specific_date', $specificDate)
                 ->where(function ($query) use ($classStart, $classEnd) {
                     $query->where(function ($subQuery) use ($classStart, $classEnd) {
                         $subQuery->whereTime('class_start', '<', $classEnd)
                                  ->whereTime('class_end', '>', $classStart);
                     });
                 })
+                ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
                 ->exists();
-
+    
             if ($conflictingSchedule) {
                 Notification::make()
                     ->title('Schedule Conflict')
                     ->danger()
-                    ->body('This schedule conflicts with another makeup class for the instructor on the specified date.')
+                    ->body('This makeup class conflicts with another schedule in the laboratory on the same date.')
                     ->send();
-
+    
                 throw ValidationException::withMessages([
-                    'class_start' => ['This schedule conflicts with another makeup class for the instructor on the specified date.'],
+                    'class_start' => ['This makeup class conflicts with another schedule in the laboratory on the same date.'],
                 ]);
             }
         }
-    }
-
-    /**
-     * Validate that the same block and year for a course cannot have different instructors.
-     */
-    protected function validateUniqueInstructorForBlockYear(array $data): void
-    {
-        $existing = LabSchedule::where('course_id', $data['course_id'])
+    
+        // Additional validation: Ensure no duplicate schedule for the same course, instructor, block, and year
+        $duplicateSchedule = LabSchedule::where('course_id', $data['course_id'])
+            ->where('instructor_id', $data['instructor_id'])
             ->where('block_id', $data['block_id'])
             ->where('year', $data['year'])
-            ->where('instructor_id', '!=', $data['instructor_id'])
+            ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
             ->exists();
-
-        if ($existing) {
+    
+        if ($duplicateSchedule) {
             Notification::make()
-                ->title('Instructor Conflict')
+                ->title('Duplicate Schedule')
                 ->danger()
-                ->body('This block and year combination for the course already has a different instructor.')
+                ->body('There is already a schedule for this course, instructor, block, and year.')
                 ->send();
-
+    
             throw ValidationException::withMessages([
-                'instructor_id' => ['This block and year combination for the course already has a different instructor.'],
+                'course_id' => ['There is already a schedule for this course, instructor, block, and year.'],
             ]);
         }
     }
+    
+    
+    
+
+    
+    
+    
+    // /**
+    //  * Validate that the same block and year for a course cannot have different instructors.
+    //  */
+    // protected function validateUniqueInstructorForBlockYear(array $data): void
+    // {
+    //     $existing = LabSchedule::where('course_id', $data['course_id'])
+    //         ->where('block_id', $data['block_id'])
+    //         ->where('year', $data['year'])
+    //         ->where('instructor_id', '!=', $data['instructor_id'])
+    //         ->exists();
+
+    //     if ($existing) {
+    //         Notification::make()
+    //             ->title('Instructor Conflict')
+    //             ->danger()
+    //             ->body('This block and year combination for the course already has a different instructor.')
+    //             ->send();
+
+    //         throw ValidationException::withMessages([
+    //             'instructor_id' => ['This block and year combination for the course already has a different instructor.'],
+    //         ]);
+    //     }
+    // }
 }
