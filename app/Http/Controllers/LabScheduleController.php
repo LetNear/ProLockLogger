@@ -176,57 +176,98 @@ class LabScheduleController extends Controller
     public function getFacultyScheduleByEmail($email)
     {
         $activeYearSemester = $this->getActiveYearAndSemester();
-
+    
         if (!$activeYearSemester) {
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
-
+    
+        // Find the instructor by email and role_number (assuming role_number 2 represents an instructor)
         $instructor = User::where('email', $email)
             ->where('role_number', 2)
             ->first();
-
+    
         if (!$instructor) {
             return response()->json(['message' => 'Instructor not found'], 404);
         }
-
+    
+        // Get current date and time to filter out past makeup classes
+        $currentDateTime = now();
+    
+        // Get lab schedules for the instructor in the active year and semester
         $labSchedules = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->id)
+            ->where('year_and_semester_id', $activeYearSemester->id)
+            ->where(function ($query) use ($currentDateTime) {
+                // Include both regular and makeup classes, but exclude past makeup classes
+                $query->where('is_makeup_class', false) // Regular classes
+                    ->orWhere(function ($subQuery) use ($currentDateTime) {
+                        $subQuery->where('is_makeup_class', true)
+                            ->whereRaw('CONCAT(specific_date, " ", class_end) >= ?', [$currentDateTime]); // Only future or ongoing makeup classes
+                    });
+            })
             ->get();
-
+    
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No schedules found for this instructor'], 404);
         }
-
-        return response()->json($labSchedules, 200);
+    
+        // Format the response with block and year information
+        $formattedSchedules = $labSchedules->map(function($schedule) {
+            return [
+                'course_code' => $schedule->course_code,
+                'course_name' => $schedule->course_name,
+                'day_of_the_week' => $schedule->day_of_the_week,
+                'class_start' => $schedule->class_start,
+                'class_end' => $schedule->class_end,
+                'specific_date' => $schedule->specific_date,
+                'is_makeup_class' => $schedule->is_makeup_class,
+                'block' => $schedule->block->block ?? 'N/A',  // Assuming block is a related model, with 'block' field
+                'year' => $schedule->year ?? 'N/A'    // Assuming block has a 'year' field
+            ];
+        });
+    
+        // Include the role_number in the response
+        return response()->json([
+            'instructor' => $instructor->name,
+            'email' => $instructor->email,
+            'role_number' => $instructor->role_number,
+            'schedules' => $formattedSchedules
+        ], 200);
     }
+    
+    
+    
 
 
     public function getInstructorScheduleCountByEmail($email)
     {
         $activeYearSemester = $this->getActiveYearAndSemester();
-
+    
         if (!$activeYearSemester) {
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
-
+    
+        // Find the instructor by email and role_number (assuming role_number 2 represents an instructor)
         $instructor = User::where('email', $email)
             ->where('role_number', 2)
             ->first();
-
+    
         if (!$instructor) {
             return response()->json(['message' => 'Instructor not found'], 404);
         }
-
+    
+        // Count the instructor's schedules, excluding makeup classes
         $scheduleCount = LabSchedule::where('instructor_id', $instructor->id)
-            ->where('year', $activeYearSemester->id)
+            ->where('year_and_semester_id', $activeYearSemester->id) // Ensure correct year/semester
+            ->where('is_makeup_class', false) // Exclude makeup classes
             ->count();
-
+    
         return response()->json([
             'instructor' => $instructor->name,
             'email' => $email,
             'schedule_count' => $scheduleCount,
         ], 200);
     }
+    
 
 
     public function getNextScheduleTimeByEmail($email)
