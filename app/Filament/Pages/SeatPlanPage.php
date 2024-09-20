@@ -76,19 +76,24 @@ class SeatPlanPage extends Page
     public function loadEligibleStudents()
     {
         if ($this->selectedCourse) {
-            // Fetch students enrolled in the selected course and not assigned to any seat
+            // Fetch students enrolled in the selected course and not assigned to any seat in this specific course
             $this->students = UserInformation::whereHas('user', function ($query) {
-                $query->where('role_number', 3);
+                $query->where('role_number', 3);  // Filter for student role
             })
                 ->whereHas('courses', function ($query) {
-                    $query->where('course_id', $this->selectedCourse);
+                    $query->where('course_id', $this->selectedCourse);  // Filter for students in the selected course
                 })
-                ->whereNull('seat_id')
+                ->whereDoesntHave('seats', function ($query) {
+                    $query->where('course_id', $this->selectedCourse);  // Exclude students assigned to a seat in this course only
+                })
                 ->get();
         } else {
-            $this->students = collect();
+            $this->students = collect();  // If no course is selected, return an empty collection
         }
     }
+
+
+
 
     public function selectSeat($seatId)
     {
@@ -112,43 +117,49 @@ class SeatPlanPage extends Page
             DB::transaction(function () {
                 // Fetch the student using UserInformation model
                 $student = UserInformation::find($this->selectedStudent);
-
+    
                 // Ensure the student exists and is valid
                 if (!$student) {
                     dd('Student not found with ID: ' . $this->selectedStudent);
                 }
-
-                // Fetch the seat and ensure it exists
+    
+                // Fetch the seat for the current course and computer
                 $seat = Seat::where('computer_id', $this->selectedSeat->id)
                     ->where('course_id', $this->selectedCourse)
                     ->first();
-
+    
                 // Check if a seat entry exists for the selected computer and course
                 if (!$seat) {
                     $seat = new Seat();
                     $seat->computer_id = $this->selectedSeat->id;
                     $seat->course_id = $this->selectedCourse;
                 }
-
+    
                 // Check if the student is already assigned to another seat in the same course
-                if ($student->seat_id && $student->seat_id !== $seat->id) {
-                    dd('Student is already assigned to another seat.');
+                $existingSeat = Seat::where('student_id', $student->id)
+                    ->where('course_id', $this->selectedCourse)  // Ensure we are checking within the same course
+                    ->first();
+    
+                if ($existingSeat && $existingSeat->id !== $seat->id) {
+                    dd('Student is already assigned to another seat in this course.');
                 }
-
+    
                 // Assign the student to the selected seat
                 $seat->student_id = $student->id;
                 $seat->instructor_id = auth()->user()->id; // Assuming instructor is logged in
                 $seat->instructor_name = auth()->user()->name; // Assuming the instructor's name
-                $seat->course_name = $student->courses->first()->course_name ?? null; // Assuming student has a course
-
+    
+                // Fix: Specify 'courses.id' explicitly to remove ambiguity
+                $seat->course_name = $student->courses()->where('courses.id', $this->selectedCourse)->first()->course_name ?? null;
+    
                 // Save the seat assignment
                 $seat->save();
-
-                // Update the student's seat_id
+    
+                // Update the student's seat_id (for this specific seat)
                 $student->seat_id = $seat->id;
                 $student->save();
             });
-
+    
             // Reset selected seat and student to clear the form
             $this->reset(['selectedSeat', 'selectedStudent']);
             $this->loadSeatPlanDetails(); // Refresh seat details
@@ -157,6 +168,10 @@ class SeatPlanPage extends Page
             dd('Missing selected student or seat');
         }
     }
+    
+    
+    
+
 
 
     public function removeStudentFromSeat($seatId)

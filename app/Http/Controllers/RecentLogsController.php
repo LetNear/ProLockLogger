@@ -203,56 +203,62 @@ class RecentLogsController extends Controller
      * @return JsonResponse
      */
     public function createRecordTimeOutByUID(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'rfid_number' => 'required|string',
-            'time_out' => 'required|date_format:H:i',
-        ]);
-    
-        try {
-            $activeYearSemester = $this->getActiveYearAndSemester();
-    
-            if (!$activeYearSemester) {
-                return response()->json(['message' => 'No active year and semester found.'], 404);
-            }
-    
-            $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-    
-            if (!$nfc) {
-                return response()->json(['message' => 'NFC UID not found.'], 404);
-            }
-    
-            // Find the log entry and ensure it's for the active year and semester
-            $log = RecentLogs::where('id_card_id', $nfc->id)
-                ->whereNotNull('time_in')
-                ->whereNull('time_out')
-                ->where('year_and_semester_id', $activeYearSemester->id)
-                ->first();
-    
-            if (!$log) {
-                return response()->json(['message' => 'No matching time-in record found.'], 404);
-            }
-    
-            $log->update([
-                'time_out' => $validated['time_out'],
-                'updated_at' => now(),
-            ]);
-    
-            // Update the corresponding StudentAttendance record
-            StudentAttendance::whereHas('userInformation', function ($query) use ($log) {
-                $query->where('user_number', $log->user_number);
-            })
-            ->whereNull('time_out')
-            ->update([
-                'time_out' => $validated['time_out'],
-                'status' => 'Completed',
-            ]);
-    
-            return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+{
+    $validated = $request->validate([
+        'rfid_number' => 'required|string',
+        'time_out' => 'required|date_format:H:i',
+    ]);
+
+    try {
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
         }
+
+        $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
+
+        if (!$nfc) {
+            return response()->json(['message' => 'NFC UID not found.'], 404);
+        }
+
+        // Find the log entry and ensure it's for the active year and semester
+        $log = RecentLogs::where('id_card_id', $nfc->id)
+            ->whereNotNull('time_in')
+            ->whereNull('time_out')
+            ->where('year_and_semester_id', $activeYearSemester->id)
+            ->first();
+
+        if (!$log) {
+            return response()->json(['message' => 'No matching time-in record found.'], 404);
+        }
+
+        // Check if the time_out is 00:00:00 or 00:00
+        $status = ($validated['time_out'] === '00:00' || $validated['time_out'] === '00:00:00') 
+            ? 'Absent' 
+            : 'Completed';
+
+        $log->update([
+            'time_out' => $validated['time_out'],
+            'updated_at' => now(),
+        ]);
+
+        // Update the corresponding StudentAttendance record
+        StudentAttendance::whereHas('userInformation', function ($query) use ($log) {
+            $query->where('user_number', $log->user_number);
+        })
+        ->whereNull('time_out')
+        ->update([
+            'time_out' => $validated['time_out'],
+            'status' => $status, // Set status based on time_out
+        ]);
+
+        return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
     }
+}
+
     
 
 

@@ -66,7 +66,7 @@ class UserInformation extends Model implements Auditable
     // Define the relationship with the Seat model (alternative)
     public function seats()
     {
-        return $this->hasOne(Seat::class);
+        return $this->hasOne(Seat::class, 'student_id');
     }
 
     // Define the relationship with the LabSchedule model

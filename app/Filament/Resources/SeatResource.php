@@ -161,20 +161,20 @@ class SeatResource extends Resource
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('schedule.day_of_the_week')
-                    ->label('Day of the Week')
-                    ->sortable()
-                    ->searchable(),
+                // TextColumn::make('schedule.day_of_the_week')
+                //     ->label('Day of the Week')
+                //     ->sortable()
+                //     ->searchable(),
 
-                TextColumn::make('schedule.class_start')
-                    ->label('Class Start Time')
-                    ->sortable()
-                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('H:i')),
+                // TextColumn::make('schedule.class_start')
+                //     ->label('Class Start Time')
+                //     ->sortable()
+                //     ->formatStateUsing(fn($state) => Carbon::parse($state)->format('H:i')),
 
-                TextColumn::make('schedule.class_end')
-                    ->label('Class End Time')
-                    ->sortable()
-                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('H:i')),
+                // TextColumn::make('schedule.class_end')
+                //     ->label('Class End Time')
+                //     ->sortable()
+                //     ->formatStateUsing(fn($state) => Carbon::parse($state)->format('H:i')),
 
                 TextColumn::make('created_at')
                     ->dateTime()
