@@ -23,6 +23,9 @@ class LabScheduleImporter extends Importer
             ImportColumn::make('course_name')
                 ->rules(['required', 'max:255']),
             ImportColumn::make('instructor_name')
+                ->fillRecordUsing(function(){
+                    return;
+                })
                 ->rules(['required', 'max:255']),
             ImportColumn::make('block_name')
                 ->rules(['required', 'max:255']),
