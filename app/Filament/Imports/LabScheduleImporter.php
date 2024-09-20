@@ -28,6 +28,9 @@ class LabScheduleImporter extends Importer
                 })
                 ->rules(['required', 'max:255']),
             ImportColumn::make('block_name')
+            ->fillRecordUsing(function(){
+                return;
+            })
                 ->rules(['required', 'max:255']),
             ImportColumn::make('year')
                 ->rules(['required', 'in:1,2,3,4']),

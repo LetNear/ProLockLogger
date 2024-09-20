@@ -46,9 +46,9 @@ class CalendarWidget extends FullCalendarWidget
                 \Log::info('Make-up Class End:', [$endDateTime]);
 
                 $events[] = [
-                    'title' => $event->course_code . ' - ' . $instructorName . ' (Make-up Class)',
-                    'start' => $startDateTime,
-                    'end' => $endDateTime,
+                   'title' => '(Make-up Class) ' . $event->course_code . ' - ' . $instructorName,
+            'start' => $startDateTime,
+            'end' => $endDateTime,
                 ];
             } else {
                 $events = array_merge($events, $this->getWeeklyOccurrences($event, $start, $end, $instructorName));

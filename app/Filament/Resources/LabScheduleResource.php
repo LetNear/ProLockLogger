@@ -84,6 +84,7 @@ class LabScheduleResource extends Resource
                             ]),
                     ]),
                 Forms\Components\Section::make('Schedule Details')
+               
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
@@ -123,16 +124,14 @@ class LabScheduleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->poll('2s')
             ->headerActions([
                 ImportAction::make()
                     ->importer(LabScheduleImporter::class)
                     ->label('Import Schedule'),
             ])
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable()
-                    ->searchable(),
+                
                 TextColumn::make('course_name')
                     ->label('Course Name')
                     ->searchable(),
