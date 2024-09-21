@@ -4,9 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\LabScheduleImporter;
 use App\Filament\Resources\LabScheduleResource\Pages;
+use App\Models\Block;
 use App\Models\LabSchedule;
 use App\Models\Course;
 use App\Models\User;
+use App\Models\YearAndSemester;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,7 +25,7 @@ use Filament\Tables\Table;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use Filament\Notifications\Notification;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Database\Eloquent\Builder;
 
 class LabScheduleResource extends Resource
 {
@@ -117,7 +119,6 @@ class LabScheduleResource extends Resource
                                     ->seconds(false),
                                 TextInput::make('password')
                                     ->label('Password')
-                                    ->required()
                                     ->placeholder('Enter the password for the laboratory schedule'),
                             ]),
                     ]),
@@ -173,8 +174,7 @@ class LabScheduleResource extends Resource
                 TextColumn::make('class_type') // Display class type
                     ->label('Class Type')
                     ->getStateUsing(fn($record) => $record && $record->is_makeup_class ? 'Makeup' : 'Regular')
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
                 TextColumn::make('yearAndSemester.school_year')
                     ->label('School Year')
                     ->sortable()
@@ -197,7 +197,60 @@ class LabScheduleResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Define any filters here if needed
+                // Add filter for Day of the Week
+                Tables\Filters\SelectFilter::make('day_of_the_week')
+                    ->label('Day of the Week')
+                    ->options([
+                        'Monday' => 'Monday',
+                        'Tuesday' => 'Tuesday',
+                        'Wednesday' => 'Wednesday',
+                        'Thursday' => 'Thursday',
+                        'Friday' => 'Friday',
+                        'Saturday' => 'Saturday',
+                        'Sunday' => 'Sunday',
+                    ]),
+                // Add filter for Block
+                Tables\Filters\SelectFilter::make('block_id')
+                ->label('Block')
+                ->options(
+                    Block::all()->pluck('block', 'id')  // Assuming 'block' is the column name for block name
+                )
+                ->query(function (Builder $query, $data) {
+                    if ($data['value']) {
+                        $query->where('block_id', $data['value']);
+                    }
+                })
+                ->placeholder('All Blocks')
+                ->searchable(),
+                // Add filter for Year
+                Tables\Filters\SelectFilter::make('year')
+                    ->label('Year')
+                    ->options([
+                        '1' => '1st Year',
+                        '2' => '2nd Year',
+                        '3' => '3rd Year',
+                        '4' => '4th Year',
+                    ]),
+                // Replace ToggleFilter with SelectFilter for Makeup Class
+                Tables\Filters\SelectFilter::make('is_makeup_class')
+                    ->label('Makeup Class')
+                    ->options([
+                        '1' => 'Yes',
+                        '0' => 'No',
+                    ]),
+                // Filter for Year and Semester
+                Tables\Filters\SelectFilter::make('year_and_semester_id')
+                    ->label('Year and Semester')
+                    ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
+                        return [$item->id => $item->school_year . ' - ' . $item->semester];
+                    })->toArray())
+                    ->query(function (Builder $query, $data) {
+                        if (isset($data['value'])) {
+                            $query->where('year_and_semester_id', $data['value']);
+                        }
+                    })
+                    ->placeholder('Select Year and Semester')
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -273,8 +326,6 @@ class LabScheduleResource extends Resource
                 ]),
             ]);
     }
-
-
 
     public static function getRelations(): array
     {
