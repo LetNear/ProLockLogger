@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\CourseImporter;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Models\Course;
+use App\Models\YearAndSemester;
 use Filament\Forms;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Form;
@@ -18,6 +19,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ImportAction;
+use Illuminate\Database\Eloquent\Builder;
 
 class CourseResource extends Resource
 {
@@ -47,19 +49,19 @@ class CourseResource extends Resource
                             ->label('Course Name')
                             ->required()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true) // Ensure course_name is unique
-                            ->helperText('Enter the unique name of the course.'),
+                          
+                            ->helperText('Enter the name of the course.'),
 
                         Forms\Components\TextInput::make('course_code')
                             ->label('Course Code')
                             ->required()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true) // Ensure course_code is unique
-                            ->helperText('Enter the unique code for the course.'),
+                          
+                            ->helperText('Enter the code for the course.'),
 
                         RichEditor::make('course_description')
                             ->label('Course Description')
-                            ->required()
+                           
 
                             ->helperText('Provide a brief description of the course.'),
                     ])
@@ -78,7 +80,9 @@ class CourseResource extends Resource
             ->columns([
                 TextColumn::make('instructor.name')
                     ->label('Instructor')
+                    ->searchable()
                     ->sortable(),
+
                 TextColumn::make('course_name')
                     ->label('Name')
                     ->searchable()
@@ -119,7 +123,18 @@ class CourseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Add filters to improve user searchability if needed
+                Tables\Filters\SelectFilter::make('user.year_and_semester_id')
+                ->label('Year and Semester')
+                ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
+                    return [$item->id => $item->school_year . ' - ' . $item->semester];
+                })->toArray()) // Fetch year and semester options from the model
+                ->query(function (Builder $query, $data) {
+                    if (isset($data['value'])) {
+                        $query->where('year_and_semester_id', $data['value']);
+                    }
+                })
+                ->placeholder('Select Year and Semester')
+                ->searchable(),
             ])
             ->actions([
                 EditAction::make()

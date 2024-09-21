@@ -114,13 +114,8 @@ class ComputerResource extends Resource
                     ->tooltip('The date and time when the computer record was last updated.'),
             ])
             ->filters([
-                Tables\Filters\Filter::make('brand')
-                    ->form([
-                        Forms\Components\TextInput::make('brand')
-                            ->label('Brand')
-                            ->placeholder('Filter by brand'),
-                    ])
-                    ->query(fn(Builder $query, array $data) => $query->where('brand', 'like', "%{$data['brand']}%")),
+
+                  
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

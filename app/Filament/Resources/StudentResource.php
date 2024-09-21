@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Imports\StudentImporter;
-use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\StudentResource\Pages;
 use App\Models\User;
+use App\Models\YearAndSemester;
 use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Section;
@@ -17,6 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class StudentResource extends Resource
@@ -57,7 +58,6 @@ class StudentResource extends Resource
                                     ->label('Roles')
                                     ->default(3)
                                     ->disabled(),
-
                             ]),
                     ]),      
             ]);
@@ -71,11 +71,6 @@ class StudentResource extends Resource
                 ImportAction::make()
                     ->importer(StudentImporter::class)
                     ->label('Import Students')
-                // ->visible(fn() => Auth::user()->hasRole('Instructor')), // Only visible to Administrators
-                // ImportAction::make()
-                //     ->importer(UserImporter::class)
-                //     ->label('Import Students')
-                //     ->visible(fn() => Auth::user()->hasRole('Administrator')), // Only visible to Administrators
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -93,30 +88,26 @@ class StudentResource extends Resource
                     ->getStateUsing(fn($record) => 'Student')
                     ->sortable()
                     ->tooltip('The roles assigned to the student.'),
-
                 TextColumn::make('yearAndSemester.school_year')
                     ->label('School Year')
                     ->sortable()
                     ->tooltip('The school year of the user.'),
-
                 TextColumn::make('yearAndSemester.semester')
                     ->label('Semester')
                     ->sortable()
                     ->tooltip('The semester of the user.'),
-
-
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('yearAndSemester.school_year')
-                ->label('School Year')
-                ->relationship('yearAndSemester', 'school_year')
-                ->searchable(),
-
-            // Filter by Semester
-            Tables\Filters\SelectFilter::make('yearAndSemester.semester')
-                ->label('Semester')
-                ->relationship('yearAndSemester', 'semester')
-                ->searchable(),
+                Tables\Filters\SelectFilter::make('year_and_semester_id')
+                    ->label('Year and Semester')
+                    ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
+                        return [$item->id => $item->school_year . ' - ' . $item->semester];
+                    })->toArray())
+                    ->query(function (Builder $query, $data) {
+                        if (isset($data['value'])) {
+                            $query->where('year_and_semester_id', $data['value']);
+                        }
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -149,7 +140,7 @@ class StudentResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->where('role_number', 3);
     }
