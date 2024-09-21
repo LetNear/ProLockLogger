@@ -127,10 +127,8 @@ class StudentAttendanceResource extends Resource
                     ->sortable(),
             ])
             ->filters([])
-            ->actions([])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ->actions([]);
+           
     }
 
     public static function getRelations(): array

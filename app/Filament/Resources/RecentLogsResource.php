@@ -144,10 +144,8 @@ class RecentLogsResource extends Resource
             ])
             ->actions([
                 // Remove EditAction to make it view-only
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(), // Allow delete bulk actions
             ]);
+            
     }
 
     public static function getRelations(): array

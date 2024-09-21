@@ -20,6 +20,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ImportAction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class CourseResource extends Resource
 {
@@ -32,39 +33,46 @@ class CourseResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // Get the current authenticated user
+        $user = Auth::user();
+
+        // Check if the user's role_number is 2 (Faculty)
+        $isFaculty = $user && $user->role_number === 2;
+
         return $form
             ->schema([
-                Section::make('Course Information') // Add section for better organization
+                Section::make('Course Information')
                     ->description('Please provide the details for the course below.')
                     ->schema([
                         Select::make('instructor_id')
-                            ->relationship('instructor', 'name', function($query){
+                            ->relationship('instructor', 'name', function ($query) {
                                 return $query->where('role_number', 2);
                             })
                             ->preload()
                             ->searchable()
                             ->label('Instructor')
-                            ->required(),
+                            ->required()
+                            ->disabled($isFaculty),  // Disable field for faculty
+                        
                         Forms\Components\TextInput::make('course_name')
                             ->label('Course Name')
                             ->required()
                             ->maxLength(255)
-                          
-                            ->helperText('Enter the name of the course.'),
-
+                            ->helperText('Enter the name of the course.')
+                            ->disabled($isFaculty),  // Disable field for faculty
+                        
                         Forms\Components\TextInput::make('course_code')
                             ->label('Course Code')
                             ->required()
                             ->maxLength(255)
-                          
-                            ->helperText('Enter the code for the course.'),
+                            ->helperText('Enter the code for the course.')
+                            ->disabled($isFaculty),  // Disable field for faculty
 
                         RichEditor::make('course_description')
                             ->label('Course Description')
-                           
-
-                            ->helperText('Provide a brief description of the course.'),
-                    ])
+                            ->helperText('Provide a brief description of the course.')
+                            ->disabled(false),  // Always enabled
+                    ]),
             ]);
     }
 
@@ -76,6 +84,7 @@ class CourseResource extends Resource
                 ImportAction::make()
                     ->importer(CourseImporter::class)
                     ->label('Import Course')
+                    ->visible(fn() => Auth::user()->hasRole('Administrator')),
             ])
             ->columns([
                 TextColumn::make('instructor.name')
@@ -95,9 +104,8 @@ class CourseResource extends Resource
 
                 TextColumn::make('course_description')
                     ->label('Description')
-
-                    ->wrap() // Wrap text for long descriptions
-                    ->limit(50), // Limit displayed text for better readability
+                    ->wrap()
+                    ->limit(50),
 
                 TextColumn::make('yearAndSemester.school_year')
                     ->label('School Year')
@@ -110,6 +118,7 @@ class CourseResource extends Resource
                     ->sortable()
                     ->tooltip('The semester of the course.')
                     ->searchable(),
+
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('M d, Y h:i A')
@@ -127,7 +136,7 @@ class CourseResource extends Resource
                 ->label('Year and Semester')
                 ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
                     return [$item->id => $item->school_year . ' - ' . $item->semester];
-                })->toArray()) // Fetch year and semester options from the model
+                })->toArray())
                 ->query(function (Builder $query, $data) {
                     if (isset($data['value'])) {
                         $query->where('year_and_semester_id', $data['value']);
@@ -138,24 +147,41 @@ class CourseResource extends Resource
             ])
             ->actions([
                 EditAction::make()
-
-                    ->tooltip('Edit Course'), // Tooltip for clarity
-
+                    ->tooltip('Edit Course'),
+                
                 DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->tooltip('Delete Course')
-                    ->requiresConfirmation() // Confirmation dialog for deletes
-                    ->color('danger'), // Highlight delete actions with color
+                    ->requiresConfirmation()
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->requiresConfirmation()
                         ->icon('heroicon-o-trash')
-                        ->label('Delete Selected') // Label for clarity
-                        ->color('danger'),
+                        ->label('Delete Selected')
+                        ->color('danger')
+                        ->visible(fn() => Auth::user()->hasRole('Administrator')),
                 ]),
             ]);
+    }
+
+    /**
+     * Customize the query to show only the logged-in user's courses if they're an instructor (role_number 2),
+     * and show all courses if the user is an admin (role_number 1).
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $user = Auth::user();
+
+        // Admin (role_number 1) can see all courses
+        if ($user->role_number == 1) {
+            return parent::getEloquentQuery();
+        }
+
+        // Instructors (role_number 2) can only see their own courses
+        return parent::getEloquentQuery()->where('instructor_id', $user->id);
     }
 
     public static function getRelations(): array

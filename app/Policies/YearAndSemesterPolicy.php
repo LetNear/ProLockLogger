@@ -3,31 +3,26 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Models\YearAndSemester;
 use Illuminate\Auth\Access\Response;
 
-class UserPolicy
+class YearAndSemesterPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        // determines if the navigation resource is shown.
         // return $user->hasAnyRole(['Administrator', 'Faculty']);
         return $user->hasRole('Administrator');
-        // return $user->hasRole('Instructor');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, User $model): bool
+    public function view(User $user, YearAndSemester $yearAndSemester): bool
     {
-        // determines if the user information can be viewed.
-        // return $user->hasAnyRole(['Administrator' ]);
-        // return $user->hasRole('Administrator');
         return $user->hasRole('Administrator');
-
     }
 
     /**
@@ -35,45 +30,38 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        // return $user->hasRole('Administrator');
         return $user->hasRole('Administrator');
-        // return $user->hasAnyRole(['Administrator', 'Faculty']);
-
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, User $model): bool
+    public function update(User $user, YearAndSemester $yearAndSemester): bool
     {
-        // return $user->hasAnyRole(['Administrator', 'Student']);
         return $user->hasRole('Administrator');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, User $model): bool
+    public function delete(User $user, YearAndSemester $yearAndSemester): bool
     {
-        // return $user->hasRole('Administrator');
         return $user->hasRole('Administrator');
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, User $model): bool
+    public function restore(User $user, YearAndSemester $yearAndSemester): bool
     {
-        // return $user->hasRole('Administrator');
         return $user->hasRole('Administrator');
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, User $model): bool
+    public function forceDelete(User $user, YearAndSemester $yearAndSemester): bool
     {
-        // return $user->hasRole('Administrator');
         return $user->hasRole('Administrator');
     }
 }

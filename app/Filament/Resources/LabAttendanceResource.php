@@ -136,10 +136,8 @@ class LabAttendanceResource extends Resource
             ])
             ->actions([
                 
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
             ]);
+           
     }
 
     public static function getRelations(): array
