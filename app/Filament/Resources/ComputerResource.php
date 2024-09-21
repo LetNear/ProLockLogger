@@ -76,7 +76,7 @@ class ComputerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->poll('5s')
+            ->poll('2s')
             ->headerActions([
                 ImportAction::make()
                     ->importer(ComputerImporter::class)

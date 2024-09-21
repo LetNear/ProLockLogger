@@ -140,6 +140,7 @@ class SeatResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->poll('2s')
             ->columns([
                 TextColumn::make('computer.computer_number')
                     ->label('Computer Number')

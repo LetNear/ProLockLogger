@@ -39,6 +39,7 @@ class NfcResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->poll('2s')
             ->columns([
                 Tables\Columns\TextColumn::make('rfid_number')
                     ->searchable(),
