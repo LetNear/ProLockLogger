@@ -25,6 +25,10 @@ class StudentAttendanceExporter extends Exporter
                 ->label('Block'),
             ExportColumn::make('userInformation.user_number')
                 ->label('Student Number'),
+            ExportColumn::make('time_in')
+                ->label('Time In'), // Using the accessor for time in
+            ExportColumn::make('time_out')
+                ->label('Time Out'), // Using the accessor for time out
             ExportColumn::make('duration')
                 ->label('Duration'), // Using the accessor for duration
             ExportColumn::make('formatted_date')
@@ -35,6 +39,7 @@ class StudentAttendanceExporter extends Exporter
                 ->label('Class Type'), // New column for class type (makeup or regular)
             ExportColumn::make('present_or_absent')
                 ->label('Status'), // Using the accessor for Present or Absent
+            
         ];
     }
     

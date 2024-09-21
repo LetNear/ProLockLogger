@@ -61,13 +61,16 @@ class StudentAttendanceResource extends Resource
     // Override the query to filter by instructor's logs
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->whereHas('userInformation.seat', function ($query) {
-                // Filter the logs to show only those related to the authenticated instructor's schedule
-                $query->where('instructor_id', auth()->user()->id);
-            });
-    }
+        $instructor = auth()->user();
+        $courses = $instructor->courses->pluck('id');
 
+        if (!$courses) {
+            return parent::getEloquentQuery();
+        }
+
+        return parent::getEloquentQuery()
+            ->whereIn('course_id', $courses);
+    }
     public static function table(Table $table): Table
     {
         return $table

@@ -14,6 +14,7 @@ class Course extends Model
         'course_code',
         'course_description',
         'year_and_semester_id',
+        'instructor_id',
     ];
 
     public function labSchedules()
@@ -28,7 +29,10 @@ class Course extends Model
             ->withTimestamps();
     }
 
-
+    public function instructor()
+    {
+        return $this->belongsTo(User::class, 'instructor_id');
+    }
 
     public function students()
     {

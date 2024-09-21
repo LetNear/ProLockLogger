@@ -12,11 +12,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ImportAction;
+
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
@@ -33,6 +35,14 @@ class CourseResource extends Resource
                 Section::make('Course Information') // Add section for better organization
                     ->description('Please provide the details for the course below.')
                     ->schema([
+                        Select::make('instructor_id')
+                            ->relationship('instructor', 'name', function($query){
+                                return $query->where('role_number', 2);
+                            })
+                            ->preload()
+                            ->searchable()
+                            ->label('Instructor')
+                            ->required(),
                         Forms\Components\TextInput::make('course_name')
                             ->label('Course Name')
                             ->required()
@@ -66,6 +76,9 @@ class CourseResource extends Resource
                     ->label('Import Course')
             ])
             ->columns([
+                TextColumn::make('instructor.name')
+                    ->label('Instructor')
+                    ->sortable(),
                 TextColumn::make('course_name')
                     ->label('Name')
                     ->searchable()

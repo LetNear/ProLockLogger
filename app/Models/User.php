@@ -127,6 +127,9 @@ class User extends Authenticatable implements Auditable, FilamentUser
 
         return parent::delete();
     }
-    
 
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'instructor_id');
+    }
 }
