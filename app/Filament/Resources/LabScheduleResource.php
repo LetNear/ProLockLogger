@@ -52,19 +52,22 @@ class LabScheduleResource extends Resource
                                     ->placeholder('Select a course')
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($course = Course::find($state)) {
+                                        $course = Course::find($state);
+
+                                        if ($course) {
                                             $set('course_code', $course->course_code);
                                             $set('course_name', $course->course_name);
+                                            $set('instructor_name', $course->instructor?->name );
                                         } else {
                                             $set('course_code', null);
                                             $set('course_name', null);
+                                            $set('instructor_id', null);
                                         }
                                     }),
-                                Select::make('instructor_id')
-                                    ->label('Instructor')
-                                    ->options(User::where('role_number', 2)->pluck('name', 'id')->toArray())
-                                    ->required()
-                                    ->placeholder('Select an instructor'),
+                                TextInput::make('instructor_name')
+                                    ->disabled()
+                                    ->label('Instructor'),
+
                                 Select::make('block_id')
                                     ->relationship('block', 'block')
                                     ->required(),
@@ -84,7 +87,7 @@ class LabScheduleResource extends Resource
                             ]),
                     ]),
                 Forms\Components\Section::make('Schedule Details')
-               
+
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
@@ -124,14 +127,14 @@ class LabScheduleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->poll('2s')
+            ->poll('2s')
             ->headerActions([
                 ImportAction::make()
                     ->importer(LabScheduleImporter::class)
                     ->label('Import Schedule'),
             ])
             ->columns([
-                
+
                 TextColumn::make('course_name')
                     ->label('Course Name')
                     ->searchable(),
@@ -215,50 +218,50 @@ class LabScheduleResource extends Resource
                     ])
                     ->action(function (array $data, $record) {
                         // 1. Validate if the specific date is in the past
-                    if (strtotime($data['specific_date']) < strtotime(now()->format('Y-m-d'))) {
-                        Notification::make()
-                            ->title('Invalid Makeup Class Date')
-                            ->danger()
-                            ->body('Makeup class date must be today or a future date.')
-                            ->send();
+                        if (strtotime($data['specific_date']) < strtotime(now()->format('Y-m-d'))) {
+                            Notification::make()
+                                ->title('Invalid Makeup Class Date')
+                                ->danger()
+                                ->body('Makeup class date must be today or a future date.')
+                                ->send();
 
-                        throw ValidationException::withMessages([
-                            'specific_date' => ['Makeup class date must be today or a future date.'],
-                        ]);
-                    }
+                            throw ValidationException::withMessages([
+                                'specific_date' => ['Makeup class date must be today or a future date.'],
+                            ]);
+                        }
 
                         // Validate if the makeup class conflicts with any other makeup class
                         $conflictingSchedule = LabSchedule::where('specific_date', $data['specific_date'])
                             ->where('is_makeup_class', true)
                             ->where(function ($query) use ($data) {
                                 $query->whereTime('class_start', '<', $data['class_end'])
-                                      ->whereTime('class_end', '>', $data['class_start']);
+                                    ->whereTime('class_end', '>', $data['class_start']);
                             })
                             ->where('id', '!=', $record->id ?? null) // Exclude the current record if editing
                             ->exists();
-    
+
                         if ($conflictingSchedule) {
                             Notification::make()
                                 ->title('Makeup Class Conflict')
                                 ->danger()
                                 ->body('This makeup class conflicts with another makeup class.')
                                 ->send();
-    
+
                             throw ValidationException::withMessages([
                                 'specific_date' => ['This makeup class conflicts with another makeup class.'],
                             ]);
                         }
-    
+
                         // Create the makeup class if no conflicts are found
                         $newRecord = $record->replicate(['day_of_the_week'])->fill(array_merge($data, ['is_makeup_class' => true]));
                         $newRecord = LabSchedule::create($newRecord->toArray());
                         $newRecord->update(['course_name' => $record->course->course_name . ' (Makeup)']);
-    
+
                         // Optionally link students to the new makeup class
                         $students = $record->course->students->each(function ($student) use ($newRecord) {
                             $newRecord->students()->attach($student->id, ['course_id' => $newRecord->course->id]);
                         });
-    
+
                         // Redirect to the edit page for the new makeup class
                         return redirect(LabScheduleResource::getUrl('edit', ['record' => $newRecord]));
                     })

@@ -265,21 +265,21 @@ class UserInformationResource extends Resource
 
                 // Add this column to display courses
                 TextColumn::make('courses')
-                ->label('Courses')
-                ->searchable(false)
-                ->tooltip('The courses assigned to the user.')
-                ->alignLeft()
-                ->html() // Enable HTML rendering
-                ->getStateUsing(function ($record) {
-                    // Map the courses to create HTML formatted entries for each course on a new line
-                    return $record->labSchedules->map(function ($schedule) {
-                        // Include the instructor's name along with course details
-                        $instructorName = $schedule->instructor ? $schedule->instructor->name : 'No Instructor Assigned';
-                        return '<div>' . $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' 
-                            . ($schedule->is_makeup_class ? ' - Makeup Class' : '') 
-                            . ' - ' . $instructorName . '</div>';
-                    })->implode(''); // Use implode to join all HTML divs without spaces
-                }),
+                    ->label('Courses')
+                    ->searchable(false)
+                    ->tooltip('The courses assigned to the user.')
+                    ->alignLeft()
+                    ->html() // Enable HTML rendering
+                    ->getStateUsing(function ($record) {
+                        // Map the courses to create HTML formatted entries for each course on a new line
+                        return $record->labSchedules->map(function ($schedule) {
+                            // Include the instructor's name along with course details
+                            $instructorName = $schedule->instructor ? $schedule->instructor->name : 'No Instructor Assigned';
+                            return '<div>' . $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')'
+                                . ($schedule->is_makeup_class ? ' - Makeup Class' : '')
+                                . ' - ' . $instructorName . '</div>';
+                        })->implode(''); // Use implode to join all HTML divs without spaces
+                    }),
 
                 TextColumn::make('first_name')
                     ->label('First Name')
@@ -369,6 +369,16 @@ class UserInformationResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('user.role_number')
+                ->label('Role')
+                ->options(Role::pluck('name', 'id')->toArray()) // Fetch role names and IDs from the Role model
+                ->query(function (Builder $query, $data) {
+                    if (isset($data['value'])) {
+                        $query->whereHas('user', function (Builder $query) use ($data) {
+                            $query->where('role_number', $data['value']); // Filter by role_number in the users table
+                        });
+                    }
+                }),
                 Tables\Filters\SelectFilter::make('year')
                     ->label('Year')
                     ->options([
@@ -385,13 +395,13 @@ class UserInformationResource extends Resource
                     ->relationship('block', 'block'),
 
 
-                    Tables\Filters\SelectFilter::make('courses')
+                Tables\Filters\SelectFilter::make('courses')
                     ->label('Courses')
                     ->relationship('courses', 'course_name')
                     ->multiple() // Allows filtering by multiple courses
                     ->searchable(), // Allows searching for courses within the filter
 
-                    Tables\Filters\SelectFilter::make('is_makeup_class')
+                Tables\Filters\SelectFilter::make('is_makeup_class')
                     ->label('Makeup Class')
                     ->options([
                         '1' => 'Yes',
@@ -401,6 +411,19 @@ class UserInformationResource extends Resource
                         if (isset($data['value'])) {
                             $query->whereHas('labSchedules', function ($query) use ($data) {
                                 $query->where('is_makeup_class', $data['value']);
+                            });
+                        }
+                    }),
+
+                    Tables\Filters\SelectFilter::make('user.year_and_semester_id')
+                    ->label('Year and Semester')
+                    ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
+                        return [$item->id => $item->school_year . ' - ' . $item->semester];
+                    })->toArray()) // Fetch year and semester options from the model
+                    ->query(function (Builder $query, $data) {
+                        if (isset($data['value'])) {
+                            $query->whereHas('user', function (Builder $query) use ($data) {
+                                $query->where('year_and_semester_id', $data['value']); // Filter by year_and_semester_id in the users table
                             });
                         }
                     }),
