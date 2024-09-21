@@ -21,6 +21,8 @@ use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class UserResource extends Resource
 {
@@ -49,18 +51,18 @@ class UserResource extends Resource
                                     ->placeholder('Enter the user\'s name')
                                     ->helperText('The full name of the user.'),
 
-                                    // TextInput::make('email')
-                                    // ->label('Email')
-                                    // ->email()
-                                    // ->required()
-                                    // ->maxLength(255)
-                                    // ->placeholder('Enter the user\'s email address')
-                                    // ->helperText('The email address of the user.')
-                                    // ->unique(ignoreRecord: true) // Ensure uniqueness, ignoring the current record during updates
-                                    // ->rule('regex:/^[a-zA-Z0-9._%+-]+@cspc\.edu\.ph$/') // Regex to validate email ending with @cspc.edu.ph
-                                    // ->validationAttribute('email'), // Optionally set a custom validation attribute name for error messages
+                                // TextInput::make('email')
+                                // ->label('Email')
+                                // ->email()
+                                // ->required()
+                                // ->maxLength(255)
+                                // ->placeholder('Enter the user\'s email address')
+                                // ->helperText('The email address of the user.')
+                                // ->unique(ignoreRecord: true) // Ensure uniqueness, ignoring the current record during updates
+                                // ->rule('regex:/^[a-zA-Z0-9._%+-]+@cspc\.edu\.ph$/') // Regex to validate email ending with @cspc.edu.ph
+                                // ->validationAttribute('email'), // Optionally set a custom validation attribute name for error messages
 
-                                    TextInput::make('email')
+                                TextInput::make('email')
                                     ->label('Email')
                                     ->email()
                                     ->required()
@@ -69,7 +71,7 @@ class UserResource extends Resource
                                     ->helperText('The email address of the user.')
                                     ->unique(ignoreRecord: true), // Make email unique
 
-                                
+
 
                                 Select::make('role_number')
                                     ->label('Roles')
@@ -101,7 +103,7 @@ class UserResource extends Resource
 
                             ]),
                     ]),
-               
+
             ]);
     }
 
@@ -189,28 +191,20 @@ class UserResource extends Resource
                     ->tooltip('Delete this user'),
             ])
             ->filters([
-                SelectFilter::make('year_and_semester_id')
-                    ->label('School Year')
-                    ->relationship('yearAndSemester', 'school_year')
-                    ->options(
-                        YearAndSemester::query()
-                            ->distinct('school_year') // Fetch distinct school years
-                            ->pluck('school_year', 'id')
-                    )
-                    ->placeholder('All School Years')
-                    ->searchable(),
-
-                SelectFilter::make('semester')
-                    ->label('Semester')
-                    ->relationship('yearAndSemester', 'semester')
-                    ->options(
-                        YearAndSemester::query()
-                            ->distinct('semester') // Fetch distinct semesters
-                            ->pluck('semester', 'semester') // Ensure unique semester values
-                    )
-                    ->placeholder('All Semesters')
-                    ->searchable(),
-            ])
+                Tables\Filters\SelectFilter::make('user.year_and_semester_id')
+                ->label('Year and Semester')
+                ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
+                    return [$item->id => $item->school_year . ' - ' . $item->semester];
+                })->toArray()) // Fetch year and semester options from the model
+                ->query(function (Builder $query, $data) {
+                    if (isset($data['value'])) {
+                        $query->where('year_and_semester_id', $data['value']);
+                    }
+                })
+                ->placeholder('Select Year and Semester')
+                ->searchable(),
+            // Tables\Filters\TrashedFilter::make('trashed'),
+        ])
 
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()

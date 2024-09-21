@@ -34,7 +34,11 @@ class ListUsers extends ListRecords
     // Correct method signature to apply filters to the table query
     protected function applyFiltersToTableQuery(Builder $query): Builder
     {
-        // Only show users with role_number 1 or 2
-        return $query->whereIn('role_number', [1, 2]);
+        // Apply the role number filter globally for role_number 1 and 2
+        $query->whereIn('role_number', [1, 2]);
+    
+        // Apply other filters by calling the parent method
+        return parent::applyFiltersToTableQuery($query);
     }
+    
 }
