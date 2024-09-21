@@ -71,6 +71,7 @@ public function getAssociatedCourseAttribute()
     return $course ? $course->course_name : 'N/A'; // Return 'N/A' if no course found
 }
 
+
 public function getClassTypeAttribute()
 {
     // Determine if the class is a makeup class or a regular class

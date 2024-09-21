@@ -17,6 +17,7 @@ use Filament\Tables\Filters\TextFilter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\DateFilter;
 use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 class StudentAttendanceResource extends Resource
@@ -57,6 +58,16 @@ class StudentAttendanceResource extends Resource
             ]);
     }
 
+    // Override the query to filter by instructor's logs
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereHas('userInformation.seat', function ($query) {
+                // Filter the logs to show only those related to the authenticated instructor's schedule
+                $query->where('instructor_id', auth()->user()->id);
+            });
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -70,15 +81,13 @@ class StudentAttendanceResource extends Resource
                     ->label('Name')
                     ->sortable()
                     ->searchable(),
-                    Tables\Columns\TextColumn::make('userInformation.courses.course_name')
+                Tables\Columns\TextColumn::make('associatedCourse')
                     ->label('Course')
                     ->sortable()
                     ->searchable()
-                    ->formatStateUsing(function ($state) {
-                        // Explode the courses by comma and wrap each in a <div> for line breaks
-                        return collect(explode(', ', $state))->map(function ($course) {
-                            return "<div>{$course}</div>";
-                        })->implode('');
+                    ->formatStateUsing(function ($state, $record) {
+                        // Fetch the course associated with this attendance log
+                        return $record->associatedCourse ?? 'N/A'; // Assuming 'associatedCourse' is a computed attribute
                     })
                     ->html(), // Enable HTML rendering
                 Tables\Columns\TextColumn::make('userInformation.year')
