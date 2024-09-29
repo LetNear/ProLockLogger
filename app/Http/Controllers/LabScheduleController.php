@@ -8,8 +8,9 @@ use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\YearAndSemester;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;  
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 
 class LabScheduleController extends Controller
 {
@@ -310,42 +311,56 @@ class LabScheduleController extends Controller
     }
 
 
-    /**
-     * Get the total count of lab schedules for a student based on email.
+   /**
+     * Get the total count of schedules for a student based on their email.
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getStudentScheduleCountByEmail(Request $request)
     {
+        // Get the active year and semester
         $activeYearSemester = $this->getActiveYearAndSemester();
 
+        // Return error if no active year and semester is found
         if (!$activeYearSemester) {
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
 
+        // Validate the email provided in the request
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:users,email',
         ]);
 
+        // If validation fails, return the errors
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // Get the email from the request
         $email = $request->query('email');
 
+        // Find the student using their email (from the users table)
         $student = UserInformation::whereHas('user', function ($query) use ($email) {
             $query->where('email', $email);
         })->first();
 
+        // If the student is not found, return a 404 error
         if (!$student) {
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        $scheduleCount = LabSchedule::where('block_id', $student->block_id)
-            ->where('year', $activeYearSemester->id)
+        // Get the count of schedules the student is enrolled in for the active year and semester
+        $scheduleCount = LabSchedule::whereIn('id', function ($query) use ($student, $activeYearSemester) {
+                // Use the pivot table to get the schedules the student is enrolled in
+                $query->select('schedule_id')
+                      ->from('course_user_information')
+                      ->where('user_information_id', $student->id)
+                      ->where('year_and_semester_id', $activeYearSemester->id);
+            })
             ->count();
 
+        // Return the student email and schedule count
         return response()->json([
             'student' => $email,
             'schedule_count' => $scheduleCount,
@@ -623,4 +638,183 @@ class LabScheduleController extends Controller
         return response()->json($enrolledCourses, 200);
     }
     
+
+    public function getCourseDetailsByEmail(Request $request)
+    {
+        // Validate the email input to ensure it's valid and exists in the users table
+        $request->validate([
+            'email' => 'required|email|exists:users,email', // Validate email exists in the users table
+        ]);
+
+        // Find the instructor by email
+        $instructor = User::where('email', $request->query('email'))->where('role_number', 2)->first();
+
+        // If the instructor does not exist or the role isn't 'instructor'
+        if (!$instructor) {
+            return response()->json([
+                'message' => 'Instructor with the provided email was not found.'
+            ], 404);
+        }
+
+        // Retrieve the active year and semester
+        $activeYearSemester = $this->getActiveYearAndSemester();
+
+        // If no active year and semester is found, return an error
+        if (!$activeYearSemester) {
+            return response()->json(['message' => 'No active year and semester found.'], 404);
+        }
+
+        // Get all courses taught by the instructor within the active year and semester
+        $courses = Course::where('instructor_id', $instructor->id)
+            ->where('year_and_semester_id', $activeYearSemester->id)
+            ->with(['labSchedules' => function ($query) use ($activeYearSemester) {
+                // Filter lab schedules by the active year and semester
+                $query->where('year_and_semester_id', $activeYearSemester->id)
+                      ->with('block'); // Eager load the block relationship
+            }])
+            ->get();
+
+        // If no courses are found, return a 404 error
+        if ($courses->isEmpty()) {
+            return response()->json(['message' => 'No courses found for this instructor.'], 404);
+        }
+
+        // Map the courses to retrieve details and schedule information including year and block
+        $courseDetails = $courses->map(function ($course) {
+            $labSchedule = $course->labSchedules->first(); // Get the first lab schedule for this course
+
+            return [
+                'course_name' => $course->course_name,
+                'course_code' => $course->course_code,
+                'course_description' => $course->course_description,
+                'schedule_password' => $labSchedule ? $labSchedule->password : 'N/A', // Get password from lab schedule
+                'year' => $labSchedule ? $labSchedule->year : 'N/A', // Get year from lab schedule
+                'block' => $labSchedule && $labSchedule->block ? $labSchedule->block->block : 'N/A', // Get block from lab schedule
+            ];
+        });
+
+        // Return the response with the course details
+        return response()->json([
+            'instructor' => $instructor->name,
+            'course_details' => $courseDetails,
+        ]);
+    }
+
+
+    /**
+     * Update course details (course code, course description, and schedule password)
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCourseDetails(Request $request)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'courseCode' => 'required|string|max:255',
+            'courseDescription' => 'required|string|max:255',
+            'schedulePassword' => 'required|string|max:255',
+        ]);
+
+        // Find the course by the course code
+        $course = Course::where('course_code', $validatedData['courseCode'])->first();
+
+        // If the course is not found, return an error response
+        if (!$course) {
+            return response()->json(['message' => 'Course not found'], 404);
+        }
+
+        // Update the course description
+        $course->course_description = $validatedData['courseDescription'];
+        $course->save(); // Save the updated course description
+
+        // Update the lab schedule password
+        // Assuming the first lab schedule is updated here. You can modify the logic as per your needs.
+        $labSchedule = LabSchedule::where('course_id', $course->id)->first();
+        if ($labSchedule) {
+            $labSchedule->password = $validatedData['schedulePassword'];
+            $labSchedule->save(); // Save the updated schedule password
+        }
+
+        return response()->json(['message' => 'Course and schedule updated successfully'], 200);
+    }
+
+ /**
+     * Get student schedule details by email.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getStudentScheduleDetailsByEmail(Request $request): JsonResponse
+    {
+        // Validate the email provided in the request
+        $validated = $request->validate([
+            'email' => 'required|email|exists:users,email', // Ensure the email exists in the users table
+        ]);
+
+        try {
+            // Get the active year and semester
+            $activeYearSemester = $this->getActiveYearAndSemester();
+
+            if (!$activeYearSemester) {
+                return response()->json(['message' => 'No active year and semester found.'], 404);
+            }
+
+            // Find the user by email
+            $user = User::where('email', $validated['email'])->first();
+
+            if (!$user) {
+                return response()->json(['message' => 'Student not found'], 404);
+            }
+
+            // Get the associated user information record
+            $userInformation = $user->userInformation;
+
+            if (!$userInformation) {
+                return response()->json(['message' => 'User information not found'], 404);
+            }
+
+            // Ensure the student is enrolled in the active year and semester
+            if ($userInformation->year_and_semester_id !== $activeYearSemester->id) {
+                return response()->json(['message' => 'Student is not enrolled in the active year and semester.'], 404);
+            }
+
+            // Get the schedules the student is enrolled in via the pivot table
+            $scheduleDetails = LabSchedule::whereIn('id', function ($query) use ($userInformation, $activeYearSemester) {
+                $query->select('schedule_id')
+                      ->from('course_user_information')
+                      ->where('user_information_id', $userInformation->id)
+                      ->where('year_and_semester_id', $activeYearSemester->id);
+            })->with('course', 'block', 'instructor')  // Eager load related models
+              ->get();
+
+            if ($scheduleDetails->isEmpty()) {
+                return response()->json(['message' => 'No schedules found for this student.'], 404);
+            }
+
+            // Map the schedule details for the response
+            $formattedScheduleDetails = $scheduleDetails->map(function ($schedule) {
+                return [
+                    'course_code' => $schedule->course_code,
+                    'course_name' => $schedule->course_name,
+                    'day_of_the_week' => $schedule->day_of_the_week,
+                    'class_start' => $schedule->class_start,
+                    'class_end' => $schedule->class_end,
+                    'specific_date' => $schedule->is_makeup_class ? $schedule->specific_date : null,
+                    'instructor_name' => $schedule->instructor->name ?? 'N/A',
+                    'block_name' => $schedule->block->block_name ?? 'N/A',
+                ];
+            });
+
+            // Return the formatted schedule details
+            return response()->json([
+                'student_email' => $validated['email'],
+                'schedules' => $formattedScheduleDetails,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

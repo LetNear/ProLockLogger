@@ -19,6 +19,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule; // Import Rule class
+use Filament\Notifications\Notification;
 
 class StudentResource extends Resource
 {
@@ -32,8 +34,25 @@ class StudentResource extends Resource
 
     protected static ?string $navigationGroup = 'User Management';
 
+    // Year and Semester check similar to User logic
+    // protected function getActiveYearAndSemester()
+    // {
+    //     return YearAndSemester::where('status', 'on-going')->first(); // Fetches the first active year and semester
+    // }
+
     public static function form(Form $form): Form
     {
+        $ongoingYearAndSemester = User::getOngoingYearAndSemester();
+
+        if(!$ongoingYearAndSemester){
+            Notification::make()
+            ->title('Cannot Save Student')
+            ->danger()
+            ->body('There is no ongoing year and semester. Please set an on-going year and semester')
+            ->send();
+            return $form->schema([]);
+        }
+
         return $form
             ->schema([
                 Section::make('Student Information')
@@ -46,20 +65,30 @@ class StudentResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Enter the student\'s name')
                                     ->helperText('The full name of the student.'),
+                                
+                                // Email field with validation for uniqueness per year and semester
                                 TextInput::make('email')
                                     ->label('Email')
                                     ->email()
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('Enter the student\'s email address')
-                                    ->helperText('The email address of the student.'),
+                                    ->helperText('The email address of the student.')
+                                    ->rules([
+                                        Rule::unique('users', 'email')
+                                            ->where(function ($query) use ($ongoingYearAndSemester) {
+                                                return $query->where('year_and_semester_id', $ongoingYearAndSemester->id);
+                                            })
+                                            ->ignore(request()->route('record')), // Ignore current record when editing
+                                    ]),
+                                
                                 Select::make('role_number')
                                     ->relationship('role', 'name')
                                     ->label('Roles')
                                     ->default(3)
                                     ->disabled(),
                             ]),
-                    ]),      
+                    ]),
             ]);
     }
 
@@ -142,6 +171,9 @@ class StudentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('role_number', 3);
+        return parent::getEloquentQuery()->where('role_number', 3); // Students only
     }
+
+   
+   
 }

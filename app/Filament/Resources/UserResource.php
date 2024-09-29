@@ -22,6 +22,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rule; // Import the Rule class
+use Filament\Notifications\Notification;
 
 
 class UserResource extends Resource
@@ -30,14 +32,27 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $title = 'User';
+    protected static ?string $title = 'Faculty User';
 
-    protected static ?string $label = 'User';
+    protected static ?string $label = 'Faculty User';
 
     protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
     {
+
+        $ongoingYearAndSemester = User::getOngoingYearAndSemester();
+
+    if (!$ongoingYearAndSemester) {
+        // Trigger a notification and prevent submission if no ongoing year and semester
+        Notification::make()
+            ->title('Cannot Save User')
+            ->danger()
+            ->body('There is no ongoing year and semester. Please set an ongoing year and semester before saving a user.')
+            ->send();
+
+        return $form->schema([]); // Return an empty schema to prevent submission
+    }
         return $form
             ->schema([
                 Section::make('User Information')
@@ -50,35 +65,49 @@ class UserResource extends Resource
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s name')
                                     ->helperText('The full name of the user.'),
-
-                                // TextInput::make('email')
-                                // ->label('Email')
-                                // ->email()
-                                // ->required()
-                                // ->maxLength(255)
-                                // ->placeholder('Enter the user\'s email address')
-                                // ->helperText('The email address of the user.')
-                                // ->unique(ignoreRecord: true) // Ensure uniqueness, ignoring the current record during updates
-                                // ->rule('regex:/^[a-zA-Z0-9._%+-]+@cspc\.edu\.ph$/') // Regex to validate email ending with @cspc.edu.ph
-                                // ->validationAttribute('email'), // Optionally set a custom validation attribute name for error messages
-
-                                TextInput::make('email')
+                                    TextInput::make('email')
                                     ->label('Email')
                                     ->email()
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('Enter the user\'s email address')
                                     ->helperText('The email address of the user.')
-                                    ->unique(ignoreRecord: true), // Make email unique
-
-
-
+                                    ->rules(function () {
+                                        $recordId = request()->route('record');
+    
+                                        // Check if we're editing a record
+                                        if ($recordId) {
+                                            $user = User::find($recordId);
+    
+                                            if ($user) {
+                                                return [
+                                                    Rule::unique('users', 'email')
+                                                        ->where(function ($query) use ($user) {
+                                                            if ($user->year_and_semester_id) {
+                                                                $query->where('year_and_semester_id', $user->year_and_semester_id);
+                                                            }
+                                                        })
+                                                        ->ignore($user->id), // Ignore this user's ID when checking uniqueness
+                                                ];
+                                            }
+                                        }
+    
+                                        // If creating a new user
+                                        return [
+                                            Rule::unique('users', 'email')
+                                                ->where(function ($query) {
+                                                    $ongoingYearAndSemester = User::getOngoingYearAndSemester();
+                                                    if ($ongoingYearAndSemester) {
+                                                        $query->where('year_and_semester_id', $ongoingYearAndSemester->id);
+                                                    }
+                                                }),
+                                        ];
+                                    }),
                                 Select::make('role_number')
                                     ->label('Roles')
                                     ->relationship('roles', 'name')
                                     ->preload()
                                     ->required(),
-
 
                                 Repeater::make('fingerprint_id')
                                     ->label('Fingerprint IDs')
@@ -89,23 +118,38 @@ class UserResource extends Resource
                                     ])
                                     ->minItems(0)
                                     ->maxItems(2)
-                                    ->helperText('Add exactly two fingerprint IDs.'),
-
-                                // Select::make('year_and_semester_id')
-                                //     ->label('Year and Semester')
-                                //     ->relationship('yearAndSemester', 'school_year')
-                                //     ->getOptionLabelFromRecordUsing(function ($record) {
-                                //         return "{$record->school_year} - {$record->semester}"; // Display school year and semester together
-                                //     })
-                                //     ->searchable()
-                                //     ->preload()
-                                //     ->required(),
+                                    ->helperText('Add exactly two fingerprint IDs.')
+                                    ->disableItemDeletion()
+                                    ->disabled(),
 
                             ]),
                     ]),
-
             ]);
     }
+
+    // This can be added in the boot method or inside the model observer to automatically assign year and semester
+    protected static function boot()
+    {
+        parent::boot();
+    
+        static::creating(function ($user) {
+            $ongoingYearAndSemester = User::getOngoingYearAndSemester();
+    
+            if (!$ongoingYearAndSemester) {
+                // Prevent saving if no ongoing year and semester
+                Notification::make()
+                    ->title('Cannot Save User')
+                    ->danger()
+                    ->body('There is no ongoing year and semester. Please set an ongoing year and semester before saving a user.')
+                    ->send();
+    
+                return false; // Prevent saving the record
+            }
+    
+            $user->year_and_semester_id = $ongoingYearAndSemester->id;
+        });
+    }
+    
 
     public static function table(Table $table): Table
     {
@@ -192,19 +236,19 @@ class UserResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('user.year_and_semester_id')
-                ->label('Year and Semester')
-                ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
-                    return [$item->id => $item->school_year . ' - ' . $item->semester];
-                })->toArray()) // Fetch year and semester options from the model
-                ->query(function (Builder $query, $data) {
-                    if (isset($data['value'])) {
-                        $query->where('year_and_semester_id', $data['value']);
-                    }
-                })
-                ->placeholder('Select Year and Semester')
-                ->searchable(),
-            // Tables\Filters\TrashedFilter::make('trashed'),
-        ])
+                    ->label('Year and Semester')
+                    ->options(YearAndSemester::all()->mapWithKeys(function ($item) {
+                        return [$item->id => $item->school_year . ' - ' . $item->semester];
+                    })->toArray()) // Fetch year and semester options from the model
+                    ->query(function (Builder $query, $data) {
+                        if (isset($data['value'])) {
+                            $query->where('year_and_semester_id', $data['value']);
+                        }
+                    })
+                    ->placeholder('Select Year and Semester')
+                    ->searchable(),
+                // Tables\Filters\TrashedFilter::make('trashed'),
+            ])
 
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()

@@ -95,58 +95,78 @@ class RecentLogsController extends Controller
             'role_id' => 'required|integer',
             'user_name' => 'required|string',
         ]);
-
+    
         try {
             $activeYearSemester = $this->getActiveYearAndSemester();
-
+    
             if (!$activeYearSemester) {
                 info('No active year and semester found.');
                 return response()->json(['message' => 'No active year and semester found.'], 404);
             }
-
+    
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-
+    
             if (!$nfc) {
                 info('NFC UID not found.');
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-
+    
             $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
-
+    
             if (!$userInformation) {
                 info('User information not found for this NFC UID.');
                 return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
             }
-
+    
             // Check if the user information is associated with the active year and semester
             if ($userInformation->year_and_semester_id !== $activeYearSemester->id) {
                 info('User is not associated with the active year and semester.');
                 return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
             }
-
-            info('Course', [$userInformation->courses]);
+    
+            // Log the current day and time to help debug
+            $currentDay = now()->dayName;
+            $timeIn = $validated['time_in'];
+            info("Searching for course on day: {$currentDay}, time: {$timeIn}");
+            info("Server date and time: " . now()->toDateTimeString());
+    
             // Retrieve the correct course and schedule
             $course = $userInformation->courses()
-                ->whereHas('labSchedules', function (Builder $query) use ($validated) {
-                    $query->where('class_start', '<=', $validated['time_in'])
-                        ->where('class_end', '>=', $validated['time_in'])
-                        ->where('day_of_the_week', now()->dayName);
+                ->whereHas('labSchedules', function (Builder $query) use ($timeIn, $currentDay) {
+                    $query->where('class_start', '<=', $timeIn)
+                        ->where('class_end', '>=', $timeIn)
+                        ->where('day_of_the_week', $currentDay);
                 })
                 ->first();
+    
             info('Course found', [$course]);
-
+    
             if (!$course) {
                 info('No course found for the current time.');
                 return response()->json(['message' => 'No course found for the current time.'], 404);
             }
-
-            // Retrieve assigned seat using student_id from seats table
-            $assignedSeat = Seat::where('student_id', $userInformation->id)->first();
-
+    
+            // Retrieve the schedule
+            $labSchedule = $course->labSchedules()
+                ->where('day_of_the_week', $currentDay)
+                ->where('class_start', '<=', $timeIn)
+                ->where('class_end', '>=', $timeIn)
+                ->first();
+    
+            if (!$labSchedule) {
+                info('No lab schedule found for the current time.');
+                return response()->json(['message' => 'No lab schedule found for the current time.'], 404);
+            }
+    
+            // Retrieve assigned seat for the specific course and schedule
+            $assignedSeat = Seat::where('student_id', $userInformation->id)
+                ->where('course_id', $course->id) // Match the schedule
+                ->first();
+    
             // Retrieve the computer details from the assigned seat
             $computer = $assignedSeat ? $assignedSeat->computer : null;
             $computerNumber = $computer ? $computer->computer_number : 'Unassigned';
-
+    
             // Create a new log entry with the seat_id and instructor name
             $log = RecentLogs::create([
                 'user_number' => $userInformation->user_number,
@@ -158,9 +178,9 @@ class RecentLogsController extends Controller
                 'user_name' => $validated['user_name'],
                 'year_and_semester_id' => $activeYearSemester->id,
                 'seat_id' => $assignedSeat->id ?? null, // Assign seat_id if found
-                'assigned_instructor' => $assignedSeat->instructor_name ?? 'N/A', // Ensure this value is being saved
+                'assigned_instructor' => $labSchedule->instructor->name ?? 'N/A', // Get the instructor name from the schedule
             ]);
-
+    
             // Save the data to StudentAttendance table with the seat_id
             StudentAttendance::create([
                 'user_information_id' => $userInformation->id,
@@ -171,7 +191,7 @@ class RecentLogsController extends Controller
                 'year_and_semester_id' => $activeYearSemester->id,
                 'seat_id' => $assignedSeat->id ?? null, // Assign seat_id if found
             ]);
-
+    
             // Prepare response including the assigned seat
             $response = [
                 'message' => 'Time-In recorded successfully.',
@@ -180,15 +200,16 @@ class RecentLogsController extends Controller
                     'seat_id' => $assignedSeat->id,
                     'seat_number' => $computerNumber, // Include the computer number
                 ] : 'Unassigned',
-                'assigned_instructor' => $assignedSeat->instructor_name ?? 'N/A',
+                'assigned_instructor' => $labSchedule->instructor->name ?? 'N/A',
             ];
-
+    
             return response()->json($response, 201);
         } catch (\Exception $e) {
             \Log::error('An error occurred while creating the log entry.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+    
 
 
 
@@ -565,7 +586,7 @@ class RecentLogsController extends Controller
 
 
 
-    /**
+   /**
      * Get the total count of logs for a student by email.
      *
      * @param Request $request
@@ -573,13 +594,16 @@ class RecentLogsController extends Controller
      */
     public function getTotalLogsCountByEmail(Request $request): JsonResponse
     {
+        // Validate that the email is provided in the query string and exists in the users table
         $validated = $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|email|exists:users,email', // Ensure the email exists in the users table
         ]);
 
         try {
+            // Get the active year and semester
             $activeYearSemester = $this->getActiveYearAndSemester();
 
+            // Return an error if no active year and semester is found
             if (!$activeYearSemester) {
                 return response()->json(['message' => 'No active year and semester found.'], 404);
             }
@@ -587,33 +611,38 @@ class RecentLogsController extends Controller
             // Find the user by email
             $user = User::where('email', $validated['email'])->first();
 
+            // If the user is not found, return an error
             if (!$user) {
                 return response()->json(['message' => 'Student not found'], 404);
             }
 
-            // Check if the user information is associated with the active year and semester
-            if ($user->year_and_semester_id !== $activeYearSemester->id) {
-                return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
-            }
-
-            // Fetch the user information record
+            // Get the associated user information record
             $userInformation = $user->userInformation;
 
+            // If user information is not found, return an error
             if (!$userInformation) {
                 return response()->json(['message' => 'User information not found'], 404);
             }
 
-            // Get the count of logs for the student
+            // Ensure the user is associated with the active year and semester
+            if ($userInformation->year_and_semester_id !== $activeYearSemester->id) {
+                return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
+            }
+
+            // Get the count of logs for the student in the active year and semester
             $logCount = RecentLogs::where('user_number', $userInformation->user_number)
                 ->where('year_and_semester_id', $activeYearSemester->id)
                 ->count();
 
+            // Return the email and the log count
             return response()->json([
                 'email' => $validated['email'],
                 'log_count' => $logCount,
             ], 200);
         } catch (\Exception $e) {
+            // Return an error response with the exception message
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
 }

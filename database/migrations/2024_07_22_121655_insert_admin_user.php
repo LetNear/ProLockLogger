@@ -1,10 +1,7 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -16,15 +13,23 @@ return new class extends Migration
         $adminName = config('app.admin.name');
         $adminEmail = config('app.admin.email');
         $adminPassword = config('app.admin.password');
+        
+        // Define fingerprint IDs as JSON objects
+        $adminFinger = json_encode([
+            ['fingerprint_id' => '1'], 
+            ['fingerprint_id' => '2']
+        ]); 
 
+        // Check if the admin user already exists based on the email
         if (!DB::table('users')->where('email', $adminEmail)->exists()) {
             DB::table('users')->insert([
                 'name' => $adminName,
                 'email' => $adminEmail,
                 'password' => Hash::make($adminPassword),
+                'fingerprint_id' => $adminFinger, // Insert as a JSON object array
                 'created_at' => now(),
                 'updated_at' => now(),
-                'is_protected' => true, // Add a custom flag or column to indicate protected status
+                'is_protected' => true, // Flag for protected admin
             ]);
         }
     }
@@ -34,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // To prevent deletion, don't drop the specific admin user on migration rollback
+        // Do not delete the admin user in the rollback
     }
 };

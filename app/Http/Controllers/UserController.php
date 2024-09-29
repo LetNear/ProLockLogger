@@ -120,62 +120,69 @@ class UserController extends Controller
     }
 
     public function getUsersByFingerprint($fingerprint_id)
-    {
+{
+    // Check if the fingerprint_id is 1 or 2
+    if (in_array($fingerprint_id, [1, 2])) {
+        // Fetch all users regardless of year and semester
+        $users = User::all();
+    } else {
+        // Fetch users within the active year and semester
         $activeYearSemester = $this->getActiveYearAndSemester();
 
         if (!$activeYearSemester) {
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
 
-        // Retrieve users within the active year and semester
         $users = User::where('year_and_semester_id', $activeYearSemester->id)->get();
+    }
 
-        // Filtering logic for fingerprint
-        $filteredUsers = $users->filter(function ($user) use ($fingerprint_id) {
-            $fingerprints = $user->fingerprint_id;
+    // Filtering logic for fingerprint
+    $filteredUsers = $users->filter(function ($user) use ($fingerprint_id) {
+        $fingerprints = $user->fingerprint_id;
 
-            if (is_string($fingerprints)) {
-                $fingerprints = json_decode($fingerprints, true) ?? [];
-            }
+        if (is_string($fingerprints)) {
+            $fingerprints = json_decode($fingerprints, true) ?? [];
+        }
 
-            if (!is_array($fingerprints)) {
-                $fingerprints = [];
-            }
+        if (!is_array($fingerprints)) {
+            $fingerprints = [];
+        }
 
-            foreach ($fingerprints as $fingerprint) {
-                if (isset($fingerprint['fingerprint_id']) && $fingerprint['fingerprint_id'] === $fingerprint_id) {
-                    return true;
-                }
-            }
-
-            return false;
-        });
-
-        if ($filteredUsers->isNotEmpty()) {
-            $user = $filteredUsers->first();
-            $fingerprints = $user->fingerprint_id;
-
-            if (is_string($fingerprints)) {
-                $fingerprints = json_decode($fingerprints, true) ?? [];
-            }
-
-            if (!is_array($fingerprints)) {
-                $fingerprints = [];
-            }
-
-            $matchingFingerprint = collect($fingerprints)->firstWhere('fingerprint_id', $fingerprint_id);
-
-            if ($matchingFingerprint) {
-                return response()->json([
-                    'fingerprint_id' => $matchingFingerprint['fingerprint_id'],
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ], 200);
+        foreach ($fingerprints as $fingerprint) {
+            if (isset($fingerprint['fingerprint_id']) && $fingerprint['fingerprint_id'] === $fingerprint_id) {
+                return true;
             }
         }
 
-        return response()->json(['message' => 'Fingerprint ID is not registered and is available.'], 200);
+        return false;
+    });
+
+    if ($filteredUsers->isNotEmpty()) {
+        $user = $filteredUsers->first();
+        $fingerprints = $user->fingerprint_id;
+
+        if (is_string($fingerprints)) {
+            $fingerprints = json_decode($fingerprints, true) ?? [];
+        }
+
+        if (!is_array($fingerprints)) {
+            $fingerprints = [];
+        }
+
+        $matchingFingerprint = collect($fingerprints)->firstWhere('fingerprint_id', $fingerprint_id);
+
+        if ($matchingFingerprint) {
+            return response()->json([
+                'fingerprint_id' => $matchingFingerprint['fingerprint_id'],
+                'name' => $user->name,
+                'email' => $user->email,
+            ], 200);
+        }
     }
+
+    return response()->json(['message' => 'Fingerprint ID is not registered and is available.'], 200);
+}
+
 
 
 
@@ -322,4 +329,81 @@ class UserController extends Controller
             'current_time' => $currentTime,
         ], 200);
     }
+
+  
+
+// public function handleYearAndSemesterChange($newYear, $newSemester)
+// {
+//     // Fetch the active "on-going" YearAndSemester record
+//     $activeYearSemester = YearAndSemester::where('status', 'on-going')->first();
+
+//     if (!$activeYearSemester) {
+//         // Error handling: No active year and semester found
+//         return [
+//             'success' => false,
+//             'message' => 'No active year and semester found.'
+//         ];
+//     }
+
+//     // Check if the new year and semester already exists to avoid duplication
+//     $existingYearSemester = YearAndSemester::where('year', $newYear)
+//         ->where('semester', $newSemester)
+//         ->first();
+
+//     if ($existingYearSemester) {
+//         // Error handling: The year and semester already exist
+//         return [
+//             'success' => false,
+//             'message' => 'Year and semester already exist.'
+//         ];
+//     }
+
+//     // Proceed with duplicating users for role_number 2
+//     $users = User::where('role_number', 2)
+//         ->where('year_and_semester_id', $activeYearSemester->id)
+//         ->get();
+
+//     if ($users->isEmpty()) {
+//         // Error handling: No users with role_number 2 found for duplication
+//         return [
+//             'success' => false,
+//             'message' => 'No users with role_number 2 found to duplicate.'
+//         ];
+//     }
+
+//     foreach ($users as $user) {
+//         // Check if the user already has a record in the new year and semester
+//         $existingUser = User::where('role_number', 2)
+//             ->where('year', $newYear)
+//             ->where('semester', $newSemester)
+//             ->where('user_number', $user->user_number) // Ensure the user_number remains the same
+//             ->first();
+
+//         if (!$existingUser) {
+//             // Duplicate the user and update year and semester
+//             $newUser = $user->replicate();
+//             $newUser->year = $newYear;
+//             $newUser->semester = $newSemester;
+//             $newUser->save(); // Save the duplicated user with a new ID
+//         }
+//     }
+
+//     // Optional: Update the active year and semester status
+//     $activeYearSemester->status = 'completed'; // Mark the current as completed
+//     $activeYearSemester->save();
+
+//     // Create new year and semester
+//     YearAndSemester::create([
+//         'year' => $newYear,
+//         'semester' => $newSemester,
+//         'status' => 'on-going',
+//     ]);
+
+//     return [
+//         'success' => true,
+//         'message' => 'Users duplicated successfully for the new year and semester.'
+//     ];
+// }
+
+
 }

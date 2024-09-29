@@ -9,4 +9,11 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateStudent extends CreateRecord
 {
     protected static string $resource = StudentResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['role_number'] = 3;
+
+        return $data;
+    }
 }

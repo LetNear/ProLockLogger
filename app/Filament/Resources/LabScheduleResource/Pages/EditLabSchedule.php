@@ -8,6 +8,7 @@ use Filament\Resources\Pages\EditRecord;
 use App\Models\LabSchedule;
 use Filament\Notifications\Notification;
 use Illuminate\Validation\ValidationException;
+use App\Models\Course;
 
 class EditLabSchedule extends EditRecord
 {
@@ -22,6 +23,7 @@ class EditLabSchedule extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $data['instructor_id'] = Course::find($data['course_id'])?->instructor_id;
         // Validate only if relevant fields are changed
         if ($this->isScheduleChanged($data)) {
             $this->validateSchedule($data);

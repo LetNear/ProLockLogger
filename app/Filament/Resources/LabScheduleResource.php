@@ -41,6 +41,9 @@ class LabScheduleResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // Fetch the active 'on-going' Year and Semester
+        $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+    
         return $form
             ->schema([
                 Forms\Components\Section::make('General Information')
@@ -49,13 +52,18 @@ class LabScheduleResource extends Resource
                             ->schema([
                                 Select::make('course_id')
                                     ->label('Course')
-                                    ->relationship('course', 'course_name')
+                                    ->relationship('course', 'course_name', function (Builder $query) use ($onGoingYearAndSemester) {
+                                        // Ensure there is an ongoing year and semester
+                                        if ($onGoingYearAndSemester) {
+                                            $query->where('year_and_semester_id', $onGoingYearAndSemester->id);
+                                        }
+                                    })
                                     ->required()
                                     ->placeholder('Select a course')
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         $course = Course::find($state);
-
+    
                                         if ($course) {
                                             $set('course_code', $course->course_code);
                                             $set('course_name', $course->course_name);
@@ -64,15 +72,19 @@ class LabScheduleResource extends Resource
                                             $set('course_code', null);
                                             $set('course_name', null);
                                             $set('instructor_id', null);
+                                            $set('instructor_name', null);
                                         }
                                     }),
+    
                                 TextInput::make('instructor_name')
                                     ->disabled()
-                                    ->label('Instructor'),
-
+                                    ->formatStateUsing(fn($record) => $record?->course?->instructor?->name)
+                                    ->label('Instructor'), // Set the instructor name in edit mode
+    
                                 Select::make('block_id')
                                     ->relationship('block', 'block')
                                     ->required(),
+    
                                 Select::make('year')
                                     ->options([
                                         '1' => '1st Year',
@@ -81,6 +93,7 @@ class LabScheduleResource extends Resource
                                         '4' => '4th Year',
                                     ])
                                     ->required(),
+    
                                 Forms\Components\Toggle::make('is_makeup_class')
                                     ->label('Makeup Class')
                                     ->inline(false)
@@ -88,8 +101,8 @@ class LabScheduleResource extends Resource
                                     ->helperText('Toggle on for makeup classes.'),
                             ]),
                     ]),
+    
                 Forms\Components\Section::make('Schedule Details')
-
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
@@ -105,18 +118,22 @@ class LabScheduleResource extends Resource
                                     ])
                                     ->required()
                                     ->visible(fn($get) => !$get('is_makeup_class')), // Show only for regular classes
+    
                                 DatePicker::make('specific_date')
                                     ->label('Specific Date')
                                     ->required()
                                     ->visible(fn($get) => $get('is_makeup_class')), // Show only for makeup classes
+    
                                 TimePicker::make('class_start')
                                     ->label('Class Start Time')
                                     ->required()
                                     ->seconds(false),
+    
                                 TimePicker::make('class_end')
                                     ->label('Class End Time')
                                     ->required()
                                     ->seconds(false),
+    
                                 TextInput::make('password')
                                     ->label('Password')
                                     ->placeholder('Enter the password for the laboratory schedule'),
@@ -124,6 +141,8 @@ class LabScheduleResource extends Resource
                     ]),
             ]);
     }
+    
+
 
     public static function table(Table $table): Table
     {

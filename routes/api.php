@@ -7,6 +7,7 @@ use App\Http\Controllers\OpenAndCloseLogController;
 use App\Http\Controllers\RecentLogsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserInformationController;
+use App\Http\Controllers\StudentAttendanceController;
 
 Route::apiResource('user', UserController::class);
 Route::get('users/{email}', [UserController::class, 'getUserByEmail']);
@@ -71,6 +72,16 @@ Route::get('/enrolled-courses/{email}', [LabScheduleController::class, 'getEnrol
 Route::post('/door/open', [OpenAndCloseLogController::class, 'openDoor']);
 Route::post('/door/close', [OpenAndCloseLogController::class, 'closeDoor']);
 Route::get('/logs', [OpenAndCloseLogController::class, 'getAllLogs']);
+
+
+Route::get('/attendance/instructor', [StudentAttendanceController::class, 'getStudentAttendanceByInstructor']);
+Route::get('/courses/details', [LabScheduleController::class, 'getCourseDetailsByEmail']);
+Route::post('/courses/update', [LabScheduleController::class, 'updateCourseDetails']);
+Route::get('/student/schedule-details', [LabScheduleController::class, 'getStudentScheduleDetailsByEmail']);
+
+
+
+
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 // Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);
 // Route::post('/recent-logs/create-log', [RecentLogsController::class, 'createLogsByUID']);

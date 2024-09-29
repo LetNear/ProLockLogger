@@ -61,33 +61,41 @@ class UserImporter extends Importer
     public function resolveRecord(): ?User
     {
         $this->validateColumns($this->data); // Validate before processing
-
+    
         FacadesLog::info('Importing user data:', $this->data);
-
+    
         // Validate email format
         if (!$this->isValidEmail($this->data['email'])) {
-            throw new RowImportFailedException("Invalid email");
+            throw new RowImportFailedException("Invalid email format.");
         }
-
-        // Check for existing email
-        $user = User::where('email', $this->data['email'])->first();
-        if ($user) {
-            throw new RowImportFailedException("Duplicate email");
-        }
-
-        // Check for duplicate user_number
-        $userInfo = UserInformation::where('user_number', $this->data['user_number'])->first();
-        if ($userInfo) {
-            throw new RowImportFailedException("Duplicate user number");
-        }
-
+    
         // Fetch the active 'on-going' Year and Semester
         $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
-
+    
         if (!$onGoingYearAndSemester) {
             throw new RowImportFailedException("No active (on-going) Year and Semester found. Please set one before importing users.");
         }
-
+    
+        // Check for existing email for the active year and semester
+        $existingUserByEmail = User::where('email', $this->data['email'])
+                    ->where('year_and_semester_id', $onGoingYearAndSemester->id)
+                    ->first();
+        
+        if ($existingUserByEmail) {
+            throw new RowImportFailedException("Duplicate email: The email already exists for the current Year and Semester.");
+        }
+    
+        // Check for duplicate user_number for the active year and semester
+        $existingUserByUserNumber = UserInformation::where('user_number', $this->data['user_number'])
+                    ->whereHas('user', function ($query) use ($onGoingYearAndSemester) {
+                        $query->where('year_and_semester_id', $onGoingYearAndSemester->id);
+                    })
+                    ->first();
+        
+        if ($existingUserByUserNumber) {
+            throw new RowImportFailedException("Duplicate user number: The user number already exists for the current Year and Semester.");
+        }
+    
         // Create the user and associate with the active Year and Semester
         $user = User::create([
             'name' => $this->data['name'],
@@ -95,19 +103,22 @@ class UserImporter extends Importer
             'role_number' => 2, // Role number for instructors
             'year_and_semester_id' => $onGoingYearAndSemester->id,
         ]);
-
+    
+        // Assign role
         $roleName = $this->getRoleNameByNumber($user->role_number);
         if ($roleName) {
             $user->syncRoles($roleName);
         }
-
+    
+        // Update or create UserInformation with the user_number
         UserInformation::updateOrCreate(
             ['user_id' => $user->id],
             ['user_number' => $this->data['user_number']]
         );
-
+    
         return $user;
     }
+    
 
     protected function isValidEmail(string $email): bool
     {

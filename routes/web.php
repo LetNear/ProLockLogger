@@ -36,12 +36,8 @@ Route::post('/assign-seat', [SeatController::class, 'assignSeat'])->name('assign
 Route::post('/remove-student', [SeatController::class, 'removeStudent'])->name('remove.student');
 
 
-Route::get('prolock://', [NfcTagController::class, 'show'])
+Route::get('https://github.com/jigabarda/NFCAppInstaller/releases/download/v1.0/NFCRegistrationApp.msi', [NfcTagController::class, 'show'])
     ->name('nfc.details');
 
 Route::get('/schedule', [LabScheduleController::class, 'showSchedule']);
 
-
-Route::get('/filament/exports/{export}/download', function ($export) {
-    return Storage::download("public/filament_exports/{$export}/export-{$export}-student-attendances.xlsx");
-})->name('filament.exports.download');

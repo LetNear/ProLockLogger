@@ -127,6 +127,10 @@ class StudentAttendanceResource extends Resource
                     ->sortable(),
             ])
             ->filters([])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ])
+            ->defaultSort('created_at', 'desc')
             ->actions([]);
            
     }

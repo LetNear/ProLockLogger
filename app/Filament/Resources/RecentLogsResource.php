@@ -14,6 +14,8 @@ use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TextFilter;
 use Filament\Tables\Filters\DateFilter;
+use Filament\Tables\Actions\BulkAction;
+
 
 class RecentLogsResource extends Resource
 {
@@ -79,16 +81,10 @@ class RecentLogsResource extends Resource
         return $table
             ->poll('2s')
             ->columns([
-                TextColumn::make('userInformation.name')
+                TextColumn::make('user_name')
                     ->label('User')
                     ->sortable()
                     ->searchable(),
-
-                TextColumn::make('fingerprint_id')
-                    ->label('Fingerprint ID')
-                    ->sortable()
-                    ->searchable(),
-
                 TextColumn::make('role.name')
                     ->label('Role')
                     ->sortable()
@@ -97,12 +93,14 @@ class RecentLogsResource extends Resource
                 TextColumn::make('block.block')
                     ->label('Block')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('year')
                     ->label('Year')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('time_in')
                     ->label('Time In')
@@ -129,22 +127,33 @@ class RecentLogsResource extends Resource
             ->filters([
 
                 SelectFilter::make('role_id')
-                    ->label('Role')
-                    ->relationship('role', 'name')
-                    ->searchable(),
+                ->label('Role')
+                ->options(\App\Models\Role::all()->pluck('name', 'id')) // Load all roles
+                ->searchable()
+                ->placeholder('Select Role'),
 
-                SelectFilter::make('block_id')
-                    ->label('Block')
-                    ->relationship('block', 'block')
-                    ->searchable(),
+            // Filter by block, load all blocks eagerly
+            SelectFilter::make('block_id')
+                ->label('Block')
+                ->options(\App\Models\Block::all()->pluck('block', 'id')) // Load all blocks
+                ->searchable()
+                ->placeholder('Select Block'),
 
-                SelectFilter::make('year')
-                    ->label('Year'),
-
+            // Filter by year (assuming years are static, this loads from database)
+            SelectFilter::make('year')
+                ->label('Year')
+                ->options(RecentLogs::select('year')->distinct()->pluck('year', 'year')) // Load all distinct years from logs
+                ->searchable()
+                ->placeholder('Select Year'),
             ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ])
+            ->defaultSort('created_at', 'desc')
             ->actions([
-                // Remove EditAction to make it view-only
+               
             ]);
+
             
     }
 

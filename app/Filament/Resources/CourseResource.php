@@ -35,18 +35,27 @@ class CourseResource extends Resource
     {
         // Get the current authenticated user
         $user = Auth::user();
-
+    
         // Check if the user's role_number is 2 (Faculty)
         $isFaculty = $user && $user->role_number === 2;
-
+    
+        // Fetch the active 'on-going' Year and Semester
+        $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+    
         return $form
             ->schema([
                 Section::make('Course Information')
                     ->description('Please provide the details for the course below.')
                     ->schema([
+    
+                        // Filter instructors by the ongoing year and semester
                         Select::make('instructor_id')
-                            ->relationship('instructor', 'name', function ($query) {
-                                return $query->where('role_number', 2);
+                            ->relationship('instructor', 'name', function ($query) use ($onGoingYearAndSemester) {
+                                // Ensure there is an ongoing year and semester
+                                if ($onGoingYearAndSemester) {
+                                    $query->where('role_number', 2)
+                                          ->where('year_and_semester_id', $onGoingYearAndSemester->id); // Filter by year and semester
+                                }
                             })
                             ->preload()
                             ->searchable()
@@ -67,7 +76,7 @@ class CourseResource extends Resource
                             ->maxLength(255)
                             ->helperText('Enter the code for the course.')
                             ->disabled($isFaculty),  // Disable field for faculty
-
+    
                         RichEditor::make('course_description')
                             ->label('Course Description')
                             ->helperText('Provide a brief description of the course.')
@@ -75,6 +84,7 @@ class CourseResource extends Resource
                     ]),
             ]);
     }
+    
 
     public static function table(Table $table): Table
     {

@@ -22,6 +22,7 @@ class RecentLogs extends Model implements Auditable
         'year_and_semester_id',
         'seat_id', // Ensure seat_id is fillable
         'assigned_instructor',
+        'user_name',
     ];
 
     public function block()

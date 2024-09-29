@@ -34,89 +34,93 @@ class UserInformationResource extends Resource
     protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
-    {
-        $existingUserIds = UserInformation::pluck('user_id')->toArray();
-        $existingIdCardIds = UserInformation::pluck('id_card_id')->toArray();
-        $existingSeatIds = UserInformation::pluck('seat_id')->toArray();
+{
+    // Fetch the active 'on-going' Year and Semester
+    $onGoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
 
-        return $form
-            ->schema([
-                Section::make('User Details')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Select::make('user_id')
-                                    ->relationship('user', 'name')
-                                    ->label('User')
-                                    ->placeholder('Select a user')
-                                    ->helperText('Choose the user for this information.')
-                                    ->searchable()
-                                    ->preload(10)
-                                    ->options(fn() => User::whereNotIn('id', $existingUserIds)->pluck('name', 'id')->toArray())
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        $user = User::find($state);
-                                        $roleNumber = $user ? $user->role_number : null;
+    $existingUserIds = UserInformation::pluck('user_id')->toArray();
+    $existingIdCardIds = UserInformation::pluck('id_card_id')->toArray();
+    $existingSeatIds = UserInformation::pluck('seat_id')->toArray();
 
-                                        $set('isRestricted', $roleNumber == 1 || $roleNumber == 2);
-                                    }),
+    return $form
+        ->schema([
+            Section::make('User Details')
+                ->schema([
+                    Forms\Components\Grid::make(2)
+                        ->schema([
+                            Select::make('user_id')
+                                ->relationship('user', 'name')
+                                ->label('User')
+                                ->placeholder('Select a user')
+                                ->helperText('Choose the user for this information.')
+                                ->searchable()
+                                ->preload(10)
+                                ->options(fn() => User::whereNotIn('id', $existingUserIds)->pluck('name', 'id')->toArray())
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $user = User::find($state);
+                                    $roleNumber = $user ? $user->role_number : null;
 
-                                Select::make('id_card_id')
-                                    ->relationship('idCard', 'rfid_number')
-                                    ->label('RFID Number')
-                                    ->placeholder('Select an RFID number')
-                                    ->helperText('Choose the RFID number for this user.')
-                                    ->searchable()
-                                    ->preload(10)
-                                    ->options(function () {
-                                        // Get all RFID numbers already assigned to a user
-                                        $assignedIds = UserInformation::whereNotNull('id_card_id')->pluck('id_card_id');
+                                    $set('isRestricted', $roleNumber == 1 || $roleNumber == 2);
+                                }),
 
-                                        // Fetch RFID numbers that are not assigned yet
-                                        return Nfc::whereNotIn('id', $assignedIds)->pluck('rfid_number', 'id')->toArray();
-                                    })
-                                    ->disabled(fn($get) => $get('isRestricted')),
+                            Select::make('id_card_id')
+                                ->relationship('idCard', 'rfid_number')
+                                ->label('RFID Number')
+                                ->placeholder('Select an RFID number')
+                                ->helperText('Choose the RFID number for this user.')
+                                ->searchable()
+                                ->preload(10)
+                                ->options(function () {
+                                    // Get all RFID numbers already assigned to a user
+                                    $assignedIds = UserInformation::whereNotNull('id_card_id')->pluck('id_card_id');
 
+                                    // Fetch RFID numbers that are not assigned yet
+                                    return Nfc::whereNotIn('id', $assignedIds)->pluck('rfid_number', 'id')->toArray();
+                                })
+                                ->disabled(fn($get) => $get('isRestricted')),
 
+                            TextInput::make('user_number')
+                                ->label('User ID Card Number')
+                                ->placeholder('Enter the user ID card number')
+                                ->helperText('The user\'s ID card number.')
+                                ->disabled(fn($get) => $get('isRestricted')),
 
+                            Select::make('block_id')
+                                ->relationship('block', 'block')
+                                ->label('Block')
+                                ->placeholder('Select a block')
+                                ->helperText('Choose the block assigned to this user.')
+                                ->searchable()
+                                ->preload(10)
+                                ->disabled(fn($get) => $get('isRestricted')),
 
-                                TextInput::make('user_number')
-                                    ->label('User ID Card Number')
-                                    ->placeholder('Enter the user ID card number')
-                                    ->helperText('The user\'s ID card number.')
-                                    ->disabled(fn($get) => $get('isRestricted')),
+                            Select::make('year')
+                                ->options([
+                                    '1' => '1st Year',
+                                    '2' => '2nd Year',
+                                    '3' => '3rd Year',
+                                    '4' => '4th Year',
+                                ])
+                                ->label('Year')
+                                ->placeholder('Select the year')
+                                ->helperText('Choose the year level of the user.')
+                                ->disabled(fn($get) => $get('isRestricted')),
 
-                                Select::make('block_id')
-                                    ->relationship('block', 'block')
-                                    ->label('Block')
-                                    ->placeholder('Select a block')
-                                    ->helperText('Choose the block assigned to this user.')
-                                    ->searchable()
-                                    ->preload(10)
-                                    ->disabled(fn($get) => $get('isRestricted')),
-
-                                Select::make('year')
-                                    ->options([
-                                        '1' => '1st Year',
-                                        '2' => '2nd Year',
-                                        '3' => '3rd Year',
-                                        '4' => '4th Year',
-                                    ])
-                                    ->label('Year')
-                                    ->placeholder('Select the year')
-                                    ->helperText('Choose the year level of the user.')
-                                    ->disabled(fn($get) => $get('isRestricted')),
-                                Select::make('courses')
-                                    ->label('Courses')
-                                    ->relationship('courses', 'course_name') // Relates to the many-to-many relationship in the model
-                                    ->placeholder('Select courses')
-                                    ->helperText('Choose one or more courses for this user.')
-                                    ->searchable()
-                                    ->multiple() // Allows multiple selections
-                                    ->preload(10)
-                                    ->options(function () {
-                                        // Fetch courses with their lab schedules
-                                        $courses = Course::whereHas('labSchedules')
+                            // Filter courses based on the ongoing year and semester
+                            Select::make('courses')
+                                ->label('Courses')
+                                ->relationship('courses', 'course_name') // Relates to the many-to-many relationship in the model
+                                ->placeholder('Select courses')
+                                ->helperText('Choose one or more courses for this user.')
+                                ->searchable()
+                                ->multiple() // Allows multiple selections
+                                ->preload(10)
+                                ->options(function () use ($onGoingYearAndSemester) {
+                                    if ($onGoingYearAndSemester) {
+                                        // Fetch courses that belong to the ongoing year and semester and have lab schedules
+                                        $courses = Course::where('year_and_semester_id', $onGoingYearAndSemester->id)
+                                            ->whereHas('labSchedules')
                                             ->with('labSchedules') // Ensure schedules are loaded
                                             ->get();
 
@@ -130,91 +134,97 @@ class UserInformationResource extends Resource
                                         }
 
                                         return $options;
-                                    })
-                                    ->saveRelationshipsUsing(function ($state, $record) {
-                                        // Reset the current relationships to ensure all are saved
-                                        $record->courses()->detach();
+                                    }
 
-                                        // Handle saving of multiple courses with their schedules
-                                        foreach ($state as $scheduleId) {
-                                            // Find the schedule and get the corresponding course ID
-                                            $schedule = LabSchedule::find($scheduleId);
-                                            if ($schedule) {
-                                                // Attach the course with the specific schedule ID
-                                                $record->courses()->attach($schedule->course_id, ['schedule_id' => $scheduleId]);
-                                            }
+                                    return [];
+                                })
+                                ->saveRelationshipsUsing(function ($state, $record) {
+                                    // Reset the current relationships to ensure all are saved
+                                    $record->courses()->detach();
+
+                                    // Handle saving of multiple courses with their schedules
+                                    foreach ($state as $scheduleId) {
+                                        // Find the schedule and get the corresponding course ID
+                                        $schedule = LabSchedule::find($scheduleId);
+                                        if ($schedule) {
+                                            // Attach the course with the specific schedule ID
+                                            $record->courses()->attach($schedule->course_id, ['schedule_id' => $scheduleId]);
                                         }
-                                    })
-                                    ->disabled(fn($get) => $get('isRestricted')),
-                            ]),
-                    ]),
-                Section::make('Personal Information')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                TextInput::make('first_name')
-                                    ->label('First Name')
-                                    ->placeholder('Enter the first name')
-                                    ->helperText('The user\'s first name.')
-                                    ->maxLength(255),
+                                    }
+                                })
+                                ->disabled(fn($get) => $get('isRestricted')),
+                        ]),
+                ]),
 
-                                TextInput::make('middle_name')
-                                    ->label('Middle Name')
-                                    ->placeholder('Enter the middle name')
-                                    ->helperText('The user\'s middle name.')
-                                    ->maxLength(255)
-                                    ->default(null),
+            Section::make('Personal Information')
+                ->schema([
+                    Forms\Components\Grid::make(2)
+                        ->schema([
+                            TextInput::make('first_name')
+                                ->label('First Name')
+                                ->placeholder('Enter the first name')
+                                ->helperText('The user\'s first name.')
+                                ->maxLength(255),
 
-                                TextInput::make('last_name')
-                                    ->label('Last Name')
-                                    ->placeholder('Enter the last name')
-                                    ->helperText('The user\'s last name.')
-                                    ->maxLength(255),
+                            TextInput::make('middle_name')
+                                ->label('Middle Name')
+                                ->placeholder('Enter the middle name')
+                                ->helperText('The user\'s middle name.')
+                                ->maxLength(255)
+                                ->default(null),
 
-                                TextInput::make('suffix')
-                                    ->label('Suffix')
-                                    ->placeholder('Enter the suffix')
-                                    ->helperText('The user\'s suffix, if any.')
-                                    ->maxLength(255)
-                                    ->default(null),
+                            TextInput::make('last_name')
+                                ->label('Last Name')
+                                ->placeholder('Enter the last name')
+                                ->helperText('The user\'s last name.')
+                                ->maxLength(255),
 
-                                DatePicker::make('date_of_birth')
-                                    ->label('Date of Birth')
-                                    ->placeholder('Select the date of birth')
-                                    ->helperText('The user\'s date of birth.'),
+                            TextInput::make('suffix')
+                                ->label('Suffix')
+                                ->placeholder('Enter the suffix')
+                                ->helperText('The user\'s suffix, if any.')
+                                ->maxLength(255)
+                                ->default(null),
 
-                                Select::make('gender')
-                                    ->options([
-                                        'Male' => 'Male',
-                                        'Female' => 'Female',
-                                        'Other' => 'Other',
-                                    ])
-                                    ->label('Gender')
-                                    ->placeholder('Select the gender')
-                                    ->helperText('The user\'s gender.'),
-                            ]),
-                    ]),
-                Section::make('Contact Information')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                TextInput::make('contact_number')
-                                    ->label('Contact Number')
-                                    ->placeholder('Enter the contact number')
-                                    ->helperText('The user\'s contact number. E.g., 09123456789')
-                                    ->numeric()
-                                    ->minLength(11)
-                                    ->maxLength(11),
+                            DatePicker::make('date_of_birth')
+                                ->label('Date of Birth')
+                                ->placeholder('Select the date of birth')
+                                ->helperText('The user\'s date of birth.'),
 
-                                TextInput::make('complete_address')
-                                    ->label('Complete Address')
-                                    ->placeholder('Enter the complete address')
-                                    ->helperText('The user\'s complete address.')
-                                    ->maxLength(255),
-                            ]),
-                    ]),
-            ]);
-    }
+                            Select::make('gender')
+                                ->options([
+                                    'Male' => 'Male',
+                                    'Female' => 'Female',
+                                    'Other' => 'Other',
+                                ])
+                                ->label('Gender')
+                                ->placeholder('Select the gender')
+                                ->helperText('The user\'s gender.'),
+                        ]),
+                ]),
+
+            Section::make('Contact Information')
+                ->schema([
+                    Forms\Components\Grid::make(2)
+                        ->schema([
+                            TextInput::make('contact_number')
+                                ->label('Contact Number')
+                                ->placeholder('Enter the contact number')
+                                ->helperText('The user\'s contact number. E.g., 09123456789')
+                                ->numeric()
+                                ->minLength(11)
+                                ->maxLength(11),
+
+                            TextInput::make('complete_address')
+                                ->label('Complete Address')
+                                ->placeholder('Enter the complete address')
+                                ->helperText('The user\'s complete address.')
+                                ->maxLength(255),
+                        ]),
+                ]),
+        ]);
+}
+
 
     public static function table(Table $table): Table
     {

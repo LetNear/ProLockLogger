@@ -13,6 +13,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Notifications\Notification;
 
+
 class User extends Authenticatable implements Auditable, FilamentUser
 {
     use HasFactory, Notifiable;
@@ -132,4 +133,23 @@ class User extends Authenticatable implements Auditable, FilamentUser
     {
         return $this->hasMany(Course::class, 'instructor_id');
     }
+
+    public static function getOngoingYearAndSemester()
+    {
+        $ongoingYearAndSemester = YearAndSemester::where('status', 'on-going')->first();
+    
+        if (!$ongoingYearAndSemester) {
+            // Trigger a Filament notification
+            Notification::make()
+                ->title('No ongoing year and semester found.')
+                ->danger() // You can use success(), info(), warning(), or danger() for different types of notifications
+                ->body('Please ensure an ongoing year and semester is set.')
+                ->send();
+    
+            return null;
+        }
+    
+        return $ongoingYearAndSemester;
+    }
+
 }

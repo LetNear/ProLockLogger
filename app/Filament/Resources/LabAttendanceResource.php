@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LabAttendanceResource\Pages;
+use App\Filament\Exports\LabAttendanceExporter;
 use App\Models\LabAttendance;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -15,6 +16,7 @@ use Filament\Tables\Filters\DateFilter;
 use Filament\Tables\Filters\TextFilter;
 use Filament\Tables\Filters\Filter;
 use Tapp\FilamentAuditing\RelationManagers\AuditsRelationManager;
+use Filament\Tables\Actions\ExportAction;
 
 class LabAttendanceResource extends Resource
 {
@@ -22,9 +24,9 @@ class LabAttendanceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-academic-cap';
 
-    protected static ?string $title = 'Laboratory Attendance';
+    protected static ?string $title = 'Faculty Attendance';
 
-    protected static ?string $label = 'Laboratory Attendance';
+    protected static ?string $label = 'Faculty Attendance';
 
     protected static ?string $navigationGroup = 'Laboratory Management';
 
@@ -84,6 +86,10 @@ class LabAttendanceResource extends Resource
     {
         return $table
             ->poll('2s')
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(LabAttendanceExporter::class), // Use the correct exporter class
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('instructor')
                     ->label('Instructor')
@@ -136,6 +142,10 @@ class LabAttendanceResource extends Resource
             ])
             ->actions([
                 
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
            
     }
