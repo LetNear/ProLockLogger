@@ -548,7 +548,7 @@ class LabScheduleController extends Controller
             return response()->json(['message' => 'No active year and semester found.'], 404);
         }
 
-        $labSchedules = LabSchedule::where('year', $activeYearSemester->id)->get();
+        $labSchedules = LabSchedule::where('year_and_semester_id', $activeYearSemester->id)->get();
 
         if ($labSchedules->isEmpty()) {
             return response()->json(['message' => 'No lab schedules found'], 404);

@@ -6,6 +6,7 @@ use App\Models\LabSchedule;
 use App\Models\Seat;
 use App\Models\Computer;
 use App\Models\UserInformation;
+use App\Models\YearAndSemester;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +19,7 @@ class SeatPlanPage extends Page
     public $selectedSeat;
     public $selectedCourse; // Replaces selectedBlockYear
     public $courses = []; // To store the courses available for the instructor
+    public $ongoingYearAndSemester; // To store the ongoing year and semester
 
     protected static string $view = 'filament.pages.seat-plan-page';
 
@@ -29,14 +31,25 @@ class SeatPlanPage extends Page
         $this->selectedCourse = null;
         $this->selectedStudent = null;
         $this->selectedSeat = null;
-
+    
+        // Fetch the ongoing year and semester
+        $this->ongoingYearAndSemester = $this->getOngoingYearAndSemester();
+    
+        // If no ongoing year and semester is found, handle it gracefully
+        if (!$this->ongoingYearAndSemester) {
+            // Notify the user or take other actions
+            dd('No ongoing year and semester found. Please set one first.');
+            return;
+        }
+    
         // Initially fetch students without seats assigned
         $this->loadEligibleStudents();
-
-        // Fetch courses associated with the instructor's regular schedules
+    
+        // Fetch courses associated with the instructor's regular schedules for the ongoing year and semester
         if (auth()->check() && auth()->user()->role_number == 2) {
             $this->courses = LabSchedule::where('instructor_id', auth()->user()->id)
                 ->where('is_makeup_class', false)
+                ->where('year_and_semester_id', $this->ongoingYearAndSemester->id) // Filter by ongoing year and semester
                 ->with('course')
                 ->get()
                 ->mapWithKeys(function ($schedule) {
@@ -46,10 +59,16 @@ class SeatPlanPage extends Page
                 });
         }
     }
+    
 
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->check() && auth()->user()->role_number === 2;
+    }
+
+    public function getOngoingYearAndSemester()
+    {
+        return YearAndSemester::where('status', 'on-going')->first();
     }
 
     public function updatedSelectedCourse($value)
@@ -61,9 +80,12 @@ class SeatPlanPage extends Page
     public function loadSeatPlanDetails()
     {
         if (!empty($this->selectedCourse)) {
+            // Computers are not associated with the year and semester, so we fetch all computers without filtering by year and semester
             $this->computers = Computer::all();
 
+            // Seats, however, are associated with the selected course and ongoing year and semester
             $this->seats = Seat::where('course_id', $this->selectedCourse)
+                ->where('year_and_semester_id', $this->ongoingYearAndSemester->id) // Filter by ongoing year and semester
                 ->with('computer', 'student.user')
                 ->get()
                 ->keyBy('computer_id');
@@ -76,15 +98,17 @@ class SeatPlanPage extends Page
     public function loadEligibleStudents()
     {
         if ($this->selectedCourse) {
-            // Fetch students enrolled in the selected course and not assigned to any seat in this specific course
+            // Fetch students enrolled in the selected course and not assigned to any seat in this specific course and year/semester
             $this->students = UserInformation::whereHas('user', function ($query) {
                 $query->where('role_number', 3);  // Filter for student role
             })
                 ->whereHas('courses', function ($query) {
-                    $query->where('course_id', $this->selectedCourse);  // Filter for students in the selected course
+                    $query->where('course_id', $this->selectedCourse);
+                    $query->where('year_and_semester_id', $this->ongoingYearAndSemester->id); // Filter by ongoing year and semester
                 })
                 ->whereDoesntHave('seats', function ($query) {
-                    $query->where('course_id', $this->selectedCourse);  // Exclude students assigned to a seat in this course only
+                    $query->where('course_id', $this->selectedCourse)
+                          ->where('year_and_semester_id', $this->ongoingYearAndSemester->id); // Filter by ongoing year and semester
                 })
                 ->get();
         } else {
@@ -92,13 +116,8 @@ class SeatPlanPage extends Page
         }
     }
 
-
-
-
     public function selectSeat($seatId)
     {
-
-
         // Fetch the seat associated with the computer ID
         $this->selectedSeat = Computer::where('id', $seatId)->first();
 
@@ -108,7 +127,6 @@ class SeatPlanPage extends Page
         }
 
         // Check the selected seat details
-
     }
 
     public function assignStudentToSeat()
@@ -117,49 +135,54 @@ class SeatPlanPage extends Page
             DB::transaction(function () {
                 // Fetch the student using UserInformation model
                 $student = UserInformation::find($this->selectedStudent);
-    
+
                 // Ensure the student exists and is valid
                 if (!$student) {
                     dd('Student not found with ID: ' . $this->selectedStudent);
                 }
-    
-                // Fetch the seat for the current course and computer
+
+                // Fetch the seat for the current course, computer, and year/semester
                 $seat = Seat::where('computer_id', $this->selectedSeat->id)
                     ->where('course_id', $this->selectedCourse)
+                    ->where('year_and_semester_id', $this->ongoingYearAndSemester->id) // Filter by ongoing year and semester
                     ->first();
-    
+
                 // Check if a seat entry exists for the selected computer and course
                 if (!$seat) {
                     $seat = new Seat();
                     $seat->computer_id = $this->selectedSeat->id;
                     $seat->course_id = $this->selectedCourse;
+                    $seat->year_and_semester_id = $this->ongoingYearAndSemester->id; // Assign the ongoing year and semester
                 }
-    
-                // Check if the student is already assigned to another seat in the same course
+
+                // Check if the student is already assigned to another seat in the same course and year/semester
                 $existingSeat = Seat::where('student_id', $student->id)
-                    ->where('course_id', $this->selectedCourse)  // Ensure we are checking within the same course
+                    ->where('course_id', $this->selectedCourse)
+                    ->where('year_and_semester_id', $this->ongoingYearAndSemester->id) // Filter by ongoing year and semester
                     ->first();
-    
+
                 if ($existingSeat && $existingSeat->id !== $seat->id) {
-                    dd('Student is already assigned to another seat in this course.');
+                    dd('Student is already assigned to another seat in this course for the ongoing year and semester.');
                 }
-    
+
                 // Assign the student to the selected seat
                 $seat->student_id = $student->id;
                 $seat->instructor_id = auth()->user()->id; // Assuming instructor is logged in
                 $seat->instructor_name = auth()->user()->name; // Assuming the instructor's name
-    
+
                 // Fix: Specify 'courses.id' explicitly to remove ambiguity
-                $seat->course_name = $student->courses()->where('courses.id', $this->selectedCourse)->first()->course_name ?? null;
-    
+                $seat->course_name = $student->courses()
+                    ->where('courses.id', $this->selectedCourse)
+                    ->first()->course_name ?? null;
+
                 // Save the seat assignment
                 $seat->save();
-    
+
                 // Update the student's seat_id (for this specific seat)
                 $student->seat_id = $seat->id;
                 $student->save();
             });
-    
+
             // Reset selected seat and student to clear the form
             $this->reset(['selectedSeat', 'selectedStudent']);
             $this->loadSeatPlanDetails(); // Refresh seat details
@@ -168,16 +191,13 @@ class SeatPlanPage extends Page
             dd('Missing selected student or seat');
         }
     }
-    
-    
-    
-
-
 
     public function removeStudentFromSeat($seatId)
     {
         DB::transaction(function () use ($seatId) {
-            $seat = Seat::find($seatId);
+            $seat = Seat::where('id', $seatId)
+                        ->where('year_and_semester_id', $this->ongoingYearAndSemester->id) // Filter by ongoing year and semester
+                        ->first();
 
             if ($seat && $seat->student) {
                 $student = UserInformation::find($seat->student->id);

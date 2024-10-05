@@ -29,7 +29,7 @@ class SeatPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('Faculty');
+        return $user->hasRole('Administrator');
     }
 
     /**
@@ -37,7 +37,7 @@ class SeatPolicy
      */
     public function update(User $user, Seat $seat): bool
     {
-        return $user->hasRole('Faculty');
+        return $user->hasRole('Administrator');
     }
 
     /**

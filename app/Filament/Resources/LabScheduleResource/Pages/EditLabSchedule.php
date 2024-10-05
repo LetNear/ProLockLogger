@@ -51,50 +51,59 @@ class EditLabSchedule extends EditRecord
     {
         $classStart = $data['class_start'];
         $classEnd = $data['class_end'];
-        $classType = $data['is_makeup_class'] ?? false; // Assume 'false' means regular class
-
+        $classType = $data['is_makeup_class'] ?? false;
+    
+        // Fetch the current Year and Semester
+        $yearAndSemesterId = Course::find($data['course_id'])->year_and_semester_id ?? null;
+    
+        if (!$yearAndSemesterId) {
+            throw ValidationException::withMessages([
+                'course_id' => ['Unable to determine the Year and Semester for this course.'],
+            ]);
+        }
+    
+        // Validate time range
         if (strtotime($classEnd) <= strtotime($classStart)) {
             Notification::make()
                 ->title('Invalid Time Range')
                 ->danger()
                 ->body('Class end time must be after class start time.')
                 ->send();
-
+    
             throw ValidationException::withMessages([
                 'class_end' => ['Class end time must be after class start time.'],
             ]);
         }
-
-        // Validate unique instructor for block and year combination
-        $this->validateUniqueInstructorForBlockYear($data);
-
-        // Check for schedule conflicts based on the class type
+    
+        // **Regular class conflict check (day_of_the_week)**
         if (!$classType && isset($data['day_of_the_week'])) {
-            // Regular class: check for conflicts using day_of_the_week
+            // Check for conflicts within the same year and semester
             $conflictingSchedule = LabSchedule::where('day_of_the_week', $data['day_of_the_week'])
-                ->where('instructor_id', $data['instructor_id'])
-                ->where('id', '!=', $this->record->id ?? null)
+                ->where('year_and_semester_id', $yearAndSemesterId) // Ensure same year and semester
                 ->where(function ($query) use ($classStart, $classEnd) {
                     $query->where(function ($subQuery) use ($classStart, $classEnd) {
                         $subQuery->whereTime('class_start', '<', $classEnd)
                             ->whereTime('class_end', '>', $classStart);
                     });
                 })
+                ->where('id', '!=', $this->record->id ?? null) // Exclude current record if editing
                 ->exists();
-
+    
             if ($conflictingSchedule) {
                 Notification::make()
                     ->title('Schedule Conflict')
                     ->danger()
-                    ->body('This schedule conflicts with another schedule for the instructor.')
+                    ->body('This schedule conflicts with another regular schedule in the same Year and Semester.')
                     ->send();
-
+    
                 throw ValidationException::withMessages([
-                    'class_start' => ['This schedule conflicts with another schedule for the instructor.'],
+                    'class_start' => ['This schedule conflicts with another regular schedule in the same Year and Semester.'],
                 ]);
             }
-        } elseif ($classType && isset($data['specific_date'])) {
-            // Makeup class: check for conflicts using specific_date
+        }
+    
+        // **Makeup class conflict check (specific_date)**
+        elseif ($classType && isset($data['specific_date'])) {
             $specificDate = strtotime($data['specific_date']);
             if ($specificDate < strtotime(date('Y-m-d'))) {
                 Notification::make()
@@ -102,36 +111,64 @@ class EditLabSchedule extends EditRecord
                     ->danger()
                     ->body('Makeup class date must be set to a future date.')
                     ->send();
-
+    
                 throw ValidationException::withMessages([
                     'specific_date' => ['Makeup class date must be set to a future date.'],
                 ]);
             }
-
-            $conflictingSchedule = LabSchedule::where('specific_date', $data['specific_date'])
-                ->where('instructor_id', $data['instructor_id'])
-                ->where('id', '!=', $this->record->id ?? null)
+    
+            // Check for conflicts with other makeup classes within the same year and semester
+            $conflictingMakeupSchedule = LabSchedule::where('specific_date', $data['specific_date'])
+                ->where('year_and_semester_id', $yearAndSemesterId) // Ensure same year and semester
                 ->where(function ($query) use ($classStart, $classEnd) {
                     $query->where(function ($subQuery) use ($classStart, $classEnd) {
                         $subQuery->whereTime('class_start', '<', $classEnd)
                             ->whereTime('class_end', '>', $classStart);
                     });
                 })
+                ->where('id', '!=', $this->record->id ?? null) // Exclude current record if editing
                 ->exists();
-
-            if ($conflictingSchedule) {
+    
+            if ($conflictingMakeupSchedule) {
+                Notification::make()
+                    ->title('Makeup Class Conflict')
+                    ->danger()
+                    ->body('This makeup class conflicts with another makeup class in the same Year and Semester.')
+                    ->send();
+    
+                throw ValidationException::withMessages([
+                    'specific_date' => ['This makeup class conflicts with another makeup class in the same Year and Semester.'],
+                ]);
+            }
+    
+            // Check for conflicts with regular classes within the same year and semester
+            $conflictingRegularSchedule = LabSchedule::where('day_of_the_week', date('l', $specificDate)) // Day of the week from specific date
+                ->where('year_and_semester_id', $yearAndSemesterId) // Ensure same year and semester
+                ->where(function ($query) use ($classStart, $classEnd) {
+                    $query->where(function ($subQuery) use ($classStart, $classEnd) {
+                        $subQuery->whereTime('class_start', '<', $classEnd)
+                            ->whereTime('class_end', '>', $classStart);
+                    });
+                })
+                ->where('is_makeup_class', false) // Ensure it's a regular class
+                ->where('id', '!=', $this->record->id ?? null) // Exclude current record if editing
+                ->exists();
+    
+            if ($conflictingRegularSchedule) {
                 Notification::make()
                     ->title('Schedule Conflict')
                     ->danger()
-                    ->body('This schedule conflicts with another makeup class for the instructor on the specified date.')
+                    ->body('This makeup class conflicts with a regular schedule in the same Year and Semester.')
                     ->send();
-
+    
                 throw ValidationException::withMessages([
-                    'class_start' => ['This schedule conflicts with another makeup class for the instructor on the specified date.'],
+                    'specific_date' => ['This makeup class conflicts with a regular schedule in the same Year and Semester.'],
                 ]);
             }
         }
     }
+    
+    
 
     /**
      * Validate that the same block and year for a course cannot have different instructors.

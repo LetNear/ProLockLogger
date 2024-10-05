@@ -42,7 +42,6 @@ class CreateLabSchedule extends CreateRecord
 
         return $data;
     }
-
     protected function validateSchedule(array $data): void
     {
         $classStart = $data['class_start'];
@@ -71,11 +70,37 @@ class CreateLabSchedule extends CreateRecord
             ]);
         }
     
-        // Validation for Makeup Classes (check conflicts only with other makeup classes)
-        if ($classType && isset($data['specific_date'])) {
-            $specificDate = $data['specific_date'];
+        // **Regular class conflict check (day_of_the_week)**
+        if (!$classType && isset($data['day_of_the_week'])) {
+            // Check for conflicts within the same year and semester
+            $conflictingSchedule = LabSchedule::where('day_of_the_week', $data['day_of_the_week'])
+                ->where('year_and_semester_id', $yearAndSemesterId) // Ensure same year and semester
+                ->where(function ($query) use ($classStart, $classEnd) {
+                    $query->where(function ($subQuery) use ($classStart, $classEnd) {
+                        $subQuery->whereTime('class_start', '<', $classEnd)
+                            ->whereTime('class_end', '>', $classStart);
+                    });
+                })
+                ->where('id', '!=', $this->record->id ?? null) // Exclude current record if editing
+                ->exists();
     
-            if (strtotime($specificDate) < strtotime(date('Y-m-d'))) {
+            if ($conflictingSchedule) {
+                Notification::make()
+                    ->title('Schedule Conflict')
+                    ->danger()
+                    ->body('This schedule conflicts with another regular schedule in the same Year and Semester.')
+                    ->send();
+    
+                throw ValidationException::withMessages([
+                    'class_start' => ['This schedule conflicts with another regular schedule in the same Year and Semester.'],
+                ]);
+            }
+        }
+    
+        // **Makeup class conflict check (specific_date)**
+        elseif ($classType && isset($data['specific_date'])) {
+            $specificDate = strtotime($data['specific_date']);
+            if ($specificDate < strtotime(date('Y-m-d'))) {
                 Notification::make()
                     ->title('Invalid Makeup Class Date')
                     ->danger()
@@ -87,79 +112,58 @@ class CreateLabSchedule extends CreateRecord
                 ]);
             }
     
-            // Check for conflicting schedules (makeup classes only within the same year and semester)
-            $conflictingSchedule = LabSchedule::where('specific_date', $specificDate)
-                ->where('is_makeup_class', true)
-                ->where('year_and_semester_id', $yearAndSemesterId) // Limit check to same year and semester
+            // Check for conflicts with other makeup classes within the same year and semester
+            $conflictingMakeupSchedule = LabSchedule::where('specific_date', $data['specific_date'])
+                ->where('year_and_semester_id', $yearAndSemesterId) // Ensure same year and semester
                 ->where(function ($query) use ($classStart, $classEnd) {
                     $query->where(function ($subQuery) use ($classStart, $classEnd) {
                         $subQuery->whereTime('class_start', '<', $classEnd)
                             ->whereTime('class_end', '>', $classStart);
                     });
                 })
-                ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
+                ->where('id', '!=', $this->record->id ?? null) // Exclude current record if editing
                 ->exists();
     
-            if ($conflictingSchedule) {
+            if ($conflictingMakeupSchedule) {
                 Notification::make()
                     ->title('Makeup Class Conflict')
                     ->danger()
-                    ->body('This makeup class conflicts with another makeup class in the laboratory.')
+                    ->body('This makeup class conflicts with another makeup class in the same Year and Semester.')
                     ->send();
     
                 throw ValidationException::withMessages([
-                    'specific_date' => ['This makeup class conflicts with another makeup class in the laboratory.'],
+                    'specific_date' => ['This makeup class conflicts with another makeup class in the same Year and Semester.'],
                 ]);
             }
-        }
     
-        // Additional validation for regular classes (no conflicts with other regular classes within the same year and semester)
-        if (!$classType && isset($data['day_of_the_week'])) {
-            $conflictingSchedule = LabSchedule::where('day_of_the_week', $data['day_of_the_week'])
-                ->where('year_and_semester_id', $yearAndSemesterId) // Limit check to same year and semester
+            // Check for conflicts with regular classes within the same year and semester
+            $conflictingRegularSchedule = LabSchedule::where('day_of_the_week', date('l', $specificDate)) // Day of the week from specific date
+                ->where('year_and_semester_id', $yearAndSemesterId) // Ensure same year and semester
                 ->where(function ($query) use ($classStart, $classEnd) {
-                    // Check if any schedule overlaps with the new one
                     $query->where(function ($subQuery) use ($classStart, $classEnd) {
                         $subQuery->whereTime('class_start', '<', $classEnd)
                             ->whereTime('class_end', '>', $classStart);
                     });
                 })
-                ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
+                ->where('is_makeup_class', false) // Ensure it's a regular class
+                ->where('id', '!=', $this->record->id ?? null) // Exclude current record if editing
                 ->exists();
     
-            if ($conflictingSchedule) {
+            if ($conflictingRegularSchedule) {
                 Notification::make()
                     ->title('Schedule Conflict')
                     ->danger()
-                    ->body('This schedule conflicts with another schedule in the laboratory on the same day.')
+                    ->body('This makeup class conflicts with a regular schedule in the same Year and Semester.')
                     ->send();
     
                 throw ValidationException::withMessages([
-                    'class_start' => ['This schedule conflicts with another schedule in the laboratory on the same day.'],
+                    'specific_date' => ['This makeup class conflicts with a regular schedule in the same Year and Semester.'],
                 ]);
             }
         }
-    
-        // Additional validation: Ensure no duplicate schedule for the same course, instructor, block, year, and year and semester
-        $duplicateSchedule = LabSchedule::where('course_id', $data['course_id'])
-            ->where('block_id', $data['block_id'])
-            ->where('year', $data['year'])
-            ->where('year_and_semester_id', $yearAndSemesterId) // Limit to same year and semester
-            ->where('id', '!=', $this->record->id ?? null) // Exclude the current record when editing
-            ->exists();
-    
-        if ($duplicateSchedule) {
-            Notification::make()
-                ->title('Duplicate Schedule')
-                ->danger()
-                ->body('There is already a schedule for this course, instructor, block, and year in the current Year and Semester.')
-                ->send();
-    
-            throw ValidationException::withMessages([
-                'course_id' => ['There is already a schedule for this course, instructor, block, and year in the current Year and Semester.'],
-            ]);
-        }
     }
+    
+    
     
 
 

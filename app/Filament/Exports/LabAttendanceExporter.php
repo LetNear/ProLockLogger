@@ -19,9 +19,17 @@ class LabAttendanceExporter extends Exporter
             ExportColumn::make('time_out'),
             ExportColumn::make('status'),
             ExportColumn::make('logdate'),
-            ExportColumn::make('created_at'),
-            ExportColumn::make('updated_at'),
+            // ExportColumn::make('created_at'),
+            // ExportColumn::make('updated_at'),
         ];
+    }
+
+    // Override the query to filter data where role_number is 2
+    protected function getQuery()
+    {
+        return LabAttendance::query()->whereHas('user', function($query) {
+            $query->where('role_number', 2);
+        });
     }
 
     public static function getCompletedNotificationBody(Export $export): string

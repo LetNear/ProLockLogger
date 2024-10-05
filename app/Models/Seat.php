@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Auditable as AuditingAuditable;
 use OwenIt\Auditing\Contracts\Auditable;
+use Filament\Notifications\Notification;
+
 
 class Seat extends Model implements Auditable
 {
@@ -20,7 +22,8 @@ class Seat extends Model implements Auditable
         'student_id',
         'lab_attendance_id',
         'course_id',
-        'seat_number'
+        'seat_number',
+        'year_and_semester_id',
     ];
 
     public function userInformation()
@@ -67,6 +70,10 @@ class Seat extends Model implements Auditable
         return $this->belongsTo(LabSchedule::class, 'course_id'); // assuming course_id is being used for schedule_id
     }
 
+    public function yearAndSemester()
+    {
+        return $this->belongsTo(YearAndSemester::class);
+    }
 
 
     public static function boot()
@@ -83,6 +90,8 @@ class Seat extends Model implements Auditable
             // For example, you might want to update or delete related records
         });
     }
+
+   
 
     use HasFactory;
     use AuditingAuditable;

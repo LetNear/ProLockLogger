@@ -98,7 +98,8 @@ class LabScheduleResource extends Resource
                                     ->label('Makeup Class')
                                     ->inline(false)
                                     ->reactive()
-                                    ->helperText('Toggle on for makeup classes.'),
+                                    ->helperText('Toggle on for makeup classes.')
+                                    ->disabled(),
                             ]),
                     ]),
     
@@ -141,8 +142,6 @@ class LabScheduleResource extends Resource
                     ]),
             ]);
     }
-    
-
 
     public static function table(Table $table): Table
     {
@@ -321,6 +320,28 @@ class LabScheduleResource extends Resource
 
                             throw ValidationException::withMessages([
                                 'specific_date' => ['This makeup class conflicts with another makeup class.'],
+                            ]);
+                        }
+
+                        // Validate if the makeup class conflicts with any regular class on the same day
+                        $conflictingRegularClass = LabSchedule::where('day_of_the_week', date('l', strtotime($data['specific_date'])))
+                            ->where('is_makeup_class', false)
+                            ->where(function ($query) use ($data) {
+                                $query->whereTime('class_start', '<', $data['class_end'])
+                                    ->whereTime('class_end', '>', $data['class_start']);
+                            })
+                            ->where('id', '!=', $record->id ?? null) // Exclude the current record if editing
+                            ->exists();
+
+                        if ($conflictingRegularClass) {
+                            Notification::make()
+                                ->title('Schedule Conflict')
+                                ->danger()
+                                ->body('This makeup class conflicts with a regular class on the same day.')
+                                ->send();
+
+                            throw ValidationException::withMessages([
+                                'specific_date' => ['This makeup class conflicts with a regular class on the same day.'],
                             ]);
                         }
 
