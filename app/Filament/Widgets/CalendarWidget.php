@@ -98,7 +98,7 @@ class CalendarWidget extends FullCalendarWidget
     protected function getOptions(): array
     {
         return [
-            'initialView' => 'timeGridWeek',
+            'initialView' => 'timeGridDay',
             'headerToolbar' => [
                 'left' => 'prev,next today',
                 'center' => 'title',
@@ -107,8 +107,8 @@ class CalendarWidget extends FullCalendarWidget
             'events' => $this->fetchEvents(),
             'editable' => false,
             'selectable' => false,
-            'slotMinTime' => '00:00:00',
-            'slotMaxTime' => '24:00:00',
+            'slotMinTime' => '05:00:00',
+            'slotMaxTime' => '21:00:00',
             'timeZone' => 'Asia/Manila', // Set FullCalendar to display in Asia/Manila time zone
             'height' => 'auto',
             'contentHeight' => '90vh',

@@ -66,11 +66,13 @@ class AdminPanelProvider extends PanelProvider
                         'headerToolbar' => [
                             'left' => 'prev,next today',
                             'center' => 'title',
-                            'right' => 'timeGridDay,timeGridWeek', // Update to timeGrid views
+                            'right' => 'timeGridWeek', // Update to timeGrid views
                         ],
                         'initialView' => 'timeGridWeek', // Use timeGridWeek for the initial view
                         'nowIndicator' => true,
                         'height' => 'auto',
+                        'slotMinTime' => '06:00:00',
+                        'slotMaxTime' => '21:00:00',
                     ])
             );
     }

@@ -95,41 +95,41 @@ class RecentLogsController extends Controller
             'role_id' => 'required|integer',
             'user_name' => 'required|string',
         ]);
-    
+
         try {
             $activeYearSemester = $this->getActiveYearAndSemester();
-    
+
             if (!$activeYearSemester) {
                 info('No active year and semester found.');
                 return response()->json(['message' => 'No active year and semester found.'], 404);
             }
-    
+
             $nfc = Nfc::where('rfid_number', $validated['rfid_number'])->first();
-    
+
             if (!$nfc) {
                 info('NFC UID not found.');
                 return response()->json(['message' => 'NFC UID not found.'], 404);
             }
-    
+
             $userInformation = UserInformation::where('id_card_id', $nfc->id)->first();
-    
+
             if (!$userInformation) {
                 info('User information not found for this NFC UID.');
                 return response()->json(['message' => 'User information not found for this NFC UID.'], 404);
             }
-    
+
             // Check if the user information is associated with the active year and semester
             if ($userInformation->year_and_semester_id !== $activeYearSemester->id) {
                 info('User is not associated with the active year and semester.');
                 return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
             }
-    
+
             // Log the current day and time to help debug
             $currentDay = now()->dayName;
             $timeIn = $validated['time_in'];
             info("Searching for course on day: {$currentDay}, time: {$timeIn}");
             info("Server date and time: " . now()->toDateTimeString());
-    
+
             // Retrieve the correct course and schedule
             $course = $userInformation->courses()
                 ->whereHas('labSchedules', function (Builder $query) use ($timeIn, $currentDay) {
@@ -138,35 +138,35 @@ class RecentLogsController extends Controller
                         ->where('day_of_the_week', $currentDay);
                 })
                 ->first();
-    
+
             info('Course found', [$course]);
-    
+
             if (!$course) {
                 info('No course found for the current time.');
                 return response()->json(['message' => 'No course found for the current time.'], 404);
             }
-    
+
             // Retrieve the schedule
             $labSchedule = $course->labSchedules()
                 ->where('day_of_the_week', $currentDay)
                 ->where('class_start', '<=', $timeIn)
                 ->where('class_end', '>=', $timeIn)
                 ->first();
-    
+
             if (!$labSchedule) {
                 info('No lab schedule found for the current time.');
                 return response()->json(['message' => 'No lab schedule found for the current time.'], 404);
             }
-    
+
             // Retrieve assigned seat for the specific course and schedule
             $assignedSeat = Seat::where('student_id', $userInformation->id)
                 ->where('course_id', $course->id) // Match the schedule
                 ->first();
-    
+
             // Retrieve the computer details from the assigned seat
             $computer = $assignedSeat ? $assignedSeat->computer : null;
             $computerNumber = $computer ? $computer->computer_number : 'Unassigned';
-    
+
             // Create a new log entry with the seat_id and instructor name
             $log = RecentLogs::create([
                 'user_number' => $userInformation->user_number,
@@ -180,7 +180,7 @@ class RecentLogsController extends Controller
                 'seat_id' => $assignedSeat->id ?? null, // Assign seat_id if found
                 'assigned_instructor' => $labSchedule->instructor->name ?? 'N/A', // Get the instructor name from the schedule
             ]);
-    
+
             // Save the data to StudentAttendance table with the seat_id
             StudentAttendance::create([
                 'user_information_id' => $userInformation->id,
@@ -191,7 +191,7 @@ class RecentLogsController extends Controller
                 'year_and_semester_id' => $activeYearSemester->id,
                 'seat_id' => $assignedSeat->id ?? null, // Assign seat_id if found
             ]);
-    
+
             // Prepare response including the assigned seat
             $response = [
                 'message' => 'Time-In recorded successfully.',
@@ -202,14 +202,14 @@ class RecentLogsController extends Controller
                 ] : 'Unassigned',
                 'assigned_instructor' => $labSchedule->instructor->name ?? 'N/A',
             ];
-    
+
             return response()->json($response, 201);
         } catch (\Exception $e) {
             \Log::error('An error occurred while creating the log entry.', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-    
+
 
 
 
@@ -371,6 +371,8 @@ class RecentLogsController extends Controller
      */
     public function createRecordTimeInByFingerprintId(Request $request): JsonResponse
     {
+        \Log::info('API createRecordTimeInByFingerprintId called.');
+
         $validated = $request->validate([
             'fingerprint_id' => 'required|string',
             'time_in' => 'required|string',
@@ -379,32 +381,44 @@ class RecentLogsController extends Controller
         ]);
 
         try {
-            $activeYearSemester = $this->getActiveYearAndSemester();
-
-            if (!$activeYearSemester) {
-                return response()->json(['message' => 'No active year and semester found.'], 404);
-            }
-
             \Log::info('Validated Input:', $validated);
 
+            // Fetch the active year and semester
+            $activeYearSemester = $this->getActiveYearAndSemester();
+            if (!$activeYearSemester) {
+                \Log::warning('No active year and semester found.');
+                return response()->json(['message' => 'No active year and semester found.'], 404);
+            }
+            \Log::info('Active Year and Semester found:', ['activeYearSemester' => $activeYearSemester]);
+
             $fingerprintId = $validated['fingerprint_id'];
+            \Log::info('Searching for user by fingerprint ID.', ['fingerprint_id' => $fingerprintId]);
+
+            // Find the user by fingerprint ID
             $userInformation = DB::table('users')
                 ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
                 ->first();
 
             if (!$userInformation) {
-                \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
+                \Log::warning('Fingerprint ID not found.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
+            \Log::info('User information found.', ['user_id' => $userInformation->id]);
 
             $user = User::find($userInformation->id);
 
-            // Check if the user information is associated with the active year and semester
-            if ($user->year_and_semester_id !== $activeYearSemester->id) {
-                return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
+            // Check if the user already has an in-progress log (time_in without time_out)
+            $existingLog = RecentLogs::where('fingerprint_id', $fingerprintId)
+                ->whereNull('time_out') // Ensure we are finding the log without time_out
+                ->first();
+
+            if ($existingLog) {
+                \Log::info('User is already clocked in.', ['log_id' => $existingLog->id]);
+                return response()->json(['message' => 'User is already clocked in.', 'log' => $existingLog], 400);
             }
 
-            // Create a new log entry
+            // Create a new log entry in RecentLogs if no in-progress log exists
+            \Log::info('Creating new log entry in RecentLogs.');
             $log = RecentLogs::create([
                 'user_number' => $user->user_number,
                 'block_id' => $user->block_id,
@@ -415,9 +429,21 @@ class RecentLogsController extends Controller
                 'fingerprint_id' => $validated['fingerprint_id'],
                 'year_and_semester_id' => $activeYearSemester->id,
             ]);
+            \Log::info('RecentLogs entry created successfully.', ['recent_log_id' => $log->id]);
 
-            // Save the data to LabAttendance table
-            LabAttendance::create([
+            // Check if the user already has an in-progress LabAttendance record
+            $existingLabAttendance = LabAttendance::where('user_id', $user->id)
+                ->whereNull('time_out')  // Check for ongoing attendance
+                ->first();
+
+            if ($existingLabAttendance) {
+                \Log::info('LabAttendance record already exists for this session.', ['lab_attendance_id' => $existingLabAttendance->id]);
+                return response()->json(['message' => 'LabAttendance record already exists.', 'lab_attendance' => $existingLabAttendance], 400);
+            }
+
+            // Create a new entry in LabAttendance if no in-progress record exists
+            \Log::info('Creating new entry in LabAttendance.');
+            $labAttendance = LabAttendance::create([
                 'user_id' => $user->id,
                 'seat_id' => null,
                 'lab_schedule_id' => null,
@@ -426,8 +452,8 @@ class RecentLogsController extends Controller
                 'status' => 'In Progress',
                 'logdate' => now()->format('Y-m-d'),
                 'instructor' => $user->name,
-                'year_and_semester_id' => $activeYearSemester->id,
             ]);
+            \Log::info('LabAttendance entry created successfully.', ['lab_attendance_id' => $labAttendance->id]);
 
             return response()->json(['message' => 'Time-In recorded successfully.', 'log' => $log], 201);
         } catch (\Exception $e) {
@@ -435,6 +461,11 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
+
+
+
+
 
 
 
@@ -454,13 +485,16 @@ class RecentLogsController extends Controller
         ]);
 
         try {
+            // Fetch the active year and semester
             $activeYearSemester = $this->getActiveYearAndSemester();
-
             if (!$activeYearSemester) {
                 return response()->json(['message' => 'No active year and semester found.'], 404);
             }
 
             $fingerprintId = $validated['fingerprint_id'];
+            \Log::info('Searching for user by fingerprint ID.', ['fingerprint_id' => $fingerprintId]);
+
+            // Find the user by fingerprint ID
             $userInformation = DB::table('users')
                 ->whereRaw("JSON_SEARCH(fingerprint_id, 'one', ?, NULL, '$[*].fingerprint_id') IS NOT NULL", [$fingerprintId])
                 ->first();
@@ -469,37 +503,52 @@ class RecentLogsController extends Controller
                 \Log::warning('Fingerprint ID not found in nested JSON query.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'Fingerprint ID not found.'], 404);
             }
+            \Log::info('User information found.', ['user_id' => $userInformation->id]);
 
             $user = User::find($userInformation->id);
 
-            // Check if the user information is associated with the active year and semester
+            // Check if the user is associated with the active year and semester
             if ($user->year_and_semester_id !== $activeYearSemester->id) {
                 return response()->json(['message' => 'User is not associated with the active year and semester.'], 404);
             }
+            \Log::info('User is associated with the active year and semester.', ['user_id' => $user->id]);
 
-            // Find the existing log entry and update time-out
-            $log = RecentLogs::where('id_card_id', $user->id_card_id)
+            // Find the existing log entry by fingerprint_id and active year/semester, update time-out
+            $log = RecentLogs::where('fingerprint_id', $fingerprintId)
                 ->whereNotNull('time_in')
                 ->whereNull('time_out')
                 ->where('year_and_semester_id', $activeYearSemester->id)
                 ->first();
 
             if (!$log) {
+                \Log::warning('No matching time-in record found for the user.', ['fingerprint_id' => $fingerprintId]);
                 return response()->json(['message' => 'No matching time-in record found.'], 404);
             }
+            \Log::info('Matching log found.', ['log_id' => $log->id]);
 
+            // Update the log entry with the time-out
             $log->update([
                 'time_out' => $validated['time_out'],
                 'updated_at' => now(),
             ]);
+            \Log::info('Log time-out updated.', ['log_id' => $log->id]);
 
-            // Update the corresponding LabAttendance record
-            LabAttendance::where('user_id', $user->id)
-                ->whereNull('time_out')
-                ->update([
-                    'time_out' => $validated['time_out'],
-                    'status' => 'Completed',
-                ]);
+            // Find the existing LabAttendance record and update time-out
+            $labAttendance = LabAttendance::where('user_id', $user->id)
+                ->whereNull('time_out')  // Ensure we are finding the right ongoing attendance
+                ->first(); // Removed 'year_and_semester_id' since it caused an error
+
+            if (!$labAttendance) {
+                \Log::warning('No matching LabAttendance record found for the user.', ['user_id' => $user->id]);
+                return response()->json(['message' => 'No matching LabAttendance record found.'], 404);
+            }
+
+            // Update the LabAttendance record with time-out
+            $labAttendance->update([
+                'time_out' => $validated['time_out'],
+                'status' => 'Completed',
+            ]);
+            \Log::info('LabAttendance time-out updated.', ['lab_attendance_id' => $labAttendance->id]);
 
             return response()->json(['message' => 'Time-Out recorded successfully.', 'log' => $log], 200);
         } catch (\Exception $e) {
@@ -507,6 +556,8 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
+
 
 
 
@@ -586,7 +637,7 @@ class RecentLogsController extends Controller
 
 
 
-   /**
+    /**
      * Get the total count of logs for a student by email.
      *
      * @param Request $request
@@ -644,5 +695,4 @@ class RecentLogsController extends Controller
             return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
-
 }

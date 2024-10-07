@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\StudentAttExporter;
 use App\Filament\Exports\StudentAttendanceExporter;
 use App\Filament\Resources\StudentAttendanceResource\Pages;
 use App\Models\StudentAttendance;
@@ -19,6 +20,8 @@ use Filament\Tables\Filters\DateFilter;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Filament\Tables\Actions\Action;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentAttendanceResource extends Resource
 {
@@ -76,8 +79,12 @@ class StudentAttendanceResource extends Resource
         return $table
             ->poll('2s')
             ->headerActions([
-                ExportAction::make()
-                    ->exporter(StudentAttendanceExporter::class), // Use the correct exporter class
+                Action::make('export')
+                    ->label('Export to Excel')
+                    ->action(function () {
+                        // Trigger the export using Maatwebsite Excel and your custom exporter
+                        return Excel::download(new StudentAttExporter, 'student-attendance.xlsx');
+                    }),
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('userInformation.user.name')

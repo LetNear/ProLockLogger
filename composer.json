@@ -10,6 +10,7 @@
         "laravel/framework": "^11.9",
         "laravel/socialite": "^5.15",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "^3.1",
         "saade/filament-fullcalendar": "^3.2",
         "spatie/laravel-permission": "^6.9",
         "tapp/filament-auditing": "^3.0"

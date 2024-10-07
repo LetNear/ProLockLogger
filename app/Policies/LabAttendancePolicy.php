@@ -13,7 +13,7 @@ class LabAttendancePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('Administrator');
+        return $user->hasRole('Student');
     }
 
     /**
@@ -21,7 +21,7 @@ class LabAttendancePolicy
      */
     public function view(User $user, LabAttendance $labAttendance): bool
     {
-        return $user->hasRole('Administrator');
+        return $user->hasRole('Student');
     }
 
     /**
@@ -29,7 +29,7 @@ class LabAttendancePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('Administrator');
+        return $user->hasRole('Student');
     }
 
     /**
@@ -37,7 +37,7 @@ class LabAttendancePolicy
      */
     public function update(User $user, LabAttendance $labAttendance): bool
     {
-        return $user->hasRole('Administrator');
+        return $user->hasRole('Student');
     }
 
     /**
@@ -45,7 +45,7 @@ class LabAttendancePolicy
      */
     public function delete(User $user, LabAttendance $labAttendance): bool
     {
-        return $user->hasRole('Administrator');
+        return $user->hasRole('Student');
     }
 
     /**
@@ -53,7 +53,7 @@ class LabAttendancePolicy
      */
     public function restore(User $user, LabAttendance $labAttendance): bool
     {
-        return $user->hasRole('Administrator');
+        return $user->hasRole('Student');
     }
 
     /**
@@ -61,6 +61,6 @@ class LabAttendancePolicy
      */
     public function forceDelete(User $user, LabAttendance $labAttendance): bool
     {
-        return $user->hasRole('Administrator');
+        return $user->hasRole('Student');
     }
 }
