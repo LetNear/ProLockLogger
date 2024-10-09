@@ -24,13 +24,11 @@ class CourseImporter extends Importer
             ImportColumn::make('course_code')
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
-            ImportColumn::make('course_description')
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
             ImportColumn::make('instructor_name')
-                ->fillRecordUsing(function () {
-                    return;
-                })
+            ->fillRecordUsing(function ($record, $state) {
+                return;
+            })
+                ->requiredMapping() // Ensure instructor_name is mapped and imported
                 ->rules(['required', 'max:255']),
         ];
     }
@@ -41,7 +39,7 @@ class CourseImporter extends Importer
         $rules = [
             'course_name' => ['required', 'string', 'max:255'],
             'course_code' => ['required', 'string', 'max:255'],
-            'course_description' => ['required', 'string', 'max:255'],
+            'instructor_name' => ['required', 'string', 'max:255'], // Validate instructor_name
         ];
 
         // Validate the data
@@ -57,8 +55,9 @@ class CourseImporter extends Importer
             ->where('role_number', 2) // Ensure the user is an instructor
             ->first();
 
+        // If instructor is not found, throw a RowImportFailedException
         if (!$instructor) {
-            throw new RowImportFailedException('Instructor not found');
+            throw new RowImportFailedException("Instructor '{$this->data['instructor_name']}' not found.");
         }
 
         // Automatically associate the course with the current on-going year and semester
@@ -68,23 +67,10 @@ class CourseImporter extends Importer
             throw new RowImportFailedException("No active year and semester found. Please ensure an 'on-going' status exists.");
         }
 
-        // Check for duplicates in the same year and semester
-        $duplicateCourse = Course::where('course_name', $this->data['course_name'])
-            ->where('course_code', $this->data['course_code'])
-            ->where('instructor_id', $instructor->id)
-            ->where('year_and_semester_id', $onGoingYearAndSemester->id)
-            ->exists();
-
-        if ($duplicateCourse) {
-            // Throw an exception with a detailed duplicate course message
-            throw new RowImportFailedException("Duplicate course detected: {$this->data['course_name']} with {$this->data['course_code']} for Instructor {$this->data['instructor_name']} already exists in this year and semester. Please add it manually.");
-        }
-
         // Proceed to insert the course record
         return Course::create([
             'course_name' => $this->data['course_name'],
             'course_code' => $this->data['course_code'],
-            'course_description' => $this->data['course_description'],
             'instructor_id' => $instructor->id, // Assign instructor_id
             'year_and_semester_id' => $onGoingYearAndSemester->id,
         ]);
@@ -95,7 +81,7 @@ class CourseImporter extends Importer
         $body = 'Your course import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' were imported successfully.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import due to duplicate entries.';
+            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import due to invalid entries.';
         }
 
         return $body;

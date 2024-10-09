@@ -16,7 +16,7 @@ class UserImporter extends Importer
     protected static ?string $model = User::class;
 
     // Define required columns for UserImporter
-    protected array $requiredColumns = ['name', 'email', 'user_number', 'import_type'];
+    protected array $requiredColumns = ['name', 'email', 'import_type'];
 
     public static function getColumns(): array
     {
@@ -27,12 +27,6 @@ class UserImporter extends Importer
             ImportColumn::make('email')
                 ->requiredMapping()
                 ->rules(['required', 'email']),
-            ImportColumn::make('user_number')
-                ->fillRecordUsing(function ($record, $state) {
-                    return;
-                })
-                ->requiredMapping()
-                ->rules(['required', 'max:20']),
             ImportColumn::make('import_type')
                 ->fillRecordUsing(function ($record, $state) {
                     return;
@@ -85,17 +79,6 @@ class UserImporter extends Importer
             throw new RowImportFailedException("Duplicate email: The email already exists for the current Year and Semester.");
         }
     
-        // Check for duplicate user_number for the active year and semester
-        $existingUserByUserNumber = UserInformation::where('user_number', $this->data['user_number'])
-                    ->whereHas('user', function ($query) use ($onGoingYearAndSemester) {
-                        $query->where('year_and_semester_id', $onGoingYearAndSemester->id);
-                    })
-                    ->first();
-        
-        if ($existingUserByUserNumber) {
-            throw new RowImportFailedException("Duplicate user number: The user number already exists for the current Year and Semester.");
-        }
-    
         // Create the user and associate with the active Year and Semester
         $user = User::create([
             'name' => $this->data['name'],
@@ -110,15 +93,14 @@ class UserImporter extends Importer
             $user->syncRoles($roleName);
         }
     
-        // Update or create UserInformation with the user_number
+        // Create or update UserInformation (without user_number)
         UserInformation::updateOrCreate(
-            ['user_id' => $user->id],
-            ['user_number' => $this->data['user_number']]
+            ['user_id' => $user->id], // Link by user_id
+            [] // No additional fields needed, as you're not including user_number
         );
     
         return $user;
     }
-    
 
     protected function isValidEmail(string $email): bool
     {

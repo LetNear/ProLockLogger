@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\FacultyExport;
+use App\Exports\LogBookExport;
 use App\Filament\Resources\RecentLogsResource\Pages;
 use App\Models\RecentLogs;
 use Filament\Forms;
@@ -15,7 +17,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TextFilter;
 use Filament\Tables\Filters\DateFilter;
 use Filament\Tables\Actions\BulkAction;
-
+use Filament\Tables\Actions\Action;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RecentLogsResource extends Resource
 {
@@ -80,6 +83,20 @@ class RecentLogsResource extends Resource
     {
         return $table
             ->poll('2s')
+            ->headerActions([
+                Action::make('export')
+                    ->label('Export Log Book')
+                    ->action(function () {
+                        // Trigger the export using Maatwebsite Excel and your custom exporter
+                        return Excel::download(new LogBookExport, 'logbook.xlsx');
+                    }),
+                    // Action::make('export')
+                    // ->label('Export Faculty Log Book')
+                    // ->action(function () {
+                    //     // Trigger the export using Maatwebsite Excel and your custom exporter
+                    //     return Excel::download(new FacultyExport, 'logbookfaculty.xlsx');
+                    // }),
+            ])
             ->columns([
                 TextColumn::make('user_name')
                     ->label('User')
