@@ -148,9 +148,9 @@ class LabScheduleResource extends Resource
         return $table
             ->poll('2s')
             ->headerActions([
-                ImportAction::make()
-                    ->importer(LabScheduleImporter::class)
-                    ->label('Import Schedule'),
+                // ImportAction::make()
+                //     ->importer(LabScheduleImporter::class)
+                //     ->label('Import Schedule'),
             ])
             ->columns([
 
