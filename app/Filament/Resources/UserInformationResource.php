@@ -109,50 +109,54 @@ class UserInformationResource extends Resource
 
                                 // Filter courses based on the ongoing year and semester
                                 Select::make('courses')
-                                    ->label('Courses')
-                                    ->relationship('courses', 'course_name') // Relates to the many-to-many relationship in the model
-                                    ->placeholder('Select courses')
-                                    ->helperText('Choose one or more courses for this user.')
-                                    ->searchable()
-                                    ->multiple() // Allows multiple selections
-                                    ->preload(10)
-                                    ->options(function () use ($onGoingYearAndSemester) {
-                                        if ($onGoingYearAndSemester) {
-                                            // Fetch courses that belong to the ongoing year and semester and have lab schedules
-                                            $courses = Course::where('year_and_semester_id', $onGoingYearAndSemester->id)
-                                                ->whereHas('labSchedules')
-                                                ->with('labSchedules') // Ensure schedules are loaded
-                                                ->get();
-
-                                            // Map the courses and schedules to create separate entries
-                                            $options = [];
-                                            foreach ($courses as $course) {
-                                                foreach ($course->labSchedules as $schedule) {
-                                                    // Create a unique identifier combining course and schedule
-                                                    $options[$schedule->id] = $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '');
-                                                }
-                                            }
-
-                                            return $options;
-                                        }
-
-                                        return [];
-                                    })
-                                    ->saveRelationshipsUsing(function ($state, $record) {
-                                        // Reset the current relationships to ensure all are saved
-                                        $record->courses()->detach();
-
-                                        // Handle saving of multiple courses with their schedules
-                                        foreach ($state as $scheduleId) {
-                                            // Find the schedule and get the corresponding course ID
-                                            $schedule = LabSchedule::find($scheduleId);
-                                            if ($schedule) {
-                                                // Attach the course with the specific schedule ID
-                                                $record->courses()->attach($schedule->course_id, ['schedule_id' => $scheduleId]);
+                                ->label('Courses')
+                                ->relationship('courses', 'course_name') // Relates to the many-to-many relationship in the model
+                                ->placeholder('Select courses')
+                                ->helperText('Choose one or more courses for this user.')
+                                ->searchable()
+                                ->multiple() // Allows multiple selections
+                                ->preload(10)
+                                ->options(function () use ($onGoingYearAndSemester) {
+                                    if ($onGoingYearAndSemester) {
+                                        // Fetch courses that belong to the ongoing year and semester and have lab schedules
+                                        $courses = Course::where('year_and_semester_id', $onGoingYearAndSemester->id)
+                                            ->whereHas('labSchedules')
+                                            ->with('labSchedules') // Ensure schedules are loaded
+                                            ->get();
+                            
+                                        // Map the courses and schedules to create separate entries
+                                        $options = [];
+                                        foreach ($courses as $course) {
+                                            foreach ($course->labSchedules as $schedule) {
+                                                // Create a unique identifier combining course and schedule
+                                                $options[$schedule->id] = $schedule->course_name . ' (' . $schedule->class_start . ' - ' . $schedule->class_end . ')' . ($schedule->is_makeup_class ? ' - Makeup Class' : '');
                                             }
                                         }
-                                    })
-                                    ->disabled(fn($get) => $get('isRestricted')),
+                            
+                                        return $options;
+                                    }
+                            
+                                    return [];
+                                })
+                                ->saveRelationshipsUsing(function ($state, $record) use ($onGoingYearAndSemester) {
+                                    // Reset the current relationships to ensure all are saved
+                                    $record->courses()->detach();
+                            
+                                    // Handle saving of multiple courses with their schedules
+                                    foreach ($state as $scheduleId) {
+                                        // Find the schedule and get the corresponding course ID
+                                        $schedule = LabSchedule::find($scheduleId);
+                                        if ($schedule && $onGoingYearAndSemester) {
+                                            // Attach the course with the specific schedule ID and the ongoing year and semester ID
+                                            $record->courses()->attach($schedule->course_id, [
+                                                'schedule_id' => $scheduleId,
+                                                'year_and_semester_id' => $onGoingYearAndSemester->id, // Save the ongoing year and semester
+                                            ]);
+                                        }
+                                    }
+                                })
+                                ->disabled(fn($get) => $get('isRestricted')),
+                            
                             ]),
                     ]),
 

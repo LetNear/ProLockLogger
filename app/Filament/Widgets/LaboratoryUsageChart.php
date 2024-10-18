@@ -33,17 +33,20 @@ class LaboratoryUsageChart extends ChartWidget
 
     protected function getData(): array
     {
+        // Parse start and end dates or use default values
         $startDate = $this->startDate ? Carbon::parse($this->startDate) : Carbon::now()->subMonth()->startOfMonth();
         $endDate = $this->endDate ? Carbon::parse($this->endDate) : Carbon::now()->endOfMonth();
 
-        $usageData = RecentLogs::selectRaw('DATE(time_in) as date, COUNT(*) as count')
-            ->whereNotNull('time_in') // Ensure time_in is not null
-            ->whereBetween('time_in', [$startDate, $endDate])
+        // Adjust query to match time format
+        $usageData = RecentLogs::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->whereNotNull('time_in')
+            ->whereBetween('created_at', [$startDate, $endDate]) // Use created_at since it's full DATETIME
             ->groupBy('date')
             ->orderBy('date')
             ->pluck('count', 'date')
             ->all();
 
+        // Prepare data for the chart
         $labels = array_keys($usageData);
         $data = array_values($usageData);
 
@@ -52,6 +55,11 @@ class LaboratoryUsageChart extends ChartWidget
                 [
                     'label' => 'Laboratory Usage',
                     'data' => $data,
+                    'backgroundColor' => 'rgba(54, 162, 235, 0.2)',
+                    'borderColor' => 'rgba(54, 162, 235, 1)',
+                    'borderWidth' => 1,
+                    'lineTension' => 0.4, // Adds curvature to the line
+                    'fill' => true, // Makes the area under the line filled
                 ],
             ],
             'labels' => $labels,
@@ -65,6 +73,7 @@ class LaboratoryUsageChart extends ChartWidget
 
     public function updateChart(): void
     {
-        $this->emitSelf('updateChart');
+        // Reload the chart data when the dates are updated
+        $this->chartData($this->getData());
     }
 }

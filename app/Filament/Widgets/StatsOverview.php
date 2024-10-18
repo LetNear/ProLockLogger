@@ -21,26 +21,49 @@ class StatsOverview extends BaseWidget
         // Here assuming each user has a unique view per session (needs to be adapted based on real data)
         $uniqueViews = RecentLogs::distinct('user_number')->count();
 
-        // Calculating bounce rate (e.g., percentage of users with only one log entry)
-        $totalSessions = RecentLogs::count();
-        $singleEntryUsers = RecentLogs::select('user_number')
-            ->groupBy('user_number')
-            ->having(DB::raw('count(*)'), '=', 1)
-            ->count();
-        $bounceRate = $totalSessions > 0 ? round(($singleEntryUsers / $totalSessions) * 100, 2) . '%' : '0%';
+
+
+        // Total number of logs
+        $totalLogs = RecentLogs::count();
+
+        // Count of logs where time_out is '00:00' (invalid logs)
+        $invalidTimeOutLogs = RecentLogs::where('time_out', '=', '00:00')->count();
+
+        // Calculate the valid logs percentage (the bounce rate based on valid logs)
+        $validLogRate = $totalLogs > 0 ? round((($totalLogs - $invalidTimeOutLogs) / $totalLogs) * 100, 2) . '%' : '0%';
+
+        //dd($validLogRate);  // Output the valid logs percentage
+
+
+
+
+
 
         // Example of calculating average time on page (time difference between time_in and time_out)
         // Assuming time_in and time_out are stored as datetime
-        $avgTimeOnPage = RecentLogs::select(DB::raw('AVG(TIMESTAMPDIFF(SECOND, time_in, time_out)) as avg_time'))
+        $avgTimeOnPage = DB::table('student_attendances')
+            ->whereNotNull('time_in')
+            ->whereNotNull('time_out')
+            ->where('time_out', '!=', '00:00:00')
+            ->select(DB::raw('AVG(TIMESTAMPDIFF(SECOND, time_in, time_out)) as avg_time'))
             ->value('avg_time');
-        $avgTimeOnPageFormatted = $avgTimeOnPage ? gmdate('i:s', $avgTimeOnPage) : '0:00';
+
+        // Format the time into hours:minutes:seconds
+        $avgTimeOnPageFormatted = $avgTimeOnPage ? gmdate('H:i:s', (int) $avgTimeOnPage) : '0:00:00';
+
+        //  dd($avgTimeOnPageFormatted);  // For debugging purposes to check the formatted output
+
+
+
+
+
 
         return [
             Stat::make('Total Users', $totalUsers),
-            Stat::make('Unique Views', $uniqueViews),
-            Stat::make('Bounce Rate', $bounceRate),
+            Stat::make('Users with Logs', $uniqueViews),
+            Stat::make('Time-out Rate', $validLogRate),
             Stat::make('Average Time on Laboratory Usage', $avgTimeOnPageFormatted),
-           
+
         ];
     }
 }

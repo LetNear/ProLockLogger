@@ -24,6 +24,13 @@ class FacultyAttResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $title = 'Faculty Logs';
+
+    protected static ?string $label = 'Faculty Logs';
+
+    protected static ?string $navigationGroup = 'Laboratory Management';
+
+
     public static function form(Form $form): Form
     {
         return $form

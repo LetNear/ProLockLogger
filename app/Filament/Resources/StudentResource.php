@@ -48,7 +48,7 @@ class StudentResource extends Resource
             Notification::make()
             ->title('Cannot Save Student')
             ->danger()
-            ->body('There is no ongoing year and semester. Please set an on-going year and semester')
+            ->body('There is no ongoing year and semester. Please sePt an on-going year and semester')
             ->send();
             return $form->schema([]);
         }

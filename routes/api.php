@@ -80,7 +80,9 @@ Route::post('/courses/update', [LabScheduleController::class, 'updateCourseDetai
 Route::get('/student/schedule-details', [LabScheduleController::class, 'getStudentScheduleDetailsByEmail']);
 
 
+Route::get('/check-enrolled-courses', [LabScheduleController::class, 'checkEnrolledCourses']);
 
+Route::post('/door/log-status', [OpenAndCloseLogController::class, 'logDoorStatus']);
 
 // Route::post('/recent-logs/time-in', [RecentLogsController::class, 'createRecordTimeInByUID']);
 // Route::put('/recent-logs/update-time-out', [RecentLogsController::class, 'updateLogsByUIDForTimeOut']);

@@ -31,20 +31,20 @@ class SeatPlanPage extends Page
         $this->selectedCourse = null;
         $this->selectedStudent = null;
         $this->selectedSeat = null;
-    
+
         // Fetch the ongoing year and semester
         $this->ongoingYearAndSemester = $this->getOngoingYearAndSemester();
-    
+
         // If no ongoing year and semester is found, handle it gracefully
         if (!$this->ongoingYearAndSemester) {
             // Notify the user or take other actions
             dd('No ongoing year and semester found. Please set one first.');
             return;
         }
-    
+
         // Initially fetch students without seats assigned
         $this->loadEligibleStudents();
-    
+
         // Fetch courses associated with the instructor's regular schedules for the ongoing year and semester
         if (auth()->check() && auth()->user()->role_number == 2) {
             $this->courses = LabSchedule::where('instructor_id', auth()->user()->id)
@@ -59,7 +59,7 @@ class SeatPlanPage extends Page
                 });
         }
     }
-    
+
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -94,7 +94,6 @@ class SeatPlanPage extends Page
             $this->seats = collect();
         }
     }
-
     public function loadEligibleStudents()
     {
         if ($this->selectedCourse) {
@@ -103,18 +102,24 @@ class SeatPlanPage extends Page
                 $query->where('role_number', 3);  // Filter for student role
             })
                 ->whereHas('courses', function ($query) {
-                    $query->where('course_id', $this->selectedCourse);
-                    $query->where('year_and_semester_id', $this->ongoingYearAndSemester->id); // Filter by ongoing year and semester
+                    $query->where('courses.id', $this->selectedCourse);
+                    $query->where('course_user_information.year_and_semester_id', $this->ongoingYearAndSemester->id); // Specify the correct table alias for year_and_semester_id
                 })
                 ->whereDoesntHave('seats', function ($query) {
+                    // Exclude students who already have a seat assigned for this course and year/semester
                     $query->where('course_id', $this->selectedCourse)
-                          ->where('year_and_semester_id', $this->ongoingYearAndSemester->id); // Filter by ongoing year and semester
+                        ->where(function ($query) {
+                            $query->where('seats.year_and_semester_id', $this->ongoingYearAndSemester->id)
+                                ->orWhereNull('seats.year_and_semester_id');  // Consider NULL values
+                        });
                 })
                 ->get();
         } else {
             $this->students = collect();  // If no course is selected, return an empty collection
         }
     }
+
+
 
     public function selectSeat($seatId)
     {
@@ -196,8 +201,8 @@ class SeatPlanPage extends Page
     {
         DB::transaction(function () use ($seatId) {
             $seat = Seat::where('id', $seatId)
-                        ->where('year_and_semester_id', $this->ongoingYearAndSemester->id) // Filter by ongoing year and semester
-                        ->first();
+                ->where('year_and_semester_id', $this->ongoingYearAndSemester->id) // Filter by ongoing year and semester
+                ->first();
 
             if ($seat && $seat->student) {
                 $student = UserInformation::find($seat->student->id);

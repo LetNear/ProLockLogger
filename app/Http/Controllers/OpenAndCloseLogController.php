@@ -83,4 +83,59 @@ class OpenAndCloseLogController extends Controller
             'logs' => $logs,
         ]);
     }
+
+    public function logDoorStatus(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'fingerprint_id' => 'required',
+            'status' => 'required|in:open,close',
+        ]);
+    
+        // Find the user by fingerprint_id within the JSON field
+        // The query must target the correct JSON structure, based on the dump you provided
+        $user = User::whereJsonContains('fingerprint_id', [['fingerprint_id' => $request->fingerprint_id]])->firstOrFail();
+    
+        // Get the current timestamp
+        $now = Carbon::now('Asia/Manila');
+        $logDate = $now->format('Y-m-d');
+        $time = $now->format('H:i:s');
+    
+        // Depending on the status, set the open_time or close_time from created_at
+        if ($request->status === 'open') {
+            $log = Door::create([
+                'instructor_name' => $user->name,
+                'instructor_email' => $user->email,
+                'open_time' => $time,
+                'status' => 'open',
+                'log_date' => $logDate,
+            ]);
+    
+            return response()->json([
+                'message' => 'Door opened successfully.',
+                'log' => $log,
+            ], 201);
+    
+        } elseif ($request->status === 'close') {
+            $log = Door::create([
+                'instructor_name' => $user->name,
+                'instructor_email' => $user->email,
+                'close_time' => $time,
+                'status' => 'close',
+                'log_date' => $logDate,
+            ]);
+    
+            return response()->json([
+                'message' => 'Door closed successfully.',
+                'log' => $log,
+            ], 201);
+        }
+    
+        return response()->json(['message' => 'Invalid status'], 400);
+    }
+    
+
+    
+    
+    
 }
