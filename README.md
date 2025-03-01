@@ -15,10 +15,14 @@ composer update
 ```
 
 ##CREATE .env file from the root folder
-
+> php artisan migrate
+> php artisan migrate:fresh
 > php artisan serve
 > IF IT ASK FOR THE APP KEY USE THIS:
 
 ```sh
 php artisan key:generate
+
+```
+
 
