@@ -16,8 +16,6 @@ composer update
 
 ##CREATE .env file from the root folder
 
-> Always ask for the .env file in the GC
-> Paste the code to the newley created .env file
 > php artisan serve
 > IF IT ASK FOR THE APP KEY USE THIS:
 
